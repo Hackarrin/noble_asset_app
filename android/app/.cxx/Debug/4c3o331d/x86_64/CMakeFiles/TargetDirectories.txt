@@ -1,0 +1,2 @@
+/Users/hackarrin/Flutter/afritas/android/app/.cxx/Debug/4c3o331d/x86_64/CMakeFiles/edit_cache.dir
+/Users/hackarrin/Flutter/afritas/android/app/.cxx/Debug/4c3o331d/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/utils/bookings/hotel.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/bookings/hotel.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
@@ -45,7 +45,7 @@ class _HotelFilterState extends State<HotelFilter> {
   };
   List recentSearches = [
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -54,7 +54,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -63,7 +63,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -72,7 +72,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -81,7 +81,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -115,7 +115,7 @@ class _HotelFilterState extends State<HotelFilter> {
 
   final List<Map<String, dynamic>> _data = [
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -126,7 +126,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "lon": 3.5148
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -137,7 +137,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "lon": 3.5148
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -148,7 +148,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "lon": 3.5170
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -159,7 +159,7 @@ class _HotelFilterState extends State<HotelFilter> {
       "lon": 3.5159
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,

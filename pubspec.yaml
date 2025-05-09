@@ -1,4 +1,4 @@
-name: afritas
+name: cribsfinder
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -91,7 +91,7 @@ flutter_icons:
   ios: true
   image_path: "assets/images/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-  adaptive_icon_background: "#ffffffff"
+  adaptive_icon_background: "#ff174AB5"
   adaptive_icon_foreground: "assets/images/icon.png"
   remove_alpha_ios: true
   image_path_ios: "assets/images/icon.png"
@@ -140,6 +140,8 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 flutter_native_splash:
-  color: "#ffffff"
-  android: false
-  ios: false
+  color: "#174AB5"
+  image: "assets/images/splash-logo.png"
+  android_12:
+    color: "#174AB5"
+    image: assets/images/splash-logo.png

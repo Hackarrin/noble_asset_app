@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 class RoomItem extends StatelessWidget {
@@ -460,7 +460,7 @@ class RoomItem extends StatelessWidget {
                           },
                           style: Widgets.buildButton(context,
                               background: roomSelected != index
-                                  ? Color(0x3341B11A)
+                                  ? Palette.get("main.primary").withAlpha(50)
                                   : Palette.get("main.primary"),
                               horizontal: 10.0,
                               radius: 50.0,

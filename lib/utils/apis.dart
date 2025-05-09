@@ -1,7 +1,7 @@
 class API {
-  static final rootsApi = "https://api.useafritas.com/public/";
-  static final rootsUserApi = "https://api.useafritas.com/user/";
-  static final rootsAssets = "https://assets.useafritas.com/";
+  static final rootsApi = "https://api.cribsfinder.com/public/";
+  static final rootsUserApi = "https://api.cribsfinder.com/user/";
+  static final rootsAssets = "https://assets.cribsfinder.com/";
 
   static final blog = path(rootsApi, "blog");
   static final shop = path(rootsApi, "shop");
@@ -9,7 +9,7 @@ class API {
   static final hotels = path(rootsApi, "hotels");
   static final hotel = path(rootsApi, "hotel");
   static final wallet = path(rootsApi, "wallet");
-  static final profile = "https://api.useafritas.com/user/profile";
+  static final profile = "https://api.cribsfinder.com/user/profile";
   static final filterHotels = path(rootsApi, "search-hotels");
   static final shortlets = path(rootsApi, "shortlets");
   static final shortlet = path(rootsApi, "shortlet");

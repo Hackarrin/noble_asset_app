@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/home_header.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/home_header.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -22,24 +22,23 @@ class _HotelHomeState extends State<HotelHome> {
   final data = {
     "categories": [
       {"name": "Hotels", "image": "hotels.png", "id": "hotel"},
-      {"name": "House", "image": "house.png", "id": "house"},
-      {"name": "Villa", "image": "villa.png", "id": "villa"},
-      {"name": "Resorts", "image": "resorts.png", "id": "resorts"},
-      {"name": "Bungalow", "image": "bungalow.png", "id": "bungalow"},
+      {"name": "Shortlets", "image": "house.png", "id": "house"},
+      {"name": "Cars", "image": "villa.png", "id": "villa"},
+      {"name": "Deals", "image": "resorts.png", "id": "resorts"},
     ],
     "featuredItems": [
       {
-        "title": "Stanza Aragoza De casa",
+        "title": "Urban Hotels",
         "image": "assets/images/hotels.jpeg",
         "id": "3836352"
       },
       {
-        "title": "Stanza Aragoza De casa",
+        "title": "Urban Hotels",
         "image": "assets/images/hotels.jpeg",
         "id": "3836352"
       },
       {
-        "title": "Stanza Aragoza De casa",
+        "title": "Urban Hotels",
         "image": "assets/images/hotels.jpeg",
         "id": "3836352"
       },
@@ -72,7 +71,7 @@ class _HotelHomeState extends State<HotelHome> {
     ],
     "recommendedHotels": [
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -81,7 +80,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -90,7 +89,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -99,7 +98,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -108,7 +107,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -119,7 +118,7 @@ class _HotelHomeState extends State<HotelHome> {
     ],
     "nearbyHotels": [
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -128,7 +127,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -137,7 +136,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -146,7 +145,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -155,7 +154,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -193,7 +192,7 @@ class _HotelHomeState extends State<HotelHome> {
     ],
     "items": [
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -203,7 +202,7 @@ class _HotelHomeState extends State<HotelHome> {
         "isBreakfast": 1
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -212,7 +211,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -222,7 +221,7 @@ class _HotelHomeState extends State<HotelHome> {
         "isBreakfast": 1
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -231,7 +230,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       },
       {
-        "title": "Stanza Aragona",
+        "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
         "location": "Osapa Lagos",
         "price": 39500,
@@ -265,14 +264,9 @@ class _HotelHomeState extends State<HotelHome> {
             height: backgroundHeight,
             decoration: BoxDecoration(
               color: Palette.getColor(context, "main", "primary"),
-              image: DecorationImage(
-                  image: AssetImage(
-                    'assets/images/homebg-transparent.png',
-                  ),
-                  fit: BoxFit.cover),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
               ),
               boxShadow: [
                 BoxShadow(
@@ -585,7 +579,7 @@ class _HotelHomeState extends State<HotelHome> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Widgets.buildText("Recommended Hotel", context,
+                              Widgets.buildText("Our top stays", context,
                                   isMedium: true),
                               GestureDetector(
                                   onTap: () {
@@ -660,7 +654,7 @@ class _HotelHomeState extends State<HotelHome> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Widgets.buildText(
-                                  "Top Destinations in Nigeria", context,
+                                  "Your home in popular locations", context,
                                   isMedium: true),
                               GestureDetector(
                                   onTap: () => Navigator.pushNamed(

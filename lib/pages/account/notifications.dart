@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_booking.dart';
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_booking.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -51,7 +51,7 @@ class _NotificationsState extends State<Notifications>
       ]
     },
     {
-      "title": "Afritas Wallet & Payment Notifications",
+      "title": "Cribsfinder Wallet & Payment Notifications",
       "options": [
         {
           "name": "Payment Confirmations",
@@ -110,7 +110,7 @@ class _NotificationsState extends State<Notifications>
         },
         {
           "name": "New Features & Updates",
-          "subtext": "Stay up to date with the latest Afritas features",
+          "subtext": "Stay up to date with the latest Cribsfinder features",
           "value": "0"
         },
         {
@@ -174,7 +174,7 @@ class _NotificationsState extends State<Notifications>
                 child: Column(
                   children: [
                     Widgets.buildText(
-                        "Stay informed and in control! Customize your notifications to receive important updates about your bookings, payments, events, and special offers. Choose what matters most to you and manage your preferences anytime in the Afritas app.",
+                        "Stay informed and in control! Customize your notifications to receive important updates about your bookings, payments, events, and special offers. Choose what matters most to you and manage your preferences anytime in the Cribsfinder app.",
                         lines: 10,
                         context,
                         color: "text.secondary"),

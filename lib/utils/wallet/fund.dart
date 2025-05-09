@@ -1,8 +1,8 @@
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -496,7 +496,7 @@ class WalletTopup {
                               Column(
                                 children: [
                                   Widgets.buildText(
-                                      "What Are the Sending and Receiving Limits for Your $currency Afritas Wallet Account?",
+                                      "What Are the Sending and Receiving Limits for Your $currency Cribsfinder Wallet Account?",
                                       context,
                                       lines: 10),
                                   const SizedBox(

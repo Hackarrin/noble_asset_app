@@ -1,10 +1,10 @@
-import 'package:afritas/globals/shortlet_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -100,7 +100,7 @@ class ShortletModals {
                                 radius: 40.0,
                                 isFilled: true,
                                 isFloating: true),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 color: Palette.getColor(
                                     context, "text", "secondary"),
@@ -219,7 +219,7 @@ class ShortletModals {
                                                 result["endDate"].toString(),
                                               ).toString();
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -268,7 +268,7 @@ class ShortletModals {
                                                           res)
                                                       .toString();
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -2118,7 +2118,7 @@ class ShortletModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -2155,7 +2155,7 @@ class ShortletModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))

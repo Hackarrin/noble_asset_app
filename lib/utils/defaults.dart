@@ -1,5 +1,5 @@
 class Defaults {
-  static const String appName = 'Afritas';
+  static const String appName = 'Cribsfinder';
   static const String userid = "userid";
   static const String profile = "profile";
   static const String token = "token";

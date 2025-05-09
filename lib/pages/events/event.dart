@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/utils/bookings/event.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/utils/bookings/event.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:card_swiper/card_swiper.dart';
@@ -1667,7 +1667,7 @@ class _EventState extends State<Event> with SingleTickerProviderStateMixin {
                                                 ),
                                                 Expanded(
                                                   child: Widgets.buildText(
-                                                      "Contact the organizer to request a refund. Afritas's fee is nonrefundable",
+                                                      "Contact the organizer to request a refund. Cribsfinder's fee is nonrefundable",
                                                       context,
                                                       lines: 4,
                                                       color: "text.secondary"),

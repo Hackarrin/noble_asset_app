@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';
@@ -22,7 +22,7 @@ class _HotelTopDestinationsState extends State<HotelTopDestinations> {
   var total = 12484;
   final _items = [
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -31,7 +31,7 @@ class _HotelTopDestinationsState extends State<HotelTopDestinations> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -40,7 +40,7 @@ class _HotelTopDestinationsState extends State<HotelTopDestinations> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -49,7 +49,7 @@ class _HotelTopDestinationsState extends State<HotelTopDestinations> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -58,7 +58,7 @@ class _HotelTopDestinationsState extends State<HotelTopDestinations> {
       "hotelId": "123456"
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,

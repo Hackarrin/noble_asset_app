@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 

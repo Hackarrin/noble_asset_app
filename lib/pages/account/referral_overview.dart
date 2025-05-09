@@ -1,7 +1,7 @@
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +17,9 @@ class ReferralOverview extends StatefulWidget {
 
 class _ReferralOverviewState extends State<ReferralOverview> {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",

@@ -1,7 +1,7 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -64,7 +64,7 @@ class WalletAddRecipient extends StatelessWidget {
                         setOtherPayoutAccount(
                             {"accountNumber": text, "accountName": ""});
                       },
-                      style: GoogleFonts.poppins(
+                      style: GoogleFonts.nunito(
                           color: Palette.getColor(context, "text", "other")),
                     ),
                     Divider(thickness: 1.0, color: Color(0x14000000)),
@@ -107,7 +107,7 @@ class WalletAddRecipient extends StatelessWidget {
                             });
                           }
                         },
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             color: Palette.getColor(context, "text", "other")),
                       ),
                     if (otherPayoutAccount["currency"] == "USD")
@@ -122,7 +122,7 @@ class WalletAddRecipient extends StatelessWidget {
                               isFloating: true,
                               color:
                                   Palette.getColor(context, "text", "other")),
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               color:
                                   Palette.getColor(context, "text", "other")),
                           onChanged: (text) {
@@ -141,7 +141,7 @@ class WalletAddRecipient extends StatelessWidget {
                               isFloating: true,
                               color:
                                   Palette.getColor(context, "text", "other")),
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               color:
                                   Palette.getColor(context, "text", "other")),
                           onChanged: (text) {
@@ -160,7 +160,7 @@ class WalletAddRecipient extends StatelessWidget {
                             borderColor: Colors.transparent,
                             isFloating: true,
                             color: Palette.getColor(context, "text", "other")),
-                        style: GoogleFonts.poppins(
+                        style: GoogleFonts.nunito(
                             color: Palette.getColor(context, "text", "other")),
                         onChanged: (text) {
                           setOtherPayoutAccount({"accountName": text});
@@ -195,7 +195,7 @@ class WalletAddRecipient extends StatelessWidget {
         //                 borderColor: Colors.transparent,
         //                 isFloating: true,
         //                 color: Palette.getColor(context, "text", "other")),
-        //             style: GoogleFonts.poppins(
+        //             style: GoogleFonts.nunito(
         //                 color: Palette.getColor(context, "text", "other")),
         //             keyboardType: TextInputType.number,
         //             onChanged: (text) {
@@ -222,7 +222,7 @@ class WalletAddRecipient extends StatelessWidget {
         //                 borderColor: Colors.transparent,
         //                 isFloating: true,
         //                 color: Palette.getColor(context, "text", "other")),
-        //             style: GoogleFonts.poppins(
+        //             style: GoogleFonts.nunito(
         //                 color: Palette.getColor(context, "text", "other")),
         //             onChanged: (text) {
         //               setState(() {

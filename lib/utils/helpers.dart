@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/apis.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/fetch.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/webview.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/apis.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/fetch.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/webview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -212,7 +212,7 @@ class Helpers {
       text: TextSpan(
           text: text,
           style:
-              GoogleFonts.poppins(fontSize: 14.0, fontWeight: FontWeight.w400)),
+              GoogleFonts.nunito(fontSize: 14.0, fontWeight: FontWeight.w400)),
       maxLines: maxLines,
       textDirection: TextDirection.ltr,
     )..layout(
@@ -377,15 +377,15 @@ class Helpers {
         if (firstDate.year == secondDate.year) {
           if (firstDate.month == secondDate.month) {
             output = secondDate.day - firstDate.day == 0
-                ? " Just joined Afritas"
-                : "${secondDate.day - firstDate.day} day${(secondDate.day - firstDate.day) > 1 ? "s" : ""} on Afritas";
+                ? " Just joined Cribsfinder"
+                : "${secondDate.day - firstDate.day} day${(secondDate.day - firstDate.day) > 1 ? "s" : ""} on Cribsfinder";
           } else {
             output =
-                "${secondDate.month - firstDate.month} month${(secondDate.month - firstDate.month) > 1 ? "s" : ""} on Afritas";
+                "${secondDate.month - firstDate.month} month${(secondDate.month - firstDate.month) > 1 ? "s" : ""} on Cribsfinder";
           }
         } else {
           output =
-              "${secondDate.year - firstDate.year} year${(secondDate.year - firstDate.year) > 1 ? "s" : ""} on Afritas";
+              "${secondDate.year - firstDate.year} year${(secondDate.year - firstDate.year) > 1 ? "s" : ""} on Cribsfinder";
         }
         return output;
       } catch (e) {
@@ -512,8 +512,8 @@ class Helpers {
       var uri = Uri.parse(url);
       if (await canLaunchUrl(uri) || url.startsWith("http")) {
         if (url.startsWith("http")) {
-          if (url.contains("useafritas.com") &&
-              !url.contains("assets.useafritas.com")) {
+          if (url.contains("cribsfinder.com") &&
+              !url.contains("assets.cribsfinder.com")) {
             Navigator.push(
                 navigatorKey.currentContext!,
                 MaterialPageRoute(

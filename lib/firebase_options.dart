@@ -50,22 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC08hX3tH618YXZ5urRylc0YRsFfi6Wn08',
-    appId: '1:553627276323:android:89a2860485ef2fef8b8d96',
-    messagingSenderId: '553627276323',
-    projectId: 'afritas-9413a',
-    databaseURL: 'https://afritas-9413a-default-rtdb.firebaseio.com',
-    storageBucket: 'afritas-9413a.firebasestorage.app',
+    apiKey: 'AIzaSyALql9YcpvnutBByPfvAD-ai9umOU3Fh9k',
+    appId: '1:149378416912:android:18d35b34cefebe54502595',
+    messagingSenderId: '149378416912',
+    projectId: 'cribsfinder-dda93',
+    databaseURL: 'https://cribsfinder-dda93-default-rtdb.firebaseio.com',
+    storageBucket: 'cribsfinder-dda93.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAoFODA1Shc-Wa-diTsPcYWnNlpMpnMcOs',
-    appId: '1:553627276323:ios:cbce1200379f51898b8d96',
-    messagingSenderId: '553627276323',
-    projectId: 'afritas-9413a',
-    databaseURL: 'https://afritas-9413a-default-rtdb.firebaseio.com',
-    storageBucket: 'afritas-9413a.firebasestorage.app',
-    iosBundleId: 'com.useafritas.app.afritas',
+    apiKey: 'AIzaSyCEOaI34HQCfn5HBo7IjspiDw7-7GlWwVI',
+    appId: '1:149378416912:ios:846b0fe2770dca14502595',
+    messagingSenderId: '149378416912',
+    projectId: 'cribsfinder-dda93',
+    databaseURL: 'https://cribsfinder-dda93-default-rtdb.firebaseio.com',
+    storageBucket: 'cribsfinder-dda93.firebasestorage.app',
+    iosBundleId: 'com.cribsfinder.app',
   );
-
 }

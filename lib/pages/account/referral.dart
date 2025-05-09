@@ -1,7 +1,7 @@
-import 'package:afritas/utils/apis.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/apis.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +17,9 @@ class Referrals extends StatefulWidget {
 
 class _ReferralsState extends State<Referrals> {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -149,7 +149,7 @@ class _ReferralsState extends State<Referrals> {
                                       ],
                                     ),
                                     Widgets.buildText(
-                                        "Earn Up to 50% by Inviting Vendors & Friends to Afritas!",
+                                        "Earn Up to 50% by Inviting Vendors & Friends to Cribsfinder!",
                                         context,
                                         isMedium: true,
                                         lines: 5)
@@ -165,7 +165,7 @@ class _ReferralsState extends State<Referrals> {
                                     borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.all(15.0),
                                 child: Widgets.buildText(
-                                    "Turn Your Connections into Cash Invite vendors and friends to join Afritas and unlock an incredible earning opportunity.",
+                                    "Turn Your Connections into Cash Invite vendors and friends to join Cribsfinder and unlock an incredible earning opportunity.",
                                     lines: 10,
                                     context),
                               ),

@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/attraction_item.dart';
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/utils/bookings/attraction.dart';
-import 'package:afritas/utils/bookings/event.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/attraction_item.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/utils/bookings/attraction.dart';
+import 'package:cribsfinder/utils/bookings/event.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:card_swiper/card_swiper.dart';
@@ -1130,7 +1130,7 @@ class _AttractionState extends State<Attraction>
                               height: 15.0,
                             ),
                             TabBar(
-                              labelStyle: GoogleFonts.poppins(
+                              labelStyle: GoogleFonts.nunito(
                                   fontSize: 16.0, fontWeight: FontWeight.w500),
                               dividerColor: Color(0x1A000000),
                               indicatorWeight: 3.0,
@@ -1879,7 +1879,7 @@ class _AttractionState extends State<Attraction>
                                               radius: 40.0,
                                               isFilled: true,
                                               isFloating: true),
-                                          style: GoogleFonts.poppins(
+                                          style: GoogleFonts.nunito(
                                             color:
                                                 Palette.get("text.secondary"),
                                             fontSize: 16.0,

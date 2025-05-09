@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/attraction_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/attraction_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';

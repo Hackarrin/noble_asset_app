@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/property_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/home_header.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/property_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/home_header.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +24,11 @@ class _PropertyHomeState extends State<PropertyHome> {
     "agents": [
       {"name": "Ola Alli", "image": "assets/images/avatar.png", "id": "hotel"},
       {"name": "John Doe", "image": "assets/images/avatar.png", "id": "house"},
-      {"name": "Afritas", "image": "assets/images/avatar.png", "id": "villa"},
+      {
+        "name": "Cribsfinder",
+        "image": "assets/images/avatar.png",
+        "id": "villa"
+      },
       {"name": "Smith", "image": "assets/images/avatar.png", "id": "resorts"},
       {"name": "Dante", "image": "assets/images/avatar.png", "id": "bungalow"},
     ],

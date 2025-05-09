@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +108,7 @@ class CruiseModals {
                                 radius: 40.0,
                                 isFilled: true,
                                 isFloating: true),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 color: Palette.getColor(
                                     context, "text", "secondary"),
@@ -206,7 +206,9 @@ class CruiseModals {
                                               final res =
                                                   await Sheets.selectDate(
                                                       filter["startDate"]
-                                                          .toString(),title: "Select start date");
+                                                          .toString(),
+                                                      title:
+                                                          "Select start date");
                                               result["startDate"] = res;
                                               startDateController.text =
                                                   Helpers.formatDate(res,
@@ -217,7 +219,7 @@ class CruiseModals {
                                                 result["endDate"].toString(),
                                               ).toString();
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -256,7 +258,7 @@ class CruiseModals {
                                               result["startTime"] = res;
                                               startTimeController.text = res;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -308,13 +310,14 @@ class CruiseModals {
                                               final res =
                                                   await Sheets.selectDate(
                                                       filter["startDate"]
-                                                          .toString(),title: "Select end date");
+                                                          .toString(),
+                                                      title: "Select end date");
                                               result["endDate"] = res;
                                               endDateController.text =
                                                   Helpers.formatDate(res,
                                                       formatString: "MMM dd");
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -353,7 +356,7 @@ class CruiseModals {
                                               result["endTime"] = res;
                                               endTimeController.text = res;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -2053,7 +2056,7 @@ class CruiseModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -2090,7 +2093,7 @@ class CruiseModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))

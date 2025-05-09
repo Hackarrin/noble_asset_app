@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -156,7 +156,7 @@ class PropertyModals {
                                           isFloating: true,
                                           color: Palette.getColor(
                                               context, "text", "other")),
-                                      style: GoogleFonts.poppins(
+                                      style: GoogleFonts.nunito(
                                           color: Palette.getColor(
                                               context, "text", "other")),
                                     ),
@@ -1378,7 +1378,7 @@ class PropertyModals {
                                         radius: 10.0,
                                         isFilled: true,
                                         isFloating: true),
-                                    style: GoogleFonts.poppins(
+                                    style: GoogleFonts.nunito(
                                         fontSize: 16,
                                         color: Palette.getColor(
                                             context, "text", "secondary"),
@@ -1725,7 +1725,7 @@ class PropertyModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -1762,7 +1762,7 @@ class PropertyModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))

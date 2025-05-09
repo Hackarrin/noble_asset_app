@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../../utils/palette.dart';
@@ -76,8 +76,7 @@ class _SignupNotificationState extends State<SignupNotification> {
                     width: double.infinity,
                     child: TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(
-                              context, "/signup-complete-profile");
+                          Navigator.pushNamed(context, "/home");
                         },
                         style: Widgets.buildButton(context,
                             vertical: 20.0,
@@ -92,7 +91,7 @@ class _SignupNotificationState extends State<SignupNotification> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, "/signup-complete-profile");
+                      Navigator.pushNamed(context, "/home");
                     },
                     child: Widgets.buildText("Maybe later", context,
                         color: "main.primary", isMedium: true),

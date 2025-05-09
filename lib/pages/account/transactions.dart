@@ -1,7 +1,7 @@
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +17,9 @@ class Transactions extends StatefulWidget {
 
 class _TransactionsState extends State<Transactions> {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -48,98 +48,98 @@ class _TransactionsState extends State<Transactions> {
     {
       "type": 0,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
       "type": 1,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "USD",
     },
     {
       "type": 2,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "GBP",
     },
     {
       "type": 3,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "GBP",
     },
     {
       "type": 4,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
       "type": 5,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "USD",
     },
     {
       "type": 6,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
       "type": 7,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "USD",
     },
     {
       "type": 8,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "NGN",
     },
     {
       "type": 9,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "USD",
     },
     {
       "type": 10,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "NGN",
     },
     {
       "type": 11,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "NGN",
     },
     {
       "type": 12,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "USD",
     },
     {
       "type": 13,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-03",
       "currency": "NGN",
     },

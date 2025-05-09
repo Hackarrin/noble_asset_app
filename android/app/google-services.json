@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "553627276323",
-    "firebase_url": "https://afritas-9413a-default-rtdb.firebaseio.com",
-    "project_id": "afritas-9413a",
-    "storage_bucket": "afritas-9413a.firebasestorage.app"
+    "project_number": "149378416912",
+    "firebase_url": "https://cribsfinder-dda93-default-rtdb.firebaseio.com",
+    "project_id": "cribsfinder-dda93",
+    "storage_bucket": "cribsfinder-dda93.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:553627276323:android:89a2860485ef2fef8b8d96",
+        "mobilesdk_app_id": "1:149378416912:android:18d35b34cefebe54502595",
         "android_client_info": {
-          "package_name": "com.useafritas.app.afritas"
+          "package_name": "com.cribsfinder.app"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC08hX3tH618YXZ5urRylc0YRsFfi6Wn08"
+          "current_key": "AIzaSyALql9YcpvnutBByPfvAD-ai9umOU3Fh9k"
         }
       ],
       "services": {

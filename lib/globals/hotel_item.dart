@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -72,22 +72,6 @@ class HotelItem extends StatelessWidget {
                   )
                 ],
               ),
-              if ((item["isBreakfast"] ?? "").toString() == "1" && isBordered)
-                Positioned(
-                    top: 30,
-                    left: 0,
-                    child: Container(
-                      width: 150,
-                      height: 33,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image:
-                                  AssetImage("assets/images/breakfast-bg.png"),
-                              fit: BoxFit.contain)),
-                      padding: EdgeInsets.only(left: 18.0, top: 2.0),
-                      child: Widgets.buildText("Breakfast included", context,
-                          color: "text.white"),
-                    )),
             ],
           ),
         ),

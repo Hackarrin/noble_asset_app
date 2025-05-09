@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';
@@ -488,7 +488,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                           Widgets.buildText("Payment method", context,
                               color: "text.disabled", size: 13.0, weight: 500),
                           const SizedBox(width: 10.0),
-                          Widgets.buildText("Wallet", context,
+                          Widgets.buildText("Paystack", context,
                               color: "text.secondary", size: 13.0, weight: 500),
                         ],
                       ),
@@ -633,140 +633,6 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                 const SizedBox(
                   height: 20.0,
                 ),
-                Container(
-                    width: double.infinity,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 25.0),
-                    decoration: BoxDecoration(
-                      color: Palette.getColor(context, "background", "paper"),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                width: 50.0,
-                                height: 50.0,
-                                decoration: BoxDecoration(
-                                    color: Palette.get("text.white"),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color:
-                                                Palette.get("main.primary"))),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Color(0x0D000000),
-                                          offset: Offset(0, 1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 2)
-                                    ]),
-                                child: UnconstrainedBox(
-                                    child: Helpers.fetchIcons(
-                                        "calendar-day", "solid",
-                                        color: "main.primary", size: 20.0))),
-                            const SizedBox(
-                              width: 20.0,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Widgets.buildText(
-                                      "Event and Attraction", context,
-                                      size: 13.0,
-                                      weight: 500,
-                                      color: "text.secondary"),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  Widgets.buildText(
-                                      "Enjoy Flexibility Book Attractions with Free Cancellation",
-                                      context,
-                                      size: 12.0,
-                                      weight: 400,
-                                      lines: 3,
-                                      color: "text.secondary"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  height: 20.0,
-                ),
-                Container(
-                    width: double.infinity,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 15.0, vertical: 25.0),
-                    decoration: BoxDecoration(
-                      color: Palette.getColor(context, "background", "paper"),
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                                width: 50.0,
-                                height: 50.0,
-                                decoration: BoxDecoration(
-                                    color: Palette.get("text.white"),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border: Border(
-                                        bottom: BorderSide(
-                                            color:
-                                                Palette.get("main.primary"))),
-                                    boxShadow: [
-                                      BoxShadow(
-                                          color: Color(0x0D000000),
-                                          offset: Offset(0, 1),
-                                          blurRadius: 4.0,
-                                          spreadRadius: 2)
-                                    ]),
-                                child: UnconstrainedBox(
-                                    child: Helpers.fetchIcons("ship", "solid",
-                                        color: "main.primary", size: 20.0))),
-                            const SizedBox(
-                              width: 20.0,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Widgets.buildText("Boat", context,
-                                      size: 13.0,
-                                      weight: 500,
-                                      color: "text.secondary"),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  Widgets.buildText(
-                                      "Set Sail on Adventure! Book a Cruise with Your Stay",
-                                      context,
-                                      size: 12.0,
-                                      weight: 400,
-                                      lines: 3,
-                                      color: "text.secondary"),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    )),
-                const SizedBox(
-                  height: 20.0,
-                ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -781,7 +647,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                         const SizedBox(
                           width: 10.0,
                         ),
-                        Widgets.buildText("Share this bookings", context,
+                        Widgets.buildText("Share this booking", context,
                             size: 13.0, weight: 500, color: "main.primary")
                       ],
                     ),
@@ -795,7 +661,7 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                         const SizedBox(
                           width: 10.0,
                         ),
-                        Widgets.buildText("Share this property", context,
+                        Widgets.buildText("Share this listing", context,
                             size: 13.0, weight: 500, color: "main.primary")
                       ],
                     ),

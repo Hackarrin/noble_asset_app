@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/globals/room_item.dart';
-import 'package:afritas/utils/bookings/hotel.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/globals/room_item.dart';
+import 'package:cribsfinder/utils/bookings/hotel.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -79,7 +79,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
   }
 
   final Map<String, dynamic> _data = {
-    "title": "Stanza Aragona  Casa ",
+    "title": "Urban hotels ",
     "subtitle": "Two bedroom Apartment",
     "latitude": 6.5,
     "longitude": 3.4,
@@ -108,7 +108,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
     "description":
         "Located within 3.2 km of Nike Art Gallery and 7.9 km of Lekki Conservation Centre, Jotani Living provides rooms with air conditioning and a private bathroom in Lagos. This property offers access to a balcony and free private parking. The accommodation offers a 24-hour front desk and full-day.<br /><br />Featuring free WiFi, the units have a washing machine and a flat-screen TV with cable channels. Each unit is equipped with a private bathroom equipped with a walk-in shower, while some rooms include a fully equipped kitchen.",
     "publisher": {
-      "name": "Stanza Aragona  Casa",
+      "name": "Urban hotels",
       "image": "avatar.png",
       "isVerified": 1,
       "reviews": 173,
@@ -335,7 +335,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
     ],
     "similarHotels": [
       {
-        "title": "Stanza Aragona  Casa ",
+        "title": "Urban hotels ",
         "subtitle": "Two bedroom Apartment",
         "price": 61000,
         "location": "Lekki Lagos",
@@ -352,7 +352,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
         "hid": "327823",
       },
       {
-        "title": "Stanza Aragona  Casa ",
+        "title": "Urban hotels ",
         "subtitle": "Two bedroom Apartment",
         "price": 61000,
         "location": "Lekki Lagos",
@@ -369,7 +369,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
         "hid": "327823",
       },
       {
-        "title": "Stanza Aragona  Casa ",
+        "title": "Urban hotels ",
         "subtitle": "Two bedroom Apartment",
         "price": 61000,
         "location": "Lekki Lagos",
@@ -666,7 +666,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                       height: 15.0,
                     ),
                     TabBar(
-                      labelStyle: GoogleFonts.poppins(
+                      labelStyle: GoogleFonts.nunito(
                           fontSize: 16.0, fontWeight: FontWeight.w500),
                       dividerColor: Color(0x1A000000),
                       indicatorWeight: 3.0,
@@ -1189,13 +1189,12 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                                   formatString:
                                                                       "MMM dd");
                                                         },
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
+                                                        style: GoogleFonts.nunito(
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
                                                       )),
                                                       SizedBox(
                                                         width: 5.0,
@@ -1255,13 +1254,12 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                                   formatString:
                                                                       "MMM dd");
                                                         },
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
+                                                        style: GoogleFonts.nunito(
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
                                                       ))
                                                     ],
                                                   ),
@@ -1336,7 +1334,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1408,7 +1406,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1480,7 +1478,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1738,7 +1736,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                       radius: 40.0,
                                       isFilled: true,
                                       isFloating: true),
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                     color: Palette.get("text.secondary"),
                                     fontSize: 16.0,
                                   ),

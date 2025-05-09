@@ -1,4 +1,4 @@
-package com.useafritas.app.afritas
+package com.cribsfinder.app
 
 import io.flutter.embedding.android.FlutterActivity
 

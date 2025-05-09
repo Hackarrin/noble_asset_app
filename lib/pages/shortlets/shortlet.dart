@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/room_item.dart';
-import 'package:afritas/globals/shortlet_item.dart';
-import 'package:afritas/utils/bookings/shortlet.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/room_item.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/utils/bookings/shortlet.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -723,7 +723,7 @@ class _ShortletState extends State<Shortlet>
                       height: 15.0,
                     ),
                     TabBar(
-                      labelStyle: GoogleFonts.poppins(
+                      labelStyle: GoogleFonts.nunito(
                           fontSize: 16.0, fontWeight: FontWeight.w500),
                       dividerColor: Color(0x1A000000),
                       indicatorWeight: 3.0,
@@ -1246,13 +1246,12 @@ class _ShortletState extends State<Shortlet>
                                                                   formatString:
                                                                       "MMM dd");
                                                         },
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
+                                                        style: GoogleFonts.nunito(
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
                                                       )),
                                                       SizedBox(
                                                         width: 5.0,
@@ -1312,13 +1311,12 @@ class _ShortletState extends State<Shortlet>
                                                                   formatString:
                                                                       "MMM dd");
                                                         },
-                                                        style:
-                                                            GoogleFonts.poppins(
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
+                                                        style: GoogleFonts.nunito(
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
                                                       ))
                                                     ],
                                                   ),
@@ -1393,7 +1391,7 @@ class _ShortletState extends State<Shortlet>
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1465,7 +1463,7 @@ class _ShortletState extends State<Shortlet>
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1537,7 +1535,7 @@ class _ShortletState extends State<Shortlet>
                                                                       _data);
                                                           updateData(res);
                                                         },
-                                                        style: GoogleFonts.poppins(
+                                                        style: GoogleFonts.nunito(
                                                             color: Palette
                                                                 .getColor(
                                                                     context,
@@ -1798,7 +1796,7 @@ class _ShortletState extends State<Shortlet>
                                       radius: 40.0,
                                       isFilled: true,
                                       isFloating: true),
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                     color: Palette.get("text.secondary"),
                                     fontSize: 16.0,
                                   ),

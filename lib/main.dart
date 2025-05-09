@@ -1,90 +1,92 @@
-import 'package:afritas/pages/auth/splash.dart';
-import 'package:afritas/pages/auth/login.dart';
-import 'package:afritas/pages/auth/create_account/get_started.dart';
-import 'package:afritas/pages/auth/create_account/location.dart';
-import 'package:afritas/pages/auth/create_account/notification.dart';
-import 'package:afritas/pages/auth/forgot_password.dart';
-import 'package:afritas/pages/auth/reset_password.dart';
-import 'package:afritas/pages/auth/create_account/signup_verify.dart';
-import 'package:afritas/pages/auth/create_account/complete_profile.dart';
-import 'package:afritas/pages/auth/create_account/account_info.dart';
-import 'package:afritas/pages/auth/create_account/signup.dart';
-import 'package:afritas/pages/hotels/hotel_categories.dart';
-import 'package:afritas/pages/hotels/hotel_filter.dart';
-import 'package:afritas/pages/hotels/hotel_search.dart';
-import 'package:afritas/pages/hotels/hotel_nearby.dart';
-import 'package:afritas/pages/hotels/hotel_recommended.dart';
-import 'package:afritas/pages/hotels/hotel_top_destinations.dart';
-import 'package:afritas/pages/hotels/hotel.dart';
+import 'package:cribsfinder/pages/auth/splash.dart';
+import 'package:cribsfinder/pages/auth/login.dart';
+import 'package:cribsfinder/pages/auth/create_account/get_started.dart';
+import 'package:cribsfinder/pages/auth/create_account/location.dart';
+import 'package:cribsfinder/pages/auth/create_account/notification.dart';
+import 'package:cribsfinder/pages/auth/forgot_password.dart';
+import 'package:cribsfinder/pages/auth/reset_password.dart';
+import 'package:cribsfinder/pages/auth/create_account/signup_verify.dart';
+import 'package:cribsfinder/pages/auth/create_account/complete_profile.dart';
+import 'package:cribsfinder/pages/auth/create_account/account_info.dart';
+import 'package:cribsfinder/pages/auth/create_account/signup.dart';
+import 'package:cribsfinder/pages/hotels/hotel_categories.dart';
+import 'package:cribsfinder/pages/hotels/hotel_filter.dart';
+import 'package:cribsfinder/pages/hotels/hotel_search.dart';
+import 'package:cribsfinder/pages/hotels/hotel_nearby.dart';
+import 'package:cribsfinder/pages/hotels/hotel_recommended.dart';
+import 'package:cribsfinder/pages/hotels/hotel_top_destinations.dart';
+import 'package:cribsfinder/pages/hotels/hotel.dart';
 
-import 'package:afritas/pages/shortlets/shortlet_search.dart';
-import 'package:afritas/pages/shortlets/shortlet_filter.dart';
-import 'package:afritas/pages/shortlets/shortlet_categories.dart';
-import 'package:afritas/pages/shortlets/shortlet_recommended.dart';
-import 'package:afritas/pages/shortlets/shortlet_nearby.dart';
-import 'package:afritas/pages/shortlets/shortlet_top_destinations.dart';
-import 'package:afritas/pages/shortlets/shortlet.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_search.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_filter.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_categories.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_recommended.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_nearby.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet_top_destinations.dart';
+import 'package:cribsfinder/pages/shortlets/shortlet.dart';
 
-import 'package:afritas/pages/events/event_categories.dart';
-import 'package:afritas/pages/events/events_today.dart';
-import 'package:afritas/pages/events/event_search.dart';
-import 'package:afritas/pages/events/event_filter.dart';
-import 'package:afritas/pages/events/event.dart';
+import 'package:cribsfinder/pages/events/event_categories.dart';
+import 'package:cribsfinder/pages/events/events_today.dart';
+import 'package:cribsfinder/pages/events/event_search.dart';
+import 'package:cribsfinder/pages/events/event_filter.dart';
+import 'package:cribsfinder/pages/events/event.dart';
 
-import 'package:afritas/pages/attractions/attraction_categories.dart';
-import 'package:afritas/pages/attractions/attractions_explore.dart';
-import 'package:afritas/pages/attractions/attraction_filter.dart';
-import 'package:afritas/pages/attractions/attraction.dart';
+import 'package:cribsfinder/pages/attractions/attraction_categories.dart';
+import 'package:cribsfinder/pages/attractions/attractions_explore.dart';
+import 'package:cribsfinder/pages/attractions/attraction_filter.dart';
+import 'package:cribsfinder/pages/attractions/attraction.dart';
 
-import 'package:afritas/pages/automobile/automobile_filter.dart';
-import 'package:afritas/pages/automobile/automobile_search.dart';
-import 'package:afritas/pages/automobile/automobile_categories.dart';
-import 'package:afritas/pages/automobile/automobile_recommended.dart';
-import 'package:afritas/pages/automobile/automobile.dart';
+import 'package:cribsfinder/pages/automobile/automobile_filter.dart';
+import 'package:cribsfinder/pages/automobile/automobile_search.dart';
+import 'package:cribsfinder/pages/automobile/automobile_categories.dart';
+import 'package:cribsfinder/pages/automobile/automobile_recommended.dart';
+import 'package:cribsfinder/pages/automobile/automobile.dart';
 
-import 'package:afritas/pages/cruise/cruise_filter.dart';
-import 'package:afritas/pages/cruise/cruise_search.dart';
-import 'package:afritas/pages/cruise/cruise_categories.dart';
-import 'package:afritas/pages/cruise/cruise_recommended.dart';
-import 'package:afritas/pages/cruise/cruise.dart';
+import 'package:cribsfinder/pages/cruise/cruise_filter.dart';
+import 'package:cribsfinder/pages/cruise/cruise_search.dart';
+import 'package:cribsfinder/pages/cruise/cruise_categories.dart';
+import 'package:cribsfinder/pages/cruise/cruise_recommended.dart';
+import 'package:cribsfinder/pages/cruise/cruise.dart';
 
-import 'package:afritas/pages/property/filter.dart';
-import 'package:afritas/pages/property/search.dart';
-import 'package:afritas/pages/property/categories.dart';
-import 'package:afritas/pages/property/recommended.dart';
-import 'package:afritas/pages/property/property.dart';
-import 'package:afritas/pages/property/top_agents.dart';
-import 'package:afritas/pages/property/nearby.dart';
+import 'package:cribsfinder/pages/property/filter.dart';
+import 'package:cribsfinder/pages/property/search.dart';
+import 'package:cribsfinder/pages/property/categories.dart';
+import 'package:cribsfinder/pages/property/recommended.dart';
+import 'package:cribsfinder/pages/property/property.dart';
+import 'package:cribsfinder/pages/property/top_agents.dart';
+import 'package:cribsfinder/pages/property/nearby.dart';
 
-import 'package:afritas/pages/checkout.dart';
-import 'package:afritas/pages/account/booking.dart';
-import 'package:afritas/pages/account/account.dart';
-import 'package:afritas/pages/account/edit_profile.dart';
-import 'package:afritas/pages/account/security.dart';
-import 'package:afritas/pages/account/reset_password.dart';
-import 'package:afritas/pages/account/change_pin.dart';
-import 'package:afritas/pages/account/pin.dart';
-import 'package:afritas/pages/account/2fa.dart';
-import 'package:afritas/pages/account/devices.dart';
-import 'package:afritas/pages/account/device_preferences.dart';
-import 'package:afritas/pages/account/notifications.dart';
-import 'package:afritas/pages/account/reviews.dart';
-import 'package:afritas/pages/account/payment_method.dart';
-import 'package:afritas/pages/account/wallet.dart';
-import 'package:afritas/pages/account/wallet-add-account.dart';
-import 'package:afritas/pages/account/referral.dart';
-import 'package:afritas/pages/account/referral_overview.dart';
-import 'package:afritas/pages/account/transactions.dart';
-import 'package:afritas/utils/palette.dart';
+import 'package:cribsfinder/pages/checkout.dart';
+import 'package:cribsfinder/pages/account/booking.dart';
+import 'package:cribsfinder/pages/account/account.dart';
+import 'package:cribsfinder/pages/account/edit_profile.dart';
+import 'package:cribsfinder/pages/account/security.dart';
+import 'package:cribsfinder/pages/account/reset_password.dart';
+import 'package:cribsfinder/pages/account/change_pin.dart';
+import 'package:cribsfinder/pages/account/pin.dart';
+import 'package:cribsfinder/pages/account/2fa.dart';
+import 'package:cribsfinder/pages/account/devices.dart';
+import 'package:cribsfinder/pages/account/device_preferences.dart';
+import 'package:cribsfinder/pages/account/notifications.dart';
+import 'package:cribsfinder/pages/account/reviews.dart';
+import 'package:cribsfinder/pages/account/payment_method.dart';
+import 'package:cribsfinder/pages/account/wallet.dart';
+import 'package:cribsfinder/pages/account/wallet-add-account.dart';
+import 'package:cribsfinder/pages/account/referral.dart';
+import 'package:cribsfinder/pages/account/referral_overview.dart';
+import 'package:cribsfinder/pages/account/transactions.dart';
+import 'package:cribsfinder/utils/palette.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'pages/home.dart';
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -102,7 +104,7 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.light,
-      title: 'Afritas',
+      title: 'Cribsfinder',
       routes: {
         '/hotel-search': (context) => const HotelSearch(),
         '/hotel-filter': (context) => const HotelFilter(),
@@ -178,7 +180,7 @@ class MyApp extends StatelessWidget {
       },
       theme: _buildTheme(Brightness.light, context),
       darkTheme: _buildTheme(Brightness.dark, context),
-      home: const Home(),
+      home: const Splash(),
     );
   }
 }
@@ -186,7 +188,7 @@ class MyApp extends StatelessWidget {
 ThemeData _buildTheme(brightness, context) {
   var baseTheme = ThemeData(brightness: brightness);
   return baseTheme.copyWith(
-    textTheme: GoogleFonts.poppinsTextTheme(baseTheme.textTheme),
+    textTheme: GoogleFonts.nunitoSansTextTheme(baseTheme.textTheme),
     primaryColor:
         Palette.getColor(context, "main", "primary", mode: brightness),
     canvasColor:

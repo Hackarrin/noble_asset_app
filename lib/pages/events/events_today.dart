@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/globals/shortlet_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/automobile_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/home_header.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/automobile_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/home_header.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.useafritas.app" "\0"
-            VALUE "FileDescription", "afritas" "\0"
+            VALUE "CompanyName", "com.cribsfinder.app" "\0"
+            VALUE "FileDescription", "cribsfinder" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "afritas" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.useafritas.app. All rights reserved." "\0"
-            VALUE "OriginalFilename", "afritas.exe" "\0"
-            VALUE "ProductName", "afritas" "\0"
+            VALUE "InternalName", "cribsfinder" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.cribsfinder.app. All rights reserved." "\0"
+            VALUE "OriginalFilename", "cribsfinder.exe" "\0"
+            VALUE "ProductName", "cribsfinder" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -23,7 +23,7 @@ class Widgets {
     }
     return Text(
       text,
-      style: GoogleFonts.poppins(
+      style: GoogleFonts.nunito(
           fontSize: size ?? (isBold ? 24.0 : (isMedium ? 16.0 : 13.0)),
           fontWeight: isBold
               ? FontWeight.w700

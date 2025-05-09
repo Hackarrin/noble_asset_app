@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';
@@ -13,9 +13,9 @@ class Account extends StatefulWidget {
 
 class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",

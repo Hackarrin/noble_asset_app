@@ -1,12 +1,12 @@
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/wallet/add_recipient.dart';
-import 'package:afritas/utils/wallet/recipients.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/wallet/add_recipient.dart';
+import 'package:cribsfinder/utils/wallet/recipients.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -355,7 +355,7 @@ class WalletExchange {
                                                           context,
                                                           "text",
                                                           "primary")),
-                                              style: GoogleFonts.poppins(
+                                              style: GoogleFonts.nunito(
                                                   color: Palette.getColor(
                                                       context,
                                                       "text",
@@ -517,7 +517,7 @@ class WalletExchange {
                                                                     context,
                                                                     "text",
                                                                     "primary")),
-                                                    style: GoogleFonts.poppins(
+                                                    style: GoogleFonts.nunito(
                                                         color: Palette.getColor(
                                                             context,
                                                             "text",
@@ -780,7 +780,7 @@ class WalletExchange {
                                   height: 15.0,
                                 ),
                                 Widgets.buildText(
-                                    "By selecting the ${result["currencyTo"]} option, you are unconditionally and irrevocably authorizing our local partner to convert the funds to ${result["currencyTo"]} for your recipient, without any involvement from Afritas Send.",
+                                    "By selecting the ${result["currencyTo"]} option, you are unconditionally and irrevocably authorizing our local partner to convert the funds to ${result["currencyTo"]} for your recipient, without any involvement from Cribsfinder Send.",
                                     context,
                                     lines: 10),
                                 const SizedBox(

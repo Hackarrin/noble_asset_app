@@ -1,6 +1,6 @@
-import 'package:afritas/globals/hotel_booking.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_booking.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -16,7 +16,7 @@ class Reviews extends StatefulWidget {
 class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
   final bookings = [
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -26,7 +26,7 @@ class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
       "checkin": "2025-03-04 12:30:20",
       "checkout": "2025-04-04 12:30:20",
       "confirmationCode": "4378nd7343",
-      "vendor": "Olamide Owoeye",
+      "vendor": "Tayo Oladele",
       "adults": "10",
       "children": 10,
       "infants": 5,
@@ -37,7 +37,7 @@ class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
       "status": 4
     },
     {
-      "title": "Stanza Aragona",
+      "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
       "location": "Osapa Lagos",
       "price": 39500,
@@ -47,7 +47,7 @@ class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
       "checkin": "2025-03-04 12:30:20",
       "checkout": "2025-04-04 12:30:20",
       "confirmationCode": "4378nd7343",
-      "vendor": "Olamide Owoeye",
+      "vendor": "Tayo Oladele",
       "adults": "10",
       "children": 10,
       "infants": 5,
@@ -157,7 +157,7 @@ class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
                                     size: 24.0, weight: 500),
                                 const SizedBox(height: 5.0),
                                 Widgets.buildText(
-                                    "You haven’t made any bookings yet, but don’t worry! Search and explore top hotels on Afritas to find the perfect stay.",
+                                    "You haven’t made any bookings yet, but don’t worry! Search and explore top hotels on Cribsfinder to find the perfect stay.",
                                     lines: 4,
                                     context,
                                     isCenter: true,

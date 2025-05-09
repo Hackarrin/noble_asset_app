@@ -1,13 +1,13 @@
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/apis.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/jwt.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/wallet/exchange.dart';
-import 'package:afritas/utils/wallet/fund.dart';
-import 'package:afritas/utils/wallet/transfer.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/apis.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/wallet/exchange.dart';
+import 'package:cribsfinder/utils/wallet/fund.dart';
+import 'package:cribsfinder/utils/wallet/transfer.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +23,9 @@ class Wallet extends StatefulWidget {
 
 class _WalletState extends State<Wallet> {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -102,49 +102,49 @@ class _WalletState extends State<Wallet> {
     {
       "type": 0,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
       "type": 1,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "USD",
     },
     {
       "type": 2,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "GBP",
     },
     {
       "type": 3,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "GBP",
     },
     {
       "type": 4,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
       "type": 5,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "USD",
     },
     {
       "type": 6,
       "amount": 940343,
-      "title": "Roland Emmanuel",
+      "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     }
@@ -187,7 +187,7 @@ class _WalletState extends State<Wallet> {
     "NGN": {
       "bank": "Paystack Titan",
       "accountNumber": "1234567890",
-      "accountName": "Afritas / John Doe"
+      "accountName": "Cribsfinder / John Doe"
     },
   };
   List paymentMethods = [
@@ -566,7 +566,7 @@ class _WalletState extends State<Wallet> {
       ];
       final selected = await Sheets.showOptions(
           "Get Paid",
-          "Choose Your Preferred Payment Method to Receive Funds in Your Afritas Wallet.",
+          "Choose Your Preferred Payment Method to Receive Funds in Your Cribsfinder Wallet.",
           items,
           isCustomBackground: true);
       if (selected.isNotEmpty && selected["value"].toString().isNotEmpty) {
@@ -581,7 +581,7 @@ class _WalletState extends State<Wallet> {
                   .toList(),
               title: "Add Money",
               subtitle:
-                  "Choose Your Preferred Payment Method to Receive Funds in Your Afritas Wallet.");
+                  "Choose Your Preferred Payment Method to Receive Funds in Your Cribsfinder Wallet.");
           final res = await WalletTopup.fundAccount(
               paymentMethods
                   .where(

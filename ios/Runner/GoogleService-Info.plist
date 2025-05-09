@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyAoFODA1Shc-Wa-diTsPcYWnNlpMpnMcOs</string>
+	<string>AIzaSyCEOaI34HQCfn5HBo7IjspiDw7-7GlWwVI</string>
 	<key>GCM_SENDER_ID</key>
-	<string>553627276323</string>
+	<string>149378416912</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.useafritas.app.afritas</string>
+	<string>com.cribsfinder.app</string>
 	<key>PROJECT_ID</key>
-	<string>afritas-9413a</string>
+	<string>cribsfinder-dda93</string>
 	<key>STORAGE_BUCKET</key>
-	<string>afritas-9413a.firebasestorage.app</string>
+	<string>cribsfinder-dda93.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,8 +25,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:553627276323:ios:cbce1200379f51898b8d96</string>
+	<string>1:149378416912:ios:846b0fe2770dca14502595</string>
 	<key>DATABASE_URL</key>
-	<string>https://afritas-9413a-default-rtdb.firebaseio.com</string>
+	<string>https://cribsfinder-dda93-default-rtdb.firebaseio.com</string>
 </dict>
 </plist>

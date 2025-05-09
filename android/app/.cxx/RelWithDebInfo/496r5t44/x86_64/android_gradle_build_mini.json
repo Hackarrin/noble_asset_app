@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/hackarrin/flutter_sdk/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/hackarrin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/496r5t44/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/hackarrin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/496r5t44/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

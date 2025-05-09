@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/utils/apis.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/fetch.dart';
-import 'package:afritas/utils/helpers.dart';
+import 'package:cribsfinder/utils/apis.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/fetch.dart';
+import 'package:cribsfinder/utils/helpers.dart';
 
 class JWT {
   static register(values) async {

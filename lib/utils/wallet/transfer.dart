@@ -1,10 +1,10 @@
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -180,7 +180,7 @@ class WalletTransfer {
                                                           };
                                                   });
                                                 },
-                                                style: GoogleFonts.poppins(
+                                                style: GoogleFonts.nunito(
                                                     color: Palette.getColor(
                                                         context,
                                                         "text",
@@ -276,7 +276,7 @@ class WalletTransfer {
                                                       });
                                                     }
                                                   },
-                                                  style: GoogleFonts.poppins(
+                                                  style: GoogleFonts.nunito(
                                                       color: Palette.getColor(
                                                           context,
                                                           "text",
@@ -305,7 +305,7 @@ class WalletTransfer {
                                                                     context,
                                                                     "text",
                                                                     "other")),
-                                                    style: GoogleFonts.poppins(
+                                                    style: GoogleFonts.nunito(
                                                         color: Palette.getColor(
                                                             context,
                                                             "text",
@@ -365,7 +365,7 @@ class WalletTransfer {
                                                                     context,
                                                                     "text",
                                                                     "other")),
-                                                    style: GoogleFonts.poppins(
+                                                    style: GoogleFonts.nunito(
                                                         color: Palette.getColor(
                                                             context,
                                                             "text",
@@ -427,7 +427,7 @@ class WalletTransfer {
                                                                   context,
                                                                   "text",
                                                                   "other")),
-                                                  style: GoogleFonts.poppins(
+                                                  style: GoogleFonts.nunito(
                                                       color: Palette.getColor(
                                                           context,
                                                           "text",
@@ -594,7 +594,7 @@ class WalletTransfer {
                                                           context,
                                                           "text",
                                                           "other")),
-                                              style: GoogleFonts.poppins(
+                                              style: GoogleFonts.nunito(
                                                   color: Palette.getColor(
                                                       context,
                                                       "text",
@@ -635,7 +635,7 @@ class WalletTransfer {
                                                       context,
                                                       "text",
                                                       "other")),
-                                              style: GoogleFonts.poppins(
+                                              style: GoogleFonts.nunito(
                                                   color: Palette.getColor(
                                                       context,
                                                       "text",

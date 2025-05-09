@@ -1,7 +1,7 @@
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
@@ -106,7 +106,7 @@ class _ResetForgotPasswordState extends State<ResetForgotPassword> {
                               pinBoxWidth: 50,
                               pinBoxHeight: 50,
                               wrapAlignment: WrapAlignment.center,
-                              pinTextStyle: GoogleFonts.poppins(
+                              pinTextStyle: GoogleFonts.nunito(
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w400,
                                   color: Palette.getColor(
@@ -171,7 +171,7 @@ class _ResetForgotPasswordState extends State<ResetForgotPassword> {
                             obscureText: !isPasswordVisible,
                             enableSuggestions: false,
                             autocorrect: false,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),
@@ -212,7 +212,7 @@ class _ResetForgotPasswordState extends State<ResetForgotPassword> {
                             obscureText: !isPasswordVisible,
                             enableSuggestions: false,
                             autocorrect: false,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),

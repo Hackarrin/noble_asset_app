@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -101,7 +101,7 @@ class EventModals {
                                 radius: 40.0,
                                 isFilled: true,
                                 isFloating: true),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 color: Palette.getColor(
                                     context, "text", "secondary"),
@@ -165,7 +165,7 @@ class EventModals {
                                             color: Palette.getColor(context,
                                                 "background", "default"),
                                             radius: 10.0),
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.nunito(
                                             color: Palette.getColor(
                                                 context, "text", "other")),
                                       )
@@ -237,7 +237,7 @@ class EventModals {
                                                       formatString:
                                                           "MMM dd, yyyy");
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -298,7 +298,7 @@ class EventModals {
                                               categoryController.text =
                                                   categoryName;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -1215,7 +1215,7 @@ class EventModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -1252,7 +1252,7 @@ class EventModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))

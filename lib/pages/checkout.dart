@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/globals/shortlet_item.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/jwt.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -817,7 +817,7 @@ class CustomerInformation extends StatelessWidget {
               controller: fnameController,
               decoration: Widgets.inputDecoration("",
                   color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -841,7 +841,7 @@ class CustomerInformation extends StatelessWidget {
               controller: lnameController,
               decoration: Widgets.inputDecoration("",
                   color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -865,7 +865,7 @@ class CustomerInformation extends StatelessWidget {
               controller: emailController,
               decoration: Widgets.inputDecoration("",
                   color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -889,7 +889,7 @@ class CustomerInformation extends StatelessWidget {
               controller: phoneController,
               decoration: Widgets.inputDecoration("",
                   color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -919,7 +919,7 @@ class CustomerInformation extends StatelessWidget {
                     child: Helpers.fetchIcons("caret-down", "regular",
                         size: 25.0, color: "text.disabled"),
                   )),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -991,7 +991,7 @@ class CustomerInformation extends StatelessWidget {
               controller: arrivalController,
               decoration: Widgets.inputDecoration("",
                   color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
-              style: GoogleFonts.poppins(
+              style: GoogleFonts.nunito(
                   color: Color(0xCC757575),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
@@ -1580,92 +1580,92 @@ class PaymentInformation extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 10.0),
-        GestureDetector(
-          onTap: () {
-            setMethod("wallet");
-          },
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Palette.get("background.paper"),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Color(0x0D000000))),
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                Image.asset("assets/images/logo.png",
-                    height: 44.0, fit: BoxFit.contain),
-                const SizedBox(width: 15.0),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Widgets.buildText("Wallet", context,
-                          color: "text.secondary", isMedium: true),
-                      const SizedBox(height: 5.0),
-                      Widgets.buildText(
-                          "Use Your Wallet for Fast & Secure Payments", context,
-                          color: "text.disabled",
-                          size: 13.0,
-                          weight: 500,
-                          lines: 3),
-                    ],
-                  ),
-                ),
-                Checkbox(
-                    value: method == "wallet",
-                    onChanged: (checked) {
-                      setMethod("wallet");
-                    })
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10.0),
-        GestureDetector(
-          onTap: () {
-            setMethod("stripe");
-          },
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Palette.get("background.paper"),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Color(0x0D000000))),
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                Image.asset("assets/images/stripe.jpeg",
-                    height: 44.0, fit: BoxFit.contain),
-                const SizedBox(width: 15.0),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Widgets.buildText("Stripe", context,
-                          color: "text.secondary", isMedium: true),
-                      const SizedBox(height: 5.0),
-                      Widgets.buildText(
-                          "Seamless international Payments", context,
-                          color: "text.disabled",
-                          size: 13.0,
-                          weight: 500,
-                          lines: 3),
-                    ],
-                  ),
-                ),
-                Checkbox(
-                    value: method == "stripe",
-                    onChanged: (checked) {
-                      setMethod("stripe");
-                    })
-              ],
-            ),
-          ),
-        ),
+        // const SizedBox(height: 10.0),
+        // GestureDetector(
+        //   onTap: () {
+        //     setMethod("wallet");
+        //   },
+        //   child: Container(
+        //     width: double.infinity,
+        //     decoration: BoxDecoration(
+        //         color: Palette.get("background.paper"),
+        //         borderRadius: BorderRadius.circular(10.0),
+        //         border: Border.all(color: Color(0x0D000000))),
+        //     padding: const EdgeInsets.all(20.0),
+        //     child: Row(
+        //       children: [
+        //         Image.asset("assets/images/logo.png",
+        //             height: 44.0, fit: BoxFit.contain),
+        //         const SizedBox(width: 15.0),
+        //         Expanded(
+        //           child: Column(
+        //             mainAxisAlignment: MainAxisAlignment.start,
+        //             crossAxisAlignment: CrossAxisAlignment.start,
+        //             children: [
+        //               Widgets.buildText("Wallet", context,
+        //                   color: "text.secondary", isMedium: true),
+        //               const SizedBox(height: 5.0),
+        //               Widgets.buildText(
+        //                   "Use Your Wallet for Fast & Secure Payments", context,
+        //                   color: "text.disabled",
+        //                   size: 13.0,
+        //                   weight: 500,
+        //                   lines: 3),
+        //             ],
+        //           ),
+        //         ),
+        //         Checkbox(
+        //             value: method == "wallet",
+        //             onChanged: (checked) {
+        //               setMethod("wallet");
+        //             })
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        // const SizedBox(height: 10.0),
+        // GestureDetector(
+        //   onTap: () {
+        //     setMethod("stripe");
+        //   },
+        //   child: Container(
+        //     width: double.infinity,
+        //     decoration: BoxDecoration(
+        //         color: Palette.get("background.paper"),
+        //         borderRadius: BorderRadius.circular(10.0),
+        //         border: Border.all(color: Color(0x0D000000))),
+        //     padding: const EdgeInsets.all(20.0),
+        //     child: Row(
+        //       children: [
+        //         Image.asset("assets/images/stripe.jpeg",
+        //             height: 44.0, fit: BoxFit.contain),
+        //         const SizedBox(width: 15.0),
+        //         Expanded(
+        //           child: Column(
+        //             mainAxisAlignment: MainAxisAlignment.start,
+        //             crossAxisAlignment: CrossAxisAlignment.start,
+        //             children: [
+        //               Widgets.buildText("Stripe", context,
+        //                   color: "text.secondary", isMedium: true),
+        //               const SizedBox(height: 5.0),
+        //               Widgets.buildText(
+        //                   "Seamless international Payments", context,
+        //                   color: "text.disabled",
+        //                   size: 13.0,
+        //                   weight: 500,
+        //                   lines: 3),
+        //             ],
+        //           ),
+        //         ),
+        //         Checkbox(
+        //             value: method == "stripe",
+        //             onChanged: (checked) {
+        //               setMethod("stripe");
+        //             })
+        //       ],
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

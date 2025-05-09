@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/attraction_item.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/home_header.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/attraction_item.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/home_header.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:card_swiper/card_swiper.dart';

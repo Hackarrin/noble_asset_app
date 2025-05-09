@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -15,9 +15,9 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile>
     with SingleTickerProviderStateMixin {
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -161,7 +161,7 @@ class _EditProfileState extends State<EditProfile>
                                         size: 13.0,
                                         weight: 400,
                                         color: "main.primary"))),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xCC757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),

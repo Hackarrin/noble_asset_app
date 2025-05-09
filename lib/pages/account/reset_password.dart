@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -126,7 +126,7 @@ class _ResetPasswordState extends State<ResetPassword>
                                       isVisible ? "eye-crossed" : "eye",
                                       "regular",
                                       size: 18.0))),
-                          style: GoogleFonts.poppins(
+                          style: GoogleFonts.nunito(
                               color: Color(0xCC757575),
                               fontSize: 13.0,
                               fontWeight: FontWeight.w400),

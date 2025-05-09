@@ -1,4 +1,4 @@
-import 'package:afritas/utils/palette.dart';
+import 'package:cribsfinder/utils/palette.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

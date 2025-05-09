@@ -1,9 +1,7 @@
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/webview.dart';
-import 'package:afritas/utils/widget.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -49,18 +47,21 @@ class _LoginState extends State<Login> {
               padding: const EdgeInsets.only(
                   left: 20.0, right: 20.0, top: 0.0, bottom: 50.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                     children: [
+                      const SizedBox(
+                        height: 100.0,
+                      ),
                       Image.asset(
-                        "assets/images/login-bg.png",
-                        height: 400,
+                        "assets/images/logo.png",
+                        height: 80.0,
                         fit: BoxFit.contain,
                       ),
                       Widgets.buildText(
                         isAlreadyLoggedIn
-                            ? "Welcome Back, Roland"
+                            ? "Welcome Back, Ola"
                             : "Access your Account",
                         context,
                         isMedium: true,
@@ -102,7 +103,7 @@ class _LoginState extends State<Login> {
                                       child: Helpers.fetchIcons(
                                           "caret-down", "solid",
                                           color: "text.disabled", size: 20.0))),
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),
@@ -134,7 +135,7 @@ class _LoginState extends State<Login> {
                                   isFilled: true,
                                   isOutline: true),
                               keyboardType: TextInputType.phone,
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),
@@ -158,7 +159,7 @@ class _LoginState extends State<Login> {
                                   isFilled: true,
                                   isOutline: true),
                               keyboardType: TextInputType.emailAddress,
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),
@@ -199,7 +200,7 @@ class _LoginState extends State<Login> {
                             obscureText: !isPasswordVisible,
                             enableSuggestions: false,
                             autocorrect: false,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),
@@ -385,7 +386,7 @@ class _LoginState extends State<Login> {
                           children: [
                             Widgets.buildText(
                                 isAlreadyLoggedIn
-                                    ? "No, I am not Roland    "
+                                    ? "No, I am not Ola    "
                                     : "Don't have an account?   ",
                                 context,
                                 color: "text.secondary"),

@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/automobile_item.dart';
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/bookings/cruise.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/markers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/automobile_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/bookings/cruise.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/markers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +96,7 @@ class _CruiseState extends State<Cruise> with SingleTickerProviderStateMixin {
     "description":
         "Located within 3.2 km of Nike Art Gallery and 7.9 km of Lekki Conservation Centre, Jotani Living provides rooms with air conditioning and a private bathroom in Lagos. This property offers access to a balcony and free private parking. The accommodation offers a 24-hour front desk and full-day.<br /><br />Featuring free WiFi, the units have a washing machine and a flat-screen TV with cable channels. Each unit is equipped with a private bathroom equipped with a walk-in shower, while some rooms include a fully equipped kitchen.",
     "publisher": {
-      "name": "Stanza Aragona  Casa",
+      "name": "Urban hotels",
       "image": "avatar.png",
       "isVerified": 1,
       "reviews": 173,
@@ -819,7 +819,7 @@ class _CruiseState extends State<Cruise> with SingleTickerProviderStateMixin {
                       height: 15.0,
                     ),
                     TabBar(
-                      labelStyle: GoogleFonts.poppins(
+                      labelStyle: GoogleFonts.nunito(
                           fontSize: 16.0, fontWeight: FontWeight.w500),
                       dividerColor: Color(0x1A000000),
                       indicatorWeight: 3.0,
@@ -2152,7 +2152,7 @@ class _CruiseState extends State<Cruise> with SingleTickerProviderStateMixin {
                                       radius: 40.0,
                                       isFilled: true,
                                       isFloating: true),
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                     color: Palette.get("text.secondary"),
                                     fontSize: 16.0,
                                   ),

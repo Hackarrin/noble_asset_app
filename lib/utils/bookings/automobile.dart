@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/automobile_item.dart';
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/automobile_item.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -109,7 +109,7 @@ class AutomobileModals {
                                 radius: 40.0,
                                 isFilled: true,
                                 isFloating: true),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 color: Palette.getColor(
                                     context, "text", "secondary"),
@@ -207,7 +207,9 @@ class AutomobileModals {
                                               final res =
                                                   await Sheets.selectDate(
                                                       filter["startDate"]
-                                                          .toString(),title: "Select start date");
+                                                          .toString(),
+                                                      title:
+                                                          "Select start date");
                                               result["startDate"] = res;
                                               startDateController.text =
                                                   Helpers.formatDate(res,
@@ -218,7 +220,7 @@ class AutomobileModals {
                                                 result["endDate"].toString(),
                                               ).toString();
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -257,7 +259,7 @@ class AutomobileModals {
                                               result["startTime"] = res;
                                               startTimeController.text = res;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -309,13 +311,15 @@ class AutomobileModals {
                                               final res =
                                                   await Sheets.selectDate(
                                                       filter["startDate"]
-                                                          .toString(),title: "Select start date");
+                                                          .toString(),
+                                                      title:
+                                                          "Select start date");
                                               result["endDate"] = res;
                                               endDateController.text =
                                                   Helpers.formatDate(res,
                                                       formatString: "MMM dd");
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -354,7 +358,7 @@ class AutomobileModals {
                                               result["endTime"] = res;
                                               endTimeController.text = res;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -2186,7 +2190,7 @@ class AutomobileModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -2223,7 +2227,7 @@ class AutomobileModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))

@@ -1,6 +1,6 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -26,7 +26,7 @@ class HomeHeader extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Widgets.buildText("John Smith", context,
+                  Widgets.buildText("Tayo Oladele", context,
                       color: "text.white", isMedium: true),
                   Widgets.buildText("Ibeju Lekki, Nigeria", context,
                       color: "text.white"),

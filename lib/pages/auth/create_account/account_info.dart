@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -97,7 +97,7 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                               isFilled: true,
                               isOutline: true,
                             ),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),
@@ -123,7 +123,7 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                                 isFilled: true,
                                 isOutline: true),
                             keyboardType: TextInputType.phone,
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
                                 fontWeight: FontWeight.w400),
@@ -148,7 +148,7 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                           Widgets.buildText("I agree with the ", context),
                           GestureDetector(
                             onTap: () {
-                              Helpers.openLink("https://useafritas.com/terms",
+                              Helpers.openLink("https://cribsfinder.com/terms",
                                   "Terms & Conditions");
                             },
                             child: Widgets.buildText(

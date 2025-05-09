@@ -1,1 +1,1 @@
-/Users/hackarrin/Flutter/afritas/build/app/intermediates/cxx/Debug/5r396i4x/obj/x86
+/Users/hackarrin/Flutter/cribsfinder/build/app/intermediates/cxx/Debug/5r396i4x/obj/x86

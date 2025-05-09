@@ -1,5 +1,5 @@
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
@@ -95,7 +95,7 @@ class _ChangeTransactionPinState extends State<ChangeTransactionPin>
                   pinBoxWidth: 50,
                   pinBoxHeight: 50,
                   wrapAlignment: WrapAlignment.center,
-                  pinTextStyle: GoogleFonts.poppins(
+                  pinTextStyle: GoogleFonts.nunito(
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
                       color: Palette.getColor(context, "text", "secondary"))),

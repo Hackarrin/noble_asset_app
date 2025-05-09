@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/attraction_item.dart';
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/alert.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/attraction_item.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -102,7 +102,7 @@ class AttractionModals {
                                 radius: 40.0,
                                 isFilled: true,
                                 isFloating: true),
-                            style: GoogleFonts.poppins(
+                            style: GoogleFonts.nunito(
                                 fontSize: 16,
                                 color: Palette.getColor(
                                     context, "text", "secondary"),
@@ -168,7 +168,7 @@ class AttractionModals {
                                             color: Palette.getColor(context,
                                                 "background", "default"),
                                             radius: 10.0),
-                                        style: GoogleFonts.poppins(
+                                        style: GoogleFonts.nunito(
                                             color: Palette.getColor(
                                                 context, "text", "other")),
                                       )
@@ -241,7 +241,7 @@ class AttractionModals {
                                                       formatString:
                                                           "MMM dd, yyyy");
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           )),
@@ -302,7 +302,7 @@ class AttractionModals {
                                               categoryController.text =
                                                   categoryName;
                                             },
-                                            style: GoogleFonts.poppins(
+                                            style: GoogleFonts.nunito(
                                                 color: Palette.getColor(
                                                     context, "text", "other")),
                                           ))
@@ -1268,7 +1268,7 @@ class AttractionModals {
                                         Helpers.formatDate(res,
                                             formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 )),
@@ -1306,7 +1306,7 @@ class AttractionModals {
                                         res,
                                         formatString: "MMM dd");
                                   },
-                                  style: GoogleFonts.poppins(
+                                  style: GoogleFonts.nunito(
                                       color: Palette.getColor(
                                           context, "text", "primary")),
                                 ))
@@ -3316,16 +3316,18 @@ class AttractionModals {
                                         onTap: () async {
                                           if (date["value"] == "start_date") {
                                             // load up date.
-                                            final res =
-                                                await Sheets.selectDate("",title: "Select start date");
+                                            final res = await Sheets.selectDate(
+                                                "",
+                                                title: "Select start date");
                                             result["startDate"] = res;
                                             setState(() =>
                                                 result["startDate"] = res);
                                           } else if (date["value"] ==
                                               "end_date") {
                                             // load up date.
-                                            final res =
-                                                await Sheets.selectDate("",title: "Select end date");
+                                            final res = await Sheets.selectDate(
+                                                "",
+                                                title: "Select end date");
                                             setState(
                                                 () => result["endDate"] = res);
                                           } else {

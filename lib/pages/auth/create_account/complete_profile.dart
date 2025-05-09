@@ -1,8 +1,8 @@
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/modals.dart';
-import 'package:afritas/utils/webview.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/webview.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -134,7 +134,7 @@ class _SignupCompleteProfileState extends State<SignupCompleteProfile> {
                                 isFilled: true,
                                 isOutline: true,
                               ),
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),
@@ -172,7 +172,7 @@ class _SignupCompleteProfileState extends State<SignupCompleteProfile> {
                                         color: "text.disabled", size: 20.0),
                                   ])),
                               keyboardType: TextInputType.phone,
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),
@@ -201,7 +201,7 @@ class _SignupCompleteProfileState extends State<SignupCompleteProfile> {
                                       child: Helpers.fetchIcons(
                                           "caret-down", "solid",
                                           color: "text.disabled", size: 20.0))),
-                              style: GoogleFonts.poppins(
+                              style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
                                   fontSize: 13.0,
                                   fontWeight: FontWeight.w400),

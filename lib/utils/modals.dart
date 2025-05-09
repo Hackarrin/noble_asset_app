@@ -1,14 +1,14 @@
-import 'package:afritas/globals/automobile_item.dart';
-import 'package:afritas/globals/cruise_item.dart';
-import 'package:afritas/globals/event_item.dart';
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/globals/shortlet_item.dart';
-import 'package:afritas/main.dart';
-import 'package:afritas/utils/defaults.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/palette.dart';
-import 'package:afritas/utils/platform_date_picker.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/automobile_item.dart';
+import 'package:cribsfinder/globals/cruise_item.dart';
+import 'package:cribsfinder/globals/event_item.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/palette.dart';
+import 'package:cribsfinder/utils/platform_date_picker.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
@@ -128,7 +128,7 @@ class Sheets {
                                       headerStyle: DateRangePickerHeaderStyle(
                                           backgroundColor:
                                               Palette.get("background.paper"),
-                                          textStyle: GoogleFonts.poppins(
+                                          textStyle: GoogleFonts.nunito(
                                               color: Palette.get("text.black"),
                                               fontSize: 16,
                                               fontWeight: FontWeight.w600)),
@@ -1243,7 +1243,7 @@ class Sheets {
                           pinBoxWidth: 50.0,
                           pinBoxHeight: 50.0,
                           wrapAlignment: WrapAlignment.center,
-                          pinTextStyle: GoogleFonts.poppins(
+                          pinTextStyle: GoogleFonts.nunito(
                               fontSize: 14.0,
                               color: Palette.getColor(
                                   context, "text", "secondary"))),
@@ -2431,21 +2431,24 @@ class Sheets {
                       Image.asset("assets/images/icon.png",
                           height: 80.0, fit: BoxFit.cover),
                       Widgets.buildText(
-                          "Your Afritas app is currently set to $res", context,
-                          isMedium: true, size: 20.0, lines: 3),
+                          "Your Cribsfinder app is currently set to $res",
+                          context,
+                          isMedium: true,
+                          size: 20.0,
+                          lines: 3),
                       Widgets.buildText(
-                          "Afritas is currently available only in Nigeria as we have not yet expanded to other countries. However, we are actively working on expanding our services to more regions in the near future. Stay tuned for updates as we grow!",
+                          "Cribsfinder is currently available only in Nigeria as we have not yet expanded to other countries. However, we are actively working on expanding our services to more regions in the near future. Stay tuned for updates as we grow!",
                           context,
                           lines: 10),
                       Widgets.buildText("Country:", context, size: 13.0),
                       TextFormField(
                         controller: countryController,
-                        style: GoogleFonts.poppins(),
+                        style: GoogleFonts.nunito(),
                         readOnly: true,
                         decoration: InputDecoration(
-                            labelStyle: GoogleFonts.poppins(),
-                            hintStyle: GoogleFonts.poppins(),
-                            helperStyle: GoogleFonts.poppins(),
+                            labelStyle: GoogleFonts.nunito(),
+                            hintStyle: GoogleFonts.nunito(),
+                            helperStyle: GoogleFonts.nunito(),
                             suffix: UnconstrainedBox(
                               child: Helpers.fetchIcons("caret-down", "solid",
                                   color: "text.disabled", size: 24.0),

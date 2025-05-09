@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:afritas/globals/hotel_booking.dart';
-import 'package:afritas/globals/hotel_item.dart';
-import 'package:afritas/utils/helpers.dart';
-import 'package:afritas/utils/widget.dart';
+import 'package:cribsfinder/globals/hotel_booking.dart';
+import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -33,11 +33,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           "icon": "shield-keyhole",
           "page": "/2fa"
         },
-        {
-          "name": "Device Preferences",
-          "icon": "tablet-android",
-          "page": "/device-preferences"
-        },
+        // {
+        //   "name": "Device Preferences",
+        //   "icon": "tablet-android",
+        //   "page": "/device-preferences"
+        // },
         {
           "name": "Notification",
           "icon": "bell-notification-social-media",
@@ -53,22 +53,22 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         {"name": "My Bookings", "icon": "book-alt", "page": "1"},
       ]
     },
-    {
-      "title": "Referral & Payment",
-      "options": [
-        {
-          "name": "Refer a Host or Guest",
-          "icon": "refer-arrow",
-          "page": "/referrals"
-        },
-        {
-          "name": "Payment Method",
-          "icon": "money-bill-wave",
-          "page": "/payment-method"
-        },
-        {"name": "Wallet", "icon": "wallet", "page": "/wallet"},
-      ]
-    },
+    // {
+    //   "title": "Referral & Payment",
+    //   "options": [
+    //     {
+    //       "name": "Refer a Host or Guest",
+    //       "icon": "refer-arrow",
+    //       "page": "/referrals"
+    //     },
+    //     {
+    //       "name": "Payment Method",
+    //       "icon": "money-bill-wave",
+    //       "page": "/payment-method"
+    //     },
+    //     {"name": "Wallet", "icon": "wallet", "page": "/wallet"},
+    //   ]
+    // },
     {
       "title": "Help & Support",
       "options": [
@@ -79,7 +79,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           "icon": "group-call",
           "page": "/help"
         },
-        {"name": "How Afritas Works", "icon": "info", "page": "/work"},
+        {"name": "How Cribsfinder Works", "icon": "info", "page": "/work"},
         {
           "name": "Follow Us on Social Media",
           "icon": "following",
@@ -91,7 +91,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     {
       "title": "Legal & Privacy",
       "options": [
-        {"name": "About Afritas", "icon": "user-headset", "page": "/about"},
+        {"name": "About Cribsfinder", "icon": "user-headset", "page": "/about"},
         {"name": "FAQ", "icon": "interrogation", "page": "/faq"},
         {
           "name": "Our Services",
@@ -100,15 +100,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         },
         {"name": "Terms of Services", "icon": "info", "page": "/terms"},
         {"name": "Privacy Policy", "icon": "user-lock", "page": "/privacy"},
-        {"name": "Legal", "icon": "book-bookmark", "page": "/legal"},
-        {"name": "Cookies", "icon": "cookie", "page": "/cookies"},
+        // {"name": "Legal", "icon": "book-bookmark", "page": "/legal"},
+        // {"name": "Cookies", "icon": "cookie", "page": "/cookies"},
       ]
     }
   ];
   final profile = {
-    "fname": "Olamide",
-    "lname": "Owoeye",
-    "email": "info@useafritas.com",
+    "fname": "Tayo",
+    "lname": "Oladele",
+    "email": "info@cribsfinder.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -379,7 +379,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 Widgets.buildText("Version 1.0", context, isCenter: true),
                 const SizedBox(height: 10.0),
                 Widgets.buildText(
-                    "© ${DateTime.now().year} Afritas LTD. All rights reserved.",
+                    "© ${DateTime.now().year} Cribsfinder LTD. All rights reserved.",
                     context,
                     isCenter: true),
                 const SizedBox(height: 50.0),

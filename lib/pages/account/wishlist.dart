@@ -1,10 +1,14 @@
 import 'dart:convert';
 
 import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../utils/palette.dart';
 
@@ -18,7 +22,6 @@ class Wishlist extends StatefulWidget {
 class _WishlistState extends State<Wishlist>
     with SingleTickerProviderStateMixin {
   var selected = "";
-  int _selectedTab = 0;
   late TabController tabController;
   final bookings = [
     {
@@ -148,41 +151,65 @@ class _WishlistState extends State<Wishlist>
       "status": 0
     },
   ];
-  List<Map<String, dynamic>> filteredWishlist = [];
-  void filter() {
-    if (_selectedTab == 0) {
-      // upcoming
+  String error = "";
+  String search = "";
+  String status = "";
+  Map<String, dynamic> filters = {
+    "listing": {},
+    "dateFrom": "",
+    "dateTo": "",
+    "type": "all",
+  };
+  int page = 0;
+  int perPage = 10;
+  String order = "id";
+  String sortBy = "desc";
+  bool loading = true;
+  bool isLoggedIn = true;
+  List<dynamic> filteredWishlist = [];
+  void fetch() async {
+    try {
       setState(() {
-        filteredWishlist = bookings
-            .where((item) =>
-                item["status"].toString() == "0" ||
-                item["status"].toString() == "1")
-            .toList();
+        error = "";
+        loading = true;
       });
-    } else if (_selectedTab == 1) {
-      // completed
+      final res = await JWT.getWishlist(
+          search, status, filters, page, perPage, order, sortBy);
       setState(() {
-        filteredWishlist =
-            bookings.where((item) => item["status"].toString() == "4").toList();
+        filteredWishlist = res["data"];
+        loading = false;
       });
-    } else {
-      // cancelled
+      if (filteredWishlist.isEmpty) {
+        setState(() {
+          error =
+              "You have not added any items yet, but don't worry! Search and explore top listings on Cribsfinder.";
+        });
+      }
+    } catch (err) {
       setState(() {
-        filteredWishlist =
-            bookings.where((item) => item["status"].toString() == "2").toList();
+        error = err.toString();
+        loading = false;
       });
+      print(err);
     }
   }
 
   @override
   void initState() {
-    tabController = TabController(length: 3, vsync: this);
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      final userId = await Helpers.readPref(Defaults.userid);
+      setState(() {
+        isLoggedIn = userId.isNotEmpty;
+      });
+      if (isLoggedIn) {
+        fetch();
+      }
+    });
   }
 
   @override
   void dispose() {
-    tabController.dispose();
     super.dispose();
   }
 
@@ -224,7 +251,9 @@ class _WishlistState extends State<Wishlist>
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushReplacementNamed(context, "/home");
+                },
                 style: Widgets.buildButton(context,
                     radius: 50.0, sideColor: Color(0xFFF1F1F1)),
                 icon: Helpers.fetchIcons("plus-small", "solid",
@@ -239,153 +268,63 @@ class _WishlistState extends State<Wishlist>
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (selected.isNotEmpty && filteredWishlist.isNotEmpty)
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 15.0, right: 15.0, top: 10.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Palette.get("text.white"),
-                        borderRadius: BorderRadius.circular(10.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                      child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 5.0, vertical: 10.0),
-                          decoration: BoxDecoration(
-                            color: Palette.getColor(
-                                context, "background", "paper"),
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Widgets.buildText("Listings", context,
-                                        weight: 400, size: 16.0),
-                                    const SizedBox(height: 5.0),
-                                    Row(
-                                      children: [
-                                        Helpers.fetchIcons("heart", "solid",
-                                            color: "error.main", size: 16.0),
-                                        const SizedBox(width: 10.0),
-                                        Widgets.buildText(
-                                            "10 listings", context,
-                                            lines: 3, color: "text.disabled"),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10.0),
-                              Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                    color: Palette.get("main.primary"),
-                                    borderRadius: BorderRadius.circular(25.0)),
-                                padding: EdgeInsets.all(10.0),
-                                child: Helpers.fetchIcons(
-                                    "land-layer-location", "regular",
-                                    size: 16, color: "text.white"),
-                              ),
-                            ],
-                          )),
-                    ),
-                  ),
-                ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
-                  child: bookings.isNotEmpty
-                      ? ListView.builder(
-                          itemBuilder: (BuildContext context, int index) {
-                            final item = bookings[index];
-                            return Container(
-                              padding: const EdgeInsets.only(
-                                  left: 15.0, right: 15.0),
-                              margin: const EdgeInsets.only(bottom: 10.0),
-                              child: SwipeActionCell(
-                                key: ObjectKey(item),
-                                trailingActions: <SwipeAction>[
-                                  SwipeAction(
-                                      title: "",
-                                      backgroundRadius: 10.0,
-                                      widthSpace: 100,
-                                      performsFirstActionWithFullSwipe: true,
-                                      forceAlignmentToBoundary: true,
-                                      icon: Helpers.fetchIcons(
-                                          "trash", "regular",
-                                          size: 30.0),
-                                      onTap: (CompletionHandler handler) async {
-                                        await handler(true);
-                                        filteredWishlist.removeAt(index);
-                                        setState(() {});
-                                      },
-                                      color: Palette.get("warning.main")),
-                                ],
-                                child: HotelItem(
-                                    item: item, direction: "horizontal"),
-                              ),
-                            );
-                          },
-                          itemCount: bookings.length,
-                        )
-                      : Padding(
-                          padding:
-                              const EdgeInsets.only(left: 20.0, right: 20.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                "assets/images/events.gif",
-                                width: 100.0,
-                                height: 100.0,
-                                fit: BoxFit.contain,
-                              ),
-                              const SizedBox(height: 30.0),
-                              Widgets.buildText("Start your list", context,
-                                  size: 24.0, weight: 500),
-                              const SizedBox(height: 5.0),
-                              Widgets.buildText(
-                                  "When you find a listing you like, tap the heart icon to save it here.",
-                                  lines: 4,
-                                  context,
-                                  isCenter: true,
-                                  color: "text.secondary",
-                                  size: 13.0,
-                                  weight: 400),
-                              const SizedBox(height: 30.0),
-                              SizedBox(
-                                width: double.infinity,
-                                child: TextButton(
-                                    style: Widgets.buildButton(context,
-                                        background: Palette.get("main.primary"),
-                                        vertical: 15.0,
-                                        radius: 50.0),
-                                    onPressed: () {},
-                                    child: Widgets.buildText("Explore", context,
-                                        color: "text.white", isMedium: true)),
-                              )
-                            ],
-                          ),
-                        ),
-                ),
-              ),
-            ],
-          ),
+          child: isLoggedIn
+              ? (loading
+                  ? Shimmer.fromColors(
+                      baseColor: Palette.get("background.neutral"),
+                      highlightColor: Palette.get("background.default"),
+                      loop: 1,
+                      child: AbsorbPointer(child: buildContent()),
+                    )
+                  : (error.isNotEmpty
+                      ? Alert.showErrorMessage(context, "",
+                          padding: 50.0,
+                          buttonText: "Retry",
+                          message: error,
+                          action: fetch)
+                      : buildContent()))
+              : Alert.showErrorMessage(context, "Login to view your wishlist",
+                  buttonText: "Login", action: () {
+                  Navigator.pushNamed(context, "/login");
+                }),
         ),
+      ),
+    );
+  }
+
+  Widget buildContent() {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
+      child: ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          final item = loading ? bookings[index] : filteredWishlist[index];
+          print("item $item");
+          return Container(
+            padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+            margin: const EdgeInsets.only(bottom: 10.0),
+            child: SwipeActionCell(
+              key: ObjectKey(item),
+              trailingActions: <SwipeAction>[
+                SwipeAction(
+                    title: "",
+                    backgroundRadius: 10.0,
+                    widthSpace: 100,
+                    performsFirstActionWithFullSwipe: true,
+                    forceAlignmentToBoundary: true,
+                    icon: Helpers.fetchIcons("trash", "regular", size: 30.0),
+                    onTap: (CompletionHandler handler) async {
+                      await handler(true);
+                      filteredWishlist.removeAt(index);
+                      Helpers.wishlist(item, item["type"].toString());
+                      setState(() {});
+                    },
+                    color: Palette.get("warning.main")),
+              ],
+              child: HotelItem(item: item, direction: "horizontal"),
+            ),
+          );
+        },
+        itemCount: loading ? bookings.length : filteredWishlist.length,
       ),
     );
   }

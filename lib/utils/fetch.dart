@@ -56,7 +56,7 @@ class Fetch {
             final mimeTypeData =
                 lookupMimeType(file!, headerBytes: [0xFF, 0xD8])?.split('/');
             request.files.add(await http.MultipartFile.fromPath(
-                "featured_image", file!,
+                "customer_photo", file!,
                 contentType: MediaType(mimeTypeData![0], mimeTypeData[1])));
             final res = await request.send();
             response = await http.Response.fromStream(res);

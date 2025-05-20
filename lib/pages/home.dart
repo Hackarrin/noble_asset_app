@@ -1,23 +1,9 @@
-import 'dart:convert';
-
-import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/pages/account/bookings.dart';
 import 'package:cribsfinder/pages/account/profile.dart';
 import 'package:cribsfinder/pages/account/wishlist.dart';
-import 'package:cribsfinder/pages/attractions/home.dart';
-import 'package:cribsfinder/pages/automobile/home.dart';
-import 'package:cribsfinder/pages/cruise/home.dart';
-import 'package:cribsfinder/pages/events/home.dart';
 import 'package:cribsfinder/pages/hotels/home.dart';
-import 'package:cribsfinder/pages/property/home.dart';
-import 'package:cribsfinder/pages/shortlets/home.dart';
-import 'package:cribsfinder/utils/bookings/attraction.dart';
-import 'package:cribsfinder/utils/bookings/event.dart';
-import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/widget.dart';
-import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -46,7 +32,7 @@ class _HomeState extends State<Home> {
       "icon": "wishlist-star",
     },
     {
-      "name": "My account",
+      "name": "You",
       "icon": "user",
     },
   ];
@@ -80,6 +66,7 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.initState();
     Future.delayed(Duration.zero, () {
       final arguments = ModalRoute.of(context)?.settings.arguments;

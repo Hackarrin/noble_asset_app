@@ -1,7 +1,9 @@
+import 'dart:convert';
+
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:animate_do/animate_do.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,10 +24,36 @@ class _SplashState extends State<Splash> {
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments != null) {
+        final data = jsonDecode(arguments.toString());
+        if (data["isDone"]) {
+          setState(() {
+            isDone = true;
+          });
+          return;
+        }
+      }
 
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      setState(() {
-        isDone = true;
+      final isGuest = await Helpers.readPref(Defaults.isGuest);
+      if (isGuest == "1") {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          Navigator.pushReplacementNamed(context, "/home");
+        });
+        return;
+      }
+
+      Future.delayed(const Duration(milliseconds: 2500), () async {
+        final userid = await Helpers.readPref(Defaults.userid);
+        if (userid.isEmpty) {
+          setState(() {
+            isDone = true;
+          });
+        } else {
+          // logged in, go to home
+          Navigator.pushNamed(context, "/home");
+        }
       });
     });
   }
@@ -130,6 +158,7 @@ class _SplashState extends State<Splash> {
                                 width: double.infinity,
                                 child: TextButton(
                                     onPressed: () {
+                                      Helpers.writePref(Defaults.isGuest, "0");
                                       Navigator.pushNamed(context, "/signup");
                                     },
                                     style: Widgets.buildButton(context,
@@ -158,6 +187,7 @@ class _SplashState extends State<Splash> {
                                 width: double.infinity,
                                 child: TextButton(
                                     onPressed: () {
+                                      Helpers.writePref(Defaults.isGuest, "1");
                                       Navigator.pushNamed(context, "/home");
                                     },
                                     style: Widgets.buildButton(context,

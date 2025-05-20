@@ -4,6 +4,7 @@ import 'package:cribsfinder/globals/event_item.dart';
 import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/globals/shortlet_item.dart';
 import 'package:cribsfinder/main.dart';
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/palette.dart';
@@ -12,6 +13,7 @@ import 'package:cribsfinder/utils/widget.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +23,127 @@ import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:shimmer/shimmer.dart';
 
 class Sheets {
+  static Future<dynamic> chooseImage(String title) async {
+    if (navigatorKey.currentContext == null) {
+      return "";
+    }
+    final ImagePicker picker = ImagePicker();
+    dynamic photo = "";
+    void camera() async {
+      final XFile? image = await picker.pickImage(source: ImageSource.camera);
+      if (image != null) {
+        List<int> imageBytes = await image.readAsBytes();
+        photo = image.path;
+        Navigator.pop(navigatorKey.currentContext!, true);
+      } else {
+        Alert.show(navigatorKey.currentContext!, '',
+            "This file is either damaged or cannot be read. Please confirm and try again.");
+      }
+    }
+
+    void gallery() async {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        List<int> imageBytes = await image.readAsBytes();
+        photo = image.path;
+        Navigator.pop(navigatorKey.currentContext!, true);
+      } else {
+        Alert.show(navigatorKey.currentContext!, '',
+            "This file is either damaged or cannot be read. Please confirm and try again.");
+      }
+    }
+
+    await showModalBottomSheet(
+      context: navigatorKey.currentContext!,
+      elevation: 10,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: Container(
+              decoration: BoxDecoration(
+                color: Palette.getColor(context, "background", "paper"),
+                border: Border.all(
+                    color: Palette.getColor(context, "background", "paper")),
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(30.0),
+                    topRight: Radius.circular(30.0)),
+              ),
+              padding: const EdgeInsets.all(30.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Widgets.buildText(title, context,
+                      color: "text.primary", size: 20.0, isBold: true),
+                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
+                  TextButton(
+                    onPressed: () => {gallery()},
+                    child: Container(
+                      padding: const EdgeInsets.all(15.0),
+                      decoration: BoxDecoration(
+                        color:
+                            Palette.getColor(context, "background", "neutral"),
+                        border: Border.all(
+                            color: Palette.getColor(
+                                context, "background", "neutral")),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                              child: Widgets.buildText(
+                                  "Upload from Gallery", context,
+                                  color: "main.secondary",
+                                  size: 16.0,
+                                  isBold: true,
+                                  isCenter: true))
+                        ],
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => {camera()},
+                    child: Container(
+                      padding: const EdgeInsets.all(15.0),
+                      decoration: BoxDecoration(
+                        color:
+                            Palette.getColor(context, "background", "neutral"),
+                        border: Border.all(
+                            color: Palette.getColor(
+                                context, "background", "neutral")),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                              child: Widgets.buildText(
+                                  "Take from camera", context,
+                                  color: "main.secondary",
+                                  size: 16.0,
+                                  isBold: true,
+                                  isCenter: true))
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              )),
+        );
+      },
+    );
+    return photo;
+  }
+
   static Future<String> selectDate(String selectedDate,
       {bool disablePast = false,
       title = "Select date",
@@ -1386,7 +1509,8 @@ class Sheets {
         });
   }
 
-  static void showImagePreview(List images, String title) async {
+  static void showImagePreview(List images, String title,
+      {String type = "hotel"}) async {
     await showModalBottomSheet(
         elevation: 10,
         backgroundColor: Colors.transparent,
@@ -1451,7 +1575,8 @@ class Sheets {
                               scrollPhysics: const BouncingScrollPhysics(),
                               builder: (BuildContext context, int index) {
                                 return PhotoViewGalleryPageOptions(
-                                  imageProvider: AssetImage(images[index]),
+                                  imageProvider: NetworkImage(
+                                      "${Defaults.sectionsImagesUrl[type]}${images[index]}"),
                                   initialScale:
                                       PhotoViewComputedScale.contained * 0.8,
                                   heroAttributes: PhotoViewHeroAttributes(
@@ -2403,11 +2528,8 @@ class Sheets {
     return res;
   }
 
-  static Future<String> showCountry() async {
-    final selected = await Helpers.readPref(Defaults.selectedCountry);
-    var res = selected.isNotEmpty ? selected : "Nigeria";
-    final countryController = TextEditingController();
-    countryController.text = res;
+  static Future<bool> showConfirmation() async {
+    var res = false;
     await showModalBottomSheet(
         elevation: 10,
         backgroundColor: Colors.transparent,
@@ -2418,75 +2540,42 @@ class Sheets {
             return Wrap(
               children: [
                 Container(
+                  width: double.infinity,
                   decoration: BoxDecoration(
                       color: Palette.getColor(context, "background", "paper"),
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(20.0),
                           topRight: Radius.circular(20.0))),
-                  padding: EdgeInsets.all(15.0),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 15.0,
                     children: [
-                      Image.asset("assets/images/icon.png",
-                          height: 80.0, fit: BoxFit.cover),
+                      Widgets.buildText("Logout Device", context,
+                          isMedium: true, size: 20.0, lines: 3),
                       Widgets.buildText(
-                          "Your Cribsfinder app is currently set to $res",
-                          context,
-                          isMedium: true,
-                          size: 20.0,
-                          lines: 3),
-                      Widgets.buildText(
-                          "Cribsfinder is currently available only in Nigeria as we have not yet expanded to other countries. However, we are actively working on expanding our services to more regions in the near future. Stay tuned for updates as we grow!",
+                          "Please confirm you want to logout this device.",
                           context,
                           lines: 10),
-                      Widgets.buildText("Country:", context, size: 13.0),
-                      TextFormField(
-                        controller: countryController,
-                        style: GoogleFonts.nunito(),
-                        readOnly: true,
-                        decoration: InputDecoration(
-                            labelStyle: GoogleFonts.nunito(),
-                            hintStyle: GoogleFonts.nunito(),
-                            helperStyle: GoogleFonts.nunito(),
-                            suffix: UnconstrainedBox(
-                              child: Helpers.fetchIcons("caret-down", "solid",
-                                  color: "text.disabled", size: 24.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.transparent),
-                                borderRadius: BorderRadius.circular(10)),
-                            focusedBorder: OutlineInputBorder(
-                                borderSide:
-                                    const BorderSide(color: Colors.transparent),
-                                borderRadius: BorderRadius.circular(10)),
-                            filled: true,
-                            fillColor: Color(0x99F4F4F4),
-                            labelText: "",
-                            contentPadding: const EdgeInsets.fromLTRB(
-                                15.0, 10.0, 15.0, 10.0),
-                            //hintText: hint,
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10))),
-                        onTap: () async {
-                          final country = await showOptions(
-                              "Countries",
-                              "",
-                              Defaults.countries
-                                  .map((country) =>
-                                      {...country, "value": country["name"]})
-                                  .toList(),
-                              isSearch: true);
-                          if (country.isNotEmpty) {
-                            setState(() => countryController.text =
-                                country["value"].toString());
-                          }
-                        },
-                      ),
                       const SizedBox(
                         height: 10.0,
                       ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              res = true;
+                              Navigator.pop(context);
+                            },
+                            style: Widgets.buildButton(context,
+                                horizontal: 15.0,
+                                vertical: 15.0,
+                                radius: 60.0,
+                                background: Palette.get("error.main")),
+                            child: Widgets.buildText("Proceed", context,
+                                color: "text.white")),
+                      )
                     ],
                   ),
                 )

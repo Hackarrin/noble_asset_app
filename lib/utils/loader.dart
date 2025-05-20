@@ -68,19 +68,24 @@ class LoaderDialogState extends State<LoaderDialog>
       listOfChildren.add(Padding(
           padding: const EdgeInsets.only(left: 20, right: 20),
           child: Widgets.buildText(widget.title, context,
-              size: 22.0, isBold: true, color: "text.white", isCenter: true)));
+              size: 16.0,
+              isBold: true,
+              color: "text.white",
+              isCenter: true,
+              lines: 2)));
     }
 
     if (widget.subtitle.isNotEmpty) {
       listOfChildren.add(Padding(
           padding: const EdgeInsets.only(top: 10.0, left: 40, right: 40),
           child: Widgets.buildText(widget.subtitle, context,
-              size: 16.0,
+              size: 15.0,
               isBold: true,
               color: Theme.of(context).brightness == Brightness.dark
                   ? "text.secondary"
                   : "text.disabled",
-              isCenter: true)));
+              isCenter: true,
+              lines: 2)));
     }
 
     return Center(
@@ -123,10 +128,11 @@ abstract class Loader {
     isLoading = true;
     showDialog(
         barrierDismissible: false,
+        useSafeArea: false,
         context: context,
         builder: (BuildContext context) {
           return Scaffold(
-              backgroundColor: Colors.black45,
+              backgroundColor: Colors.black26,
               body: LoaderDialog(
                   curve: showCurve, title: title, subtitle: subtitle));
         });

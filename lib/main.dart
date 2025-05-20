@@ -75,7 +75,9 @@ import 'package:cribsfinder/pages/account/wallet-add-account.dart';
 import 'package:cribsfinder/pages/account/referral.dart';
 import 'package:cribsfinder/pages/account/referral_overview.dart';
 import 'package:cribsfinder/pages/account/transactions.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/palette.dart';
+import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -91,6 +93,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // await PusherBeams.instance.start(Defaults.pusherBeamKey);
+
+  await EncryptedSharedPreferences.initialize(Defaults.prefKey);
+
   runApp(const MyApp());
 }
 

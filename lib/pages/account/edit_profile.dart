@@ -1,4 +1,6 @@
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,19 +16,7 @@ class EditProfile extends StatefulWidget {
 
 class _EditProfileState extends State<EditProfile>
     with SingleTickerProviderStateMixin {
-  final profile = {
-    "fname": "Tayo",
-    "lname": "Oladele",
-    "email": "info@cribsfinder.com",
-    "phone": "091833383",
-    "dateAdded": "2025-01-01",
-    "isVerified": "1",
-    "status": "1",
-    "photo": "",
-    "gender": "M",
-    "dob": "1995-01-02",
-    "address": "ibeju Lekki Lagos Nigeria"
-  };
+  Map<String, dynamic> profile = {};
   var isEditing = -1;
   final fNameController = TextEditingController();
   final lNameController = TextEditingController();
@@ -34,12 +24,27 @@ class _EditProfileState extends State<EditProfile>
   final emailController = TextEditingController();
   final addressController = TextEditingController();
 
+  void handleSubmit(type, value) async {
+    try {
+      Alert.showLoading(context, "Updating...");
+      await JWT.updateSettings(value, type);
+      Alert.hideLoading(context);
+      Alert.show(context, "", "Profile updated successfully!", type: "success");
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      fNameController.text = profile["fname"].toString();
-      lNameController.text = profile["lname"].toString();
+    Future.delayed(Duration.zero, () async {
+      final details = await Helpers.getProfile();
+      setState(() {
+        profile = details["user"] ?? {};
+      });
+      fNameController.text = profile["name"].toString();
       emailController.text = profile["email"].toString();
       phoneController.text = profile["phone"].toString();
       addressController.text = profile["address"].toString();
@@ -104,32 +109,34 @@ class _EditProfileState extends State<EditProfile>
                     switch (index) {
                       case 0:
                         item = {
-                          "label": "First Name",
-                          "controller": fNameController
+                          "label": "Full Name",
+                          "controller": fNameController,
+                          "value": "name",
+                          "values": ["name"],
                         };
                         break;
                       case 1:
                         item = {
-                          "label": "Last Name",
-                          "controller": lNameController
+                          "label": "Mobile Number",
+                          "controller": phoneController,
+                          "values": ["phone"],
+                          "value": "phone",
                         };
                         break;
                       case 2:
                         item = {
-                          "label": "Mobile Number",
-                          "controller": phoneController
+                          "label": "Email",
+                          "controller": emailController,
+                          "value": "email",
+                          'values': ["email"],
                         };
                         break;
                       case 3:
                         item = {
-                          "label": "Email",
-                          "controller": emailController
-                        };
-                        break;
-                      case 4:
-                        item = {
                           "label": "Address",
-                          "controller": addressController
+                          "controller": addressController,
+                          "values": ["address"],
+                          "value": "address",
                         };
                         break;
                     }
@@ -146,21 +153,34 @@ class _EditProfileState extends State<EditProfile>
                           ),
                           TextField(
                             controller: item["controller"],
-                            readOnly: isEditing == index,
+                            readOnly: isEditing != index,
+                            autofocus: isEditing == index,
                             decoration: Widgets.inputDecoration("",
                                 color: Color(0xFFF4F4F4),
                                 isFilled: true,
                                 isOutline: true,
-                                suffixIcon: TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        isEditing = index;
-                                      });
-                                    },
-                                    child: Widgets.buildText("Edit", context,
-                                        size: 13.0,
-                                        weight: 400,
-                                        color: "main.primary"))),
+                                suffixIcon: isEditing == index
+                                    ? null
+                                    : TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            isEditing = index;
+                                          });
+                                        },
+                                        child: Widgets.buildText(
+                                            "Edit", context,
+                                            size: 13.0,
+                                            weight: 400,
+                                            color: "main.primary"))),
+                            onSubmitted: (value) {
+                              if (value.isNotEmpty) {
+                                handleSubmit(item["value"].toString(),
+                                    {item["value"].toString(): value});
+                              } else {
+                                Alert.show(context, "",
+                                    "Pleae enter a valid ${item["value"].toString()} to proceed.");
+                              }
+                            },
                             style: GoogleFonts.nunito(
                                 color: Color(0xCC757575),
                                 fontSize: 13.0,
@@ -170,7 +190,7 @@ class _EditProfileState extends State<EditProfile>
                       ),
                     );
                   },
-                  itemCount: 5,
+                  itemCount: 4,
                 ),
               ),
             ),

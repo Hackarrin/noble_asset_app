@@ -1,6 +1,7 @@
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../utils/palette.dart';
 
@@ -75,7 +76,8 @@ class _SignupNotificationState extends State<SignupNotification> {
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await Permission.notification.request();
                           Navigator.pushNamed(context, "/home");
                         },
                         style: Widgets.buildButton(context,

@@ -202,7 +202,7 @@ class _PropertyTopAgentsState extends State<PropertyTopAgents> {
                         ),
                         GestureDetector(
                             onTap: () {
-                              Sheets.showCountry();
+                              Sheets.showConfirmation();
                             },
                             child: Container(
                               decoration: BoxDecoration(

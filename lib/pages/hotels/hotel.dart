@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/globals/room_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/bookings/hotel.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/markers.dart';
 import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/widget.dart';
@@ -13,6 +15,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:widget_to_marker/widget_to_marker.dart';
 
 import '../../utils/palette.dart';
@@ -49,7 +53,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
     "children": 0,
     "rooms": 0
   };
-  List<Map<String, dynamic>> _selectedRooms = [];
+  List<dynamic> _selectedRooms = [];
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -70,15 +74,12 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
           filter = res;
         });
       }
-      setState(() {
-        _selectedRooms = _data["rooms"];
-      });
     } catch (err) {
       print(err);
     }
   }
 
-  final Map<String, dynamic> _data = {
+  Map<String, dynamic> _data = {
     "title": "Urban hotels ",
     "subtitle": "Two bedroom Apartment",
     "latitude": 6.5,
@@ -107,7 +108,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
     "totalReviews": 75,
     "description":
         "Located within 3.2 km of Nike Art Gallery and 7.9 km of Lekki Conservation Centre, Jotani Living provides rooms with air conditioning and a private bathroom in Lagos. This property offers access to a balcony and free private parking. The accommodation offers a 24-hour front desk and full-day.<br /><br />Featuring free WiFi, the units have a washing machine and a flat-screen TV with cable channels. Each unit is equipped with a private bathroom equipped with a walk-in shower, while some rooms include a fully equipped kitchen.",
-    "publisher": {
+    "host": {
       "name": "Urban hotels",
       "image": "avatar.png",
       "isVerified": 1,
@@ -389,6 +390,46 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
   };
   Set<Marker> _markers = {};
   late TabController tabController;
+  var loading = false;
+  var error = "";
+
+  void fetch() async {
+    try {
+      setState(() {
+        error = "";
+        loading = true;
+      });
+      final res = await JWT.getHotel(_data["listingId"]);
+      setState(() {
+        _data = res;
+        _selectedRooms = _data["rooms"] ?? [];
+        loading = false;
+      });
+      // markers
+      List<Marker> markers = [];
+      final icon = await HotelSingleMarker(icon: "bed").toBitmapDescriptor(
+          logicalSize: const Size(250, 250), imageSize: const Size(250, 250));
+      Marker marker = Marker(
+          markerId: MarkerId(_data["hotelId"].toString()),
+          icon: icon,
+          position: LatLng(
+              num.tryParse(_data["latitude"].toString())?.toDouble() ??
+                  _center.latitude,
+              num.tryParse(_data["longitude"].toString())?.toDouble() ??
+                  _center.longitude),
+          onTap: () {});
+      markers.add(marker);
+      setState(() {
+        _markers = markers.toSet();
+      });
+    } catch (err) {
+      setState(() {
+        error = err.toString();
+        loading = false;
+      });
+      print(err);
+    }
+  }
 
   @override
   void initState() {
@@ -409,24 +450,10 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
           });
           updateData(null);
           final data = jsonDecode(arguments.toString());
-          // markers
-          List<Marker> markers = [];
-          final icon = await HotelSingleMarker(icon: "bed").toBitmapDescriptor(
-              logicalSize: const Size(250, 250),
-              imageSize: const Size(250, 250));
-          Marker marker = Marker(
-              markerId: MarkerId(_data["hotelId"].toString()),
-              icon: icon,
-              position: LatLng(
-                  num.tryParse(_data["latitude"].toString())?.toDouble() ??
-                      _center.latitude,
-                  num.tryParse(_data["longitude"].toString())?.toDouble() ??
-                      _center.longitude),
-              onTap: () {});
-          markers.add(marker);
           setState(() {
-            _markers = markers.toSet();
+            _data = data;
           });
+          fetch();
         } catch (err) {
           print("dante - $err");
         }
@@ -494,7 +521,19 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
         title: Widgets.buildText("Details", context, isMedium: true),
         actions: [
           IconButton(
-            onPressed: () async {},
+            onPressed: () async {
+              if (!loading) {
+                SharePlus.instance.share(ShareParams(
+                    title:
+                        "Check out ${_data["title"].toString()} on Cribsfinder",
+                    subject:
+                        "Check out ${_data["title"].toString()} on Cribsfinder",
+                    uri: Uri.https(
+                      "cribsfinder.com",
+                      "/place/${_data["listingId"]}-${_data["title"].toString().toLowerCase().replaceAll(" ", "-")}",
+                    )));
+              }
+            },
             style: Widgets.buildButton(context,
                 sideColor: Palette.getColor(context, "background", "neutral"),
                 radius: 40.0),
@@ -502,11 +541,20 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                 size: 16.0, color: "text.other"),
           ),
           IconButton(
-            onPressed: () async {},
+            onPressed: () async {
+              Helpers.wishlist(_data, "0");
+              setState(() {
+                _data = {
+                  ..._data,
+                  "favourite": _data["favourite"].toString() == "0" ? "1" : "0"
+                };
+              });
+            },
             style: Widgets.buildButton(context,
                 sideColor: Palette.getColor(context, "background", "neutral"),
                 radius: 40.0),
-            icon: Helpers.fetchIcons("heart", "regular",
+            icon: Helpers.fetchIcons("heart",
+                _data["favourite"].toString() == "0" ? "regular" : "solid",
                 size: 16.0, color: "text.other"),
           ),
           const SizedBox(width: 10.0),
@@ -516,1214 +564,1217 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
         foregroundColor: Palette.getColor(context, "text", "disabled"),
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              child: DefaultTabController(
-                length: 3,
-                child: ListView(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Sheets.showImagePreview(
-                            _data["images"], _data["title"].toString());
-                      },
-                      child: Stack(
+          child: loading
+              ? Shimmer.fromColors(
+                  baseColor: Palette.get("background.neutral"),
+                  highlightColor: Palette.get("background.default"),
+                  loop: 1,
+                  child: AbsorbPointer(child: buildContent(screenWidth)))
+              : (error.isNotEmpty
+                  ? Alert.showErrorMessage(context, "",
+                      message: error, buttonText: "Retry", action: fetch)
+                  : buildContent(screenWidth))),
+    );
+  }
+
+  Widget buildContent(double screenWidth) {
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          child: DefaultTabController(
+            length: 3,
+            child: ListView(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Sheets.showImagePreview(
+                        _data["images"] ?? [], _data["title"].toString());
+                  },
+                  child: Stack(
+                    children: [
+                      Helpers.getPhoto(
+                          (_data["images"] ?? []).isNotEmpty
+                              ? _data["images"][_selectedImageIndex]
+                              : _data["image"].toString(),
+                          height: 350.0,
+                          radius: 0.0,
+                          type: "hotel"),
+                      if ((_data["images"] ?? []).length > 1)
+                        Positioned(
+                          bottom: 30.0,
+                          left: 30.0,
+                          right: 30.0,
+                          child: SizedBox(
+                            child: UnconstrainedBox(
+                              child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Palette.get("background.paper"),
+                                      borderRadius: BorderRadius.circular(5.0)),
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    spacing: 10.0,
+                                    children: [
+                                      for (var i = 0;
+                                          i <
+                                              (_data["images"].length > 6
+                                                  ? 6
+                                                  : _data["images"].length);
+                                          i += 1)
+                                        Stack(
+                                          children: [
+                                            ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                child: Helpers.getPhoto(
+                                                    _data["images"][0],
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    type: "hotel")),
+                                            if (_data["images"].length > 6 &&
+                                                i == 5)
+                                              Positioned(
+                                                  top: 0,
+                                                  right: 0,
+                                                  child: Container(
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    decoration: BoxDecoration(
+                                                        color: Palette.get(
+                                                            "background.overlay"),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    12.0)),
+                                                    child: Center(
+                                                      child: Widgets.buildText(
+                                                          "+${(_data["images"].length - 6).toString()}",
+                                                          context,
+                                                          color: "text.white",
+                                                          isMedium: true),
+                                                    ),
+                                                  ))
+                                          ],
+                                        )
+                                    ],
+                                  )),
+                            ),
+                          ),
+                        )
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_data.containsKey("discount"))
+                        Container(
+                            decoration: BoxDecoration(
+                                color: Palette.get("background.neutral"),
+                                borderRadius: BorderRadius.circular(5.0)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5.0, horizontal: 10.0),
+                            child: Widgets.buildText("10% Off", context,
+                                color: "main.primary")),
+                      if (!_data.containsKey("discount")) SizedBox(),
+                      Row(
                         children: [
-                          Image.asset(_data["images"][_selectedImageIndex],
-                              width: double.infinity,
-                              height: 350,
-                              fit: BoxFit.cover),
-                          Positioned(
-                            bottom: 30.0,
-                            left: 30.0,
-                            right: 30.0,
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    color: Palette.get("background.paper"),
-                                    borderRadius: BorderRadius.circular(5.0)),
-                                padding: const EdgeInsets.all(5.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    for (var i = 0;
-                                        i <
-                                            (_data["images"].length > 6
-                                                ? 6
-                                                : _data["images"].length);
-                                        i += 1)
-                                      Stack(
-                                        children: [
-                                          ClipRRect(
+                          Helpers.fetchIcons("star", "solid",
+                              color: "warning.main"),
+                          const SizedBox(width: 5.0),
+                          Widgets.buildText(
+                              "${_data["rating"]} (${Helpers.formatNumber(_data["totalReviews"] ?? "0")})",
+                              context,
+                              color: "text.secondary",
+                              weight: 500)
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 10.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Widgets.buildText(
+                                _data["title"].toString(), context,
+                                isBold: true, color: "text.secondary"),
+                            Widgets.buildText(
+                                (_data["landmarks"] ?? [])
+                                    .join(", ")
+                                    .toString(),
+                                context,
+                                color: "text.other",
+                                lines: 1),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 50.0,
+                      ),
+                      GestureDetector(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: Palette.get("main.primary"),
+                              borderRadius: BorderRadius.circular(40.0)),
+                          padding: const EdgeInsets.all(15.0),
+                          child: Helpers.fetchIcons(
+                              "land-layer-location", "solid",
+                              color: "text.white", size: 24.0),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 15.0,
+                ),
+                TabBar(
+                  labelStyle: GoogleFonts.nunito(
+                      fontSize: 16.0, fontWeight: FontWeight.w500),
+                  dividerColor: Color(0x1A000000),
+                  indicatorWeight: 3.0,
+                  dividerHeight: 2.0,
+                  onTap: (index) {
+                    setState(() {
+                      _selectedTab = index;
+                    });
+                  },
+                  tabs: [
+                    Tab(text: "About"),
+                    Tab(text: "Gallery"),
+                    Tab(text: "Reviews"),
+                  ],
+                ),
+                const SizedBox(
+                  height: 15.0,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                      left: 10.0, right: 10.0, bottom: 90.0, top: 10.0),
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 500),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    child: Column(children: [
+                      if (_selectedTab == 0)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                                height: 120.0,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  shrinkWrap: true,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final item = index == 6
+                                        ? "more"
+                                        : (_data["amenities"] ?? [])[index];
+                                    return Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 10.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          if (index == 6) {
+                                            print("open stuff");
+                                          }
+                                        },
+                                        child: Container(
+                                          height: 140.0,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 15.0, vertical: 10.0),
+                                          decoration: BoxDecoration(
+                                              color: Palette.getColor(context,
+                                                  "background", "default"),
                                               borderRadius:
-                                                  BorderRadius.circular(12.0),
-                                              child: Image.asset(
-                                                  _data["images"][0],
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  fit: BoxFit.cover)),
-                                          if (_data["images"].length > 6 &&
-                                              i == 5)
-                                            Positioned(
-                                                top: 0,
-                                                right: 0,
-                                                child: Container(
-                                                  width: 50.0,
-                                                  height: 50.0,
+                                                  BorderRadius.circular(20.0)),
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                Container(
                                                   decoration: BoxDecoration(
                                                       color: Palette.get(
-                                                          "background.overlay"),
+                                                          "background.paper"),
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              12.0)),
-                                                  child: Center(
-                                                    child: Widgets.buildText(
-                                                        "+${(_data["images"].length - 6).toString()}",
-                                                        context,
-                                                        color: "text.white",
-                                                        isMedium: true),
+                                                              10.0)),
+                                                  padding: EdgeInsets.all(10.0),
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                    child: Defaults
+                                                            .hotelAmenities
+                                                            .containsKey(
+                                                                item.toString())
+                                                        ? Helpers.fetchIcons(
+                                                            Defaults
+                                                                .hotelAmenities[
+                                                                    item.toString()]![
+                                                                    "icon"]
+                                                                .toString(),
+                                                            "solid",
+                                                            size: 40.0,
+                                                            color:
+                                                                "main.primary")
+                                                        : const SizedBox(
+                                                            width: 40,
+                                                            height: 40),
                                                   ),
-                                                ))
-                                        ],
-                                      )
-                                  ],
+                                                ),
+                                                const SizedBox(height: 5.0),
+                                                FittedBox(
+                                                  child: Widgets.buildText(
+                                                      Defaults.hotelAmenities
+                                                              .containsKey(item
+                                                                  .toString())
+                                                          ? Defaults
+                                                              .hotelAmenities[
+                                                                  item.toString()]![
+                                                                  "name"]
+                                                              .toString()
+                                                          : item.toString(),
+                                                      context),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount:
+                                      (_data["amenities"] ?? []).length > 6
+                                          ? 7
+                                          : (_data["amenities"] ?? []).length,
                                 )),
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                              decoration: BoxDecoration(
-                                  color: Palette.get("background.neutral"),
-                                  borderRadius: BorderRadius.circular(5.0)),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5.0, horizontal: 10.0),
-                              child: Widgets.buildText("10% Off", context,
-                                  color: "main.primary")),
-                          Row(
-                            children: [
-                              Helpers.fetchIcons("star", "solid",
-                                  color: "warning.main"),
-                              const SizedBox(width: 5.0),
-                              Widgets.buildText(
-                                  "${_data["rating"]} (${Helpers.formatNumber(_data["totalReviews"].toString())})",
-                                  context,
-                                  color: "text.secondary",
-                                  weight: 500)
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Widgets.buildText(
-                                    _data["title"].toString(), context,
-                                    isBold: true, color: "text.secondary"),
-                                Widgets.buildText(
-                                    _data["landmarks"].join(", ").toString(),
-                                    context,
-                                    color: "text.other",
-                                    lines: 1),
-                              ],
+                            const SizedBox(
+                              height: 25.0,
                             ),
-                          ),
-                          const SizedBox(
-                            width: 50.0,
-                          ),
-                          GestureDetector(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Palette.get("main.primary"),
-                                  borderRadius: BorderRadius.circular(40.0)),
-                              padding: const EdgeInsets.all(15.0),
-                              child: Helpers.fetchIcons(
-                                  "land-layer-location", "solid",
-                                  color: "text.white", size: 24.0),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15.0,
-                    ),
-                    TabBar(
-                      labelStyle: GoogleFonts.nunito(
-                          fontSize: 16.0, fontWeight: FontWeight.w500),
-                      dividerColor: Color(0x1A000000),
-                      indicatorWeight: 3.0,
-                      dividerHeight: 2.0,
-                      onTap: (index) {
-                        setState(() {
-                          _selectedTab = index;
-                        });
-                      },
-                      tabs: [
-                        Tab(text: "About"),
-                        Tab(text: "Gallery"),
-                        Tab(text: "Reviews"),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 15.0,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                          left: 10.0, right: 10.0, bottom: 90.0, top: 10.0),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 500),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                          return ScaleTransition(
-                              scale: animation, child: child);
-                        },
-                        child: Column(children: [
-                          if (_selectedTab == 0)
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ConstrainedBox(
-                                    constraints: BoxConstraints.loose(
-                                        Size(screenWidth, 150.0)),
-                                    child: Swiper(
-                                      outer: true,
-                                      layout: SwiperLayout.CUSTOM,
-                                      customLayoutOption: Widgets.customLayout(
-                                          (_data["amenities"] ?? []).length > 6
-                                              ? 7
-                                              : (_data["amenities"] ?? [])
-                                                  .length,
-                                          screenWidth,
-                                          offset: 280.0),
-                                      itemHeight: 140.0,
-                                      itemWidth: screenWidth,
-                                      loop: false,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        final item = index == 6
-                                            ? "more"
-                                            : (_data["amenities"] ?? [])[index];
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 280.0),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              if (index == 6) {
-                                                print("open stuff");
-                                              }
-                                            },
-                                            child: Container(
-                                              height: double.infinity,
-                                              width: double.infinity,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 15.0,
-                                                      vertical: 10.0),
-                                              decoration: BoxDecoration(
-                                                  color: Palette.getColor(
-                                                      context,
-                                                      "background",
-                                                      "default"),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20.0)),
-                                              child: Center(
+                                Widgets.buildText("Description", context,
+                                    isMedium: true, size: 18.0),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Wrap(
+                                  children: [
+                                    Widgets.buildText(
+                                        _data["description"]
+                                            .toString()
+                                            .replaceAll("<br />", "\n"),
+                                        context,
+                                        lines:
+                                            isDescriptionExpanded ? 2000 : 3),
+                                    if (Helpers.hasTextOverflow(
+                                        _data["description"].toString(),
+                                        maxLines: 3))
+                                      GestureDetector(
+                                        onTap: () => setState(() =>
+                                            isDescriptionExpanded =
+                                                !isDescriptionExpanded),
+                                        child: Widgets.buildText(
+                                            isDescriptionExpanded
+                                                ? "Show less"
+                                                : "Read more",
+                                            context,
+                                            weight: 500,
+                                            color: "main.primary",
+                                            isUnderlined: true),
+                                      )
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 25.0,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Widgets.buildText("Meet Your Host", context,
+                                    isMedium: true, size: 18.0),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: Palette.get("background.paper"),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0x1A000000),
+                                          spreadRadius: 0,
+                                          blurRadius: 5,
+                                          offset: Offset(-1, 1),
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(50.0),
+                                      border: Border(
+                                          top: BorderSide(
+                                              color: Palette.get(
+                                                  "main.primary")))),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 15.0, vertical: 10.0),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 5.0),
+                                  child: Row(
+                                    children: [
+                                      Stack(
+                                        children: [
+                                          Helpers.getPhoto(
+                                              _data.containsKey("host")
+                                                  ? _data["host"]["image"]
+                                                  : "",
+                                              type: "host",
+                                              isInitials: true,
+                                              text: _data.containsKey("host")
+                                                  ? _data["host"]["name"]
+                                                  : "",
+                                              radius: 80.0,
+                                              width: 80.0,
+                                              height: 80.0),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      Expanded(
+                                        child: IntrinsicHeight(
+                                          child: Row(
+                                            children: [
+                                              Expanded(
                                                 child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Palette.get(
-                                                              "background.paper"),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      10.0)),
-                                                      padding:
-                                                          EdgeInsets.all(10.0),
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        child: Defaults
-                                                                .hotelAmenities
-                                                                .containsKey(item
-                                                                    .toString())
-                                                            ? Helpers.fetchIcons(
-                                                                Defaults
-                                                                    .hotelAmenities[
-                                                                        item.toString()]![
-                                                                        "icon"]
-                                                                    .toString(),
-                                                                "solid",
-                                                                size: 40.0,
-                                                                color:
-                                                                    "main.primary")
-                                                            : const SizedBox(
-                                                                width: 40,
-                                                                height: 40),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                        height: 20.0),
                                                     FittedBox(
                                                       child: Widgets.buildText(
-                                                          Defaults
-                                                                  .hotelAmenities
-                                                                  .containsKey(item
-                                                                      .toString())
-                                                              ? Defaults
-                                                                  .hotelAmenities[
-                                                                      item.toString()]![
-                                                                      "name"]
-                                                                  .toString()
-                                                              : item.toString(),
-                                                          context),
-                                                    )
+                                                          _data.containsKey(
+                                                                  "host")
+                                                              ? _data["host"]
+                                                                  ["name"]
+                                                              : "",
+                                                          context,
+                                                          size: 16.0,
+                                                          weight: 500,
+                                                          lines: 1),
+                                                    ),
+                                                    FittedBox(
+                                                      child: Widgets.buildText(
+                                                          _data.containsKey(
+                                                                  "host")
+                                                              ? "${_data["host"]["years"].toString()} year${(num.tryParse(_data["host"]["years"].toString())?.toInt() ?? 0) > 1 ? "s" : ""} hosting"
+                                                              : "",
+                                                          context,
+                                                          color:
+                                                              "text.secondary",
+                                                          lines: 1),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      itemCount:
-                                          (_data["amenities"] ?? []).length > 6
-                                              ? 7
-                                              : (_data["amenities"] ?? [])
-                                                  .length,
-                                    )),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Widgets.buildText("Description", context,
-                                        isMedium: true),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Wrap(
-                                      children: [
-                                        Widgets.buildText(
-                                            _data["description"]
-                                                .toString()
-                                                .replaceAll("<br />", "\n"),
-                                            context,
-                                            lines: isDescriptionExpanded
-                                                ? 2000
-                                                : 3),
-                                        if (Helpers.hasTextOverflow(
-                                            _data["description"].toString(),
-                                            maxLines: 3))
-                                          GestureDetector(
-                                            onTap: () => setState(() =>
-                                                isDescriptionExpanded =
-                                                    !isDescriptionExpanded),
-                                            child: Widgets.buildText(
-                                                isDescriptionExpanded
-                                                    ? "Show less"
-                                                    : "Read more",
-                                                context,
-                                                weight: 500,
-                                                color: "main.primary",
-                                                isUnderlined: true),
-                                          )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Widgets.buildText("Meet Your Host", context,
-                                        isMedium: true),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          color:
-                                              Palette.get("background.paper"),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Color(0x1A000000),
-                                              spreadRadius: 0,
-                                              blurRadius: 5,
-                                              offset: Offset(-1, 1),
-                                            ),
-                                          ],
-                                          borderRadius:
-                                              BorderRadius.circular(50.0),
-                                          border: Border(
-                                              top: BorderSide(
-                                                  color: Palette.get(
-                                                      "main.primary")))),
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 15.0, vertical: 10.0),
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 5.0),
-                                      child: Row(
-                                        children: [
-                                          Stack(
-                                            children: [
-                                              Helpers.getPhoto(
-                                                  _data["publisher"]["image"]
-                                                          .toString()
-                                                          .isEmpty
-                                                      ? ""
-                                                      : "assets/images/${_data["publisher"]["image"].toString()}",
-                                                  text: _data["publisher"]
-                                                      ["name"],
-                                                  height: 80.0),
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            width: 10.0,
-                                          ),
-                                          Expanded(
-                                            child: IntrinsicHeight(
-                                              child: Row(
+                                              SizedBox(
+                                                width: 25.0,
+                                                child: VerticalDivider(
+                                                    thickness: 1.0,
+                                                    color: Color(0x14000000)),
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
+                                                  FittedBox(
+                                                    child: Row(
                                                       children: [
                                                         FittedBox(
                                                           child: Widgets.buildText(
-                                                              _data["publisher"]
-                                                                  ["name"],
+                                                              _data.containsKey(
+                                                                      "host")
+                                                                  ? _data["host"]
+                                                                          [
+                                                                          "rating"]
+                                                                      .toString()
+                                                                  : "",
                                                               context,
                                                               size: 16.0,
                                                               weight: 500,
                                                               lines: 1),
                                                         ),
-                                                        FittedBox(
-                                                          child: Widgets.buildText(
-                                                              "${_data["publisher"]["years"].toString()} year${(num.tryParse(_data["publisher"]["years"].toString())?.toInt() ?? 0) > 1 ? "s" : ""} hosting",
-                                                              context,
-                                                              color:
-                                                                  "text.secondary",
-                                                              lines: 1),
+                                                        const SizedBox(
+                                                          width: 5.0,
                                                         ),
+                                                        Helpers.fetchIcons(
+                                                            "star", "solid",
+                                                            color:
+                                                                "warning.main")
                                                       ],
                                                     ),
                                                   ),
-                                                  SizedBox(
-                                                    width: 25.0,
-                                                    child: VerticalDivider(
-                                                        thickness: 1.0,
-                                                        color:
-                                                            Color(0x14000000)),
-                                                  ),
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      FittedBox(
-                                                        child: Row(
-                                                          children: [
-                                                            FittedBox(
-                                                              child: Widgets.buildText(
-                                                                  _data["publisher"]
-                                                                          [
-                                                                          "rating"]
-                                                                      .toString(),
-                                                                  context,
-                                                                  size: 16.0,
-                                                                  weight: 500,
-                                                                  lines: 1),
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 5.0,
-                                                            ),
-                                                            Helpers.fetchIcons(
-                                                                "star", "solid",
-                                                                color:
-                                                                    "warning.main")
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      FittedBox(
-                                                        child: Widgets.buildText(
-                                                            "Rating", context,
-                                                            color:
-                                                                "text.secondary",
-                                                            lines: 1),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  SizedBox(
-                                                    width: 25.0,
-                                                    child: VerticalDivider(
-                                                        thickness: 1.0,
-                                                        color:
-                                                            Color(0x14000000)),
-                                                  ),
-                                                  Column(
-                                                    children: [
-                                                      Widgets.buildText(
-                                                          Helpers.formatNumber(
-                                                              _data["publisher"]
-                                                                      [
-                                                                      "reviews"]
-                                                                  .toString()),
-                                                          context,
-                                                          size: 16.0,
-                                                          weight: 500),
-                                                      FittedBox(
-                                                        child: Widgets.buildText(
-                                                            "Reviews", context,
-                                                            color:
-                                                                "text.secondary"),
-                                                      ),
-                                                    ],
+                                                  FittedBox(
+                                                    child: Widgets.buildText(
+                                                        "Rating", context,
+                                                        color: "text.secondary",
+                                                        lines: 1),
                                                   ),
                                                 ],
                                               ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Widgets.buildText("Landmark", context,
-                                        isMedium: true),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Color(0x0A000000),
-                                              spreadRadius: 0,
-                                              blurRadius: 4,
-                                              offset: Offset(0,
-                                                  4), // changes position of shadow
-                                            ),
-                                          ],
-                                          border: Border.all(
-                                              color: Color(0x1A000000)),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0)),
-                                      padding: const EdgeInsets.all(5.0),
-                                      height: 200,
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        child: GoogleMap(
-                                            onMapCreated: _onMapCreated,
-                                            initialCameraPosition:
-                                                CameraPosition(
-                                              target: _center,
-                                              zoom: 11.0,
-                                            ),
-                                            mapToolbarEnabled: false,
-                                            zoomControlsEnabled: false,
-                                            markers: _markers),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Row(
-                                      children: [
-                                        Helpers.fetchIcons("marker", "solid",
-                                            color: "main.primary"),
-                                        SizedBox(
-                                          width: 5.0,
-                                        ),
-                                        Expanded(
-                                          child: Widgets.buildText(
-                                              _data["landmarks"]
-                                                  .join(", ")
-                                                  .toString(),
-                                              context,
-                                              color: "text.secondary"),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Widgets.buildText(
-                                        "Modify Selection", context,
-                                        isMedium: true),
-                                    const SizedBox(
-                                      height: 10.0,
-                                    ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                          color: Palette.get("main.primary"),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0)),
-                                      padding: const EdgeInsets.all(15.0),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Widgets.buildText(
-                                                  "Your Search: ${Helpers.formatNumber((num.tryParse(filter["adults"].toString())!.toInt() + num.tryParse(filter["children"].toString())!.toInt()).toString())} ${(num.tryParse(filter["adults"].toString())!.toInt() + num.tryParse(filter["children"].toString())!.toInt()) > 1 ? "People" : "Person"}, ${Helpers.dateDiff(filter["checkin"].toString(), filter["checkout"].toString())} ${Helpers.dateDiff(filter["checkin"].toString(), filter["checkout"].toString()) > 1 ? "Nights" : "Night"}, ${Helpers.formatNumber(filter["rooms"].toString())} ${num.tryParse(filter["rooms"].toString())!.toInt() > 1 ? "Rooms" : "Room"}",
-                                                  context,
-                                                  color: "text.white",
-                                                  weight: 500),
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 10.0,
-                                          ),
-                                          Column(
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                              SizedBox(
+                                                width: 25.0,
+                                                child: VerticalDivider(
+                                                    thickness: 1.0,
+                                                    color: Color(0x14000000)),
+                                              ),
+                                              Column(
                                                 children: [
                                                   Widgets.buildText(
-                                                      "Check-in date", context,
-                                                      color: "text.white"),
-                                                  Widgets.buildText(
-                                                      "Check-out date", context,
-                                                      color: "text.white"),
-                                                ],
-                                              ),
-                                              const SizedBox(
-                                                height: 10.0,
-                                              ),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                child: IntrinsicHeight(
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Expanded(
-                                                          child: TextFormField(
-                                                        readOnly: true,
-                                                        controller:
-                                                            startDateController,
-                                                        decoration: Widgets
-                                                            .inputDecoration("",
-                                                                prefixIcon:
-                                                                    UnconstrainedBox(
-                                                                  child: Helpers.fetchIcons(
-                                                                      "calendar-clock",
-                                                                      "regular",
-                                                                      size: 24,
-                                                                      color:
-                                                                          "text.other"),
-                                                                ),
-                                                                isOutline: true,
-                                                                borderColor: Colors
-                                                                    .transparent,
-                                                                isFloating:
-                                                                    true,
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
-                                                        onTap: () async {
-                                                          final res = await Sheets
-                                                              .selectDate(
-                                                                  filter["checkin"]
-                                                                      .toString(),
-                                                                  disablePast:
-                                                                      true,
-                                                                  title:
-                                                                      "Select check-in date");
-                                                          setState(() {
-                                                            filter["checkin"] =
-                                                                res;
-                                                          });
-                                                          startDateController
-                                                                  .text =
-                                                              Helpers.formatDate(
-                                                                  res,
-                                                                  formatString:
-                                                                      "MMM dd");
-                                                        },
-                                                        style: GoogleFonts.nunito(
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "other")),
-                                                      )),
-                                                      SizedBox(
-                                                        width: 5.0,
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  top: 5.0,
-                                                                  bottom: 5.0),
-                                                          child: VerticalDivider(
-                                                              thickness: 1.0,
-                                                              color: Color(
-                                                                  0x14000000)),
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                          child: TextFormField(
-                                                        readOnly: true,
-                                                        controller:
-                                                            endDateController,
-                                                        decoration: Widgets
-                                                            .inputDecoration("",
-                                                                prefixIcon:
-                                                                    UnconstrainedBox(
-                                                                  child: Helpers.fetchIcons(
-                                                                      "calendar-clock",
-                                                                      "regular",
-                                                                      size: 24,
-                                                                      color:
-                                                                          "text.other"),
-                                                                ),
-                                                                isOutline: true,
-                                                                borderColor: Colors
-                                                                    .transparent,
-                                                                isFloating:
-                                                                    true,
-                                                                color: Palette
-                                                                    .getColor(
-                                                                        context,
-                                                                        "text",
-                                                                        "other")),
-                                                        onTap: () async {
-                                                          final res = await Sheets
-                                                              .selectDate(
-                                                                  filter["checkout"]
-                                                                      .toString(),
-                                                                  title:
-                                                                      "Select check-out date");
-                                                          setState(() {
-                                                            filter["checkout"] =
-                                                                res;
-                                                          });
-                                                          endDateController
-                                                                  .text =
-                                                              Helpers.formatDate(
-                                                                  res,
-                                                                  formatString:
-                                                                      "MMM dd");
-                                                        },
-                                                        style: GoogleFonts.nunito(
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "other")),
-                                                      ))
-                                                    ],
+                                                      Helpers.formatNumber(_data
+                                                              .containsKey(
+                                                                  "host")
+                                                          ? _data["host"]
+                                                                  ["reviews"]
+                                                              .toString()
+                                                          : ""),
+                                                      context,
+                                                      size: 16.0,
+                                                      weight: 500),
+                                                  FittedBox(
+                                                    child: Widgets.buildText(
+                                                        "Reviews", context,
+                                                        color:
+                                                            "text.secondary"),
                                                   ),
-                                                ),
+                                                ],
                                               ),
                                             ],
                                           ),
-                                          const SizedBox(
-                                            height: 10.0,
-                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 25.0,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Widgets.buildText("Landmark", context,
+                                    isMedium: true),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0x0A000000),
+                                          spreadRadius: 0,
+                                          blurRadius: 4,
+                                          offset: Offset(0,
+                                              4), // changes position of shadow
+                                        ),
+                                      ],
+                                      border:
+                                          Border.all(color: Color(0x1A000000)),
+                                      borderRadius:
+                                          BorderRadius.circular(10.0)),
+                                  padding: const EdgeInsets.all(5.0),
+                                  height: 200,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    child: GoogleMap(
+                                        onMapCreated: _onMapCreated,
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(
+                                              num.tryParse(_data["latitude"]
+                                                          .toString())
+                                                      ?.toDouble() ??
+                                                  _center.latitude,
+                                              num.tryParse(_data["longitude"]
+                                                          .toString())
+                                                      ?.toDouble() ??
+                                                  _center.longitude),
+                                          zoom: 15.0,
+                                        ),
+                                        mapToolbarEnabled: true,
+                                        zoomControlsEnabled: true,
+                                        markers: _markers),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Row(
+                                  children: [
+                                    Helpers.fetchIcons("marker", "solid",
+                                        color: "main.primary"),
+                                    SizedBox(
+                                      width: 5.0,
+                                    ),
+                                    Expanded(
+                                      child: Widgets.buildText(
+                                          (_data["landmarks"] ?? [])
+                                              .join(", ")
+                                              .toString(),
+                                          context,
+                                          color: "text.secondary"),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 25.0,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Widgets.buildText("Modify Selection", context,
+                                    isMedium: true),
+                                const SizedBox(
+                                  height: 10.0,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Palette.get("main.primary"),
+                                      borderRadius:
+                                          BorderRadius.circular(10.0)),
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Widgets.buildText(
+                                              "Your Search: ${Helpers.formatNumber((num.tryParse(filter["adults"].toString())!.toInt() + num.tryParse(filter["children"].toString())!.toInt()).toString())} ${(num.tryParse(filter["adults"].toString())!.toInt() + num.tryParse(filter["children"].toString())!.toInt()) > 1 ? "People" : "Person"}, ${Helpers.dateDiff(filter["checkin"].toString(), filter["checkout"].toString())} ${Helpers.dateDiff(filter["checkin"].toString(), filter["checkout"].toString()) > 1 ? "Nights" : "Night"}, ${Helpers.formatNumber(filter["rooms"].toString())} ${num.tryParse(filter["rooms"].toString())!.toInt() > 1 ? "Rooms" : "Room"}",
+                                              context,
+                                              color: "text.white",
+                                              weight: 500),
+                                        ],
+                                      ),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      Column(
+                                        children: [
                                           Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,
                                             children: [
-                                              Expanded(
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 10.0),
-                                                        child:
-                                                            Widgets.buildText(
-                                                          "Adults",
-                                                          context,
-                                                        ),
-                                                      ),
-                                                      TextFormField(
-                                                        readOnly: true,
-                                                        controller:
-                                                            adultsController,
-                                                        decoration: Widgets.inputDecoration(
-                                                            "",
-                                                            suffixIcon:
-                                                                UnconstrainedBox(
-                                                              child: Helpers
-                                                                  .fetchIcons(
-                                                                      "caret-down",
-                                                                      "regular",
-                                                                      size: 24,
-                                                                      color:
-                                                                          "text.secondary"),
-                                                            ),
-                                                            isOutline: true,
-                                                            borderColor: Colors
-                                                                .transparent,
-                                                            isFloating: true,
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                        onTap: () async {
-                                                          final res =
-                                                              await HotelModals
-                                                                  .filter(
-                                                                      filter,
-                                                                      _data);
-                                                          updateData(res);
-                                                        },
-                                                        style: GoogleFonts.nunito(
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 20.0),
-                                              Expanded(
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 10.0),
-                                                        child:
-                                                            Widgets.buildText(
-                                                          "Children",
-                                                          context,
-                                                        ),
-                                                      ),
-                                                      TextFormField(
-                                                        readOnly: true,
-                                                        controller:
-                                                            childrenController,
-                                                        decoration: Widgets.inputDecoration(
-                                                            "",
-                                                            suffixIcon:
-                                                                UnconstrainedBox(
-                                                              child: Helpers
-                                                                  .fetchIcons(
-                                                                      "caret-down",
-                                                                      "regular",
-                                                                      size: 24,
-                                                                      color:
-                                                                          "text.secondary"),
-                                                            ),
-                                                            isOutline: true,
-                                                            borderColor: Colors
-                                                                .transparent,
-                                                            isFloating: true,
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                        onTap: () async {
-                                                          final res =
-                                                              await HotelModals
-                                                                  .filter(
-                                                                      filter,
-                                                                      _data);
-                                                          updateData(res);
-                                                        },
-                                                        style: GoogleFonts.nunito(
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 20.0),
-                                              Expanded(
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                  ),
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 8.0),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 10.0),
-                                                        child:
-                                                            Widgets.buildText(
-                                                          "Rooms",
-                                                          context,
-                                                        ),
-                                                      ),
-                                                      TextFormField(
-                                                        readOnly: true,
-                                                        controller:
-                                                            roomsController,
-                                                        decoration: Widgets.inputDecoration(
-                                                            "",
-                                                            suffixIcon:
-                                                                UnconstrainedBox(
-                                                              child: Helpers
-                                                                  .fetchIcons(
-                                                                      "caret-down",
-                                                                      "regular",
-                                                                      size: 24,
-                                                                      color:
-                                                                          "text.secondary"),
-                                                            ),
-                                                            isOutline: true,
-                                                            borderColor: Colors
-                                                                .transparent,
-                                                            isFloating: true,
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                        onTap: () async {
-                                                          final res =
-                                                              await HotelModals
-                                                                  .filter(
-                                                                      filter,
-                                                                      _data);
-                                                          updateData(res);
-                                                        },
-                                                        style: GoogleFonts.nunito(
-                                                            color: Palette
-                                                                .getColor(
-                                                                    context,
-                                                                    "text",
-                                                                    "secondary")),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
+                                              Widgets.buildText(
+                                                  "Check-in date", context,
+                                                  color: "text.white"),
+                                              Widgets.buildText(
+                                                  "Check-out date", context,
+                                                  color: "text.white"),
                                             ],
+                                          ),
+                                          const SizedBox(
+                                            height: 10.0,
+                                          ),
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            child: IntrinsicHeight(
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Expanded(
+                                                      child: TextFormField(
+                                                    readOnly: true,
+                                                    controller:
+                                                        startDateController,
+                                                    decoration:
+                                                        Widgets.inputDecoration(
+                                                            "",
+                                                            prefixIcon:
+                                                                UnconstrainedBox(
+                                                              child: Helpers.fetchIcons(
+                                                                  "calendar-clock",
+                                                                  "regular",
+                                                                  size: 24,
+                                                                  color:
+                                                                      "text.other"),
+                                                            ),
+                                                            isOutline: true,
+                                                            borderColor: Colors
+                                                                .transparent,
+                                                            isFloating: true,
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
+                                                    onTap: () async {
+                                                      final res = await Sheets
+                                                          .selectDate(
+                                                              filter["checkin"]
+                                                                  .toString(),
+                                                              disablePast: true,
+                                                              title:
+                                                                  "Select check-in date");
+                                                      setState(() {
+                                                        filter["checkin"] = res;
+                                                      });
+                                                      startDateController.text =
+                                                          Helpers.formatDate(
+                                                              res,
+                                                              formatString:
+                                                                  "MMM dd");
+                                                    },
+                                                    style: GoogleFonts.nunito(
+                                                        color: Palette.getColor(
+                                                            context,
+                                                            "text",
+                                                            "other")),
+                                                  )),
+                                                  SizedBox(
+                                                    width: 5.0,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 5.0,
+                                                              bottom: 5.0),
+                                                      child: VerticalDivider(
+                                                          thickness: 1.0,
+                                                          color: Color(
+                                                              0x14000000)),
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                      child: TextFormField(
+                                                    readOnly: true,
+                                                    controller:
+                                                        endDateController,
+                                                    decoration:
+                                                        Widgets.inputDecoration(
+                                                            "",
+                                                            prefixIcon:
+                                                                UnconstrainedBox(
+                                                              child: Helpers.fetchIcons(
+                                                                  "calendar-clock",
+                                                                  "regular",
+                                                                  size: 24,
+                                                                  color:
+                                                                      "text.other"),
+                                                            ),
+                                                            isOutline: true,
+                                                            borderColor: Colors
+                                                                .transparent,
+                                                            isFloating: true,
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "other")),
+                                                    onTap: () async {
+                                                      final res = await Sheets
+                                                          .selectDate(
+                                                              filter["checkout"]
+                                                                  .toString(),
+                                                              title:
+                                                                  "Select check-out date");
+                                                      setState(() {
+                                                        filter["checkout"] =
+                                                            res;
+                                                      });
+                                                      endDateController.text =
+                                                          Helpers.formatDate(
+                                                              res,
+                                                              formatString:
+                                                                  "MMM dd");
+                                                    },
+                                                    style: GoogleFonts.nunito(
+                                                        color: Palette.getColor(
+                                                            context,
+                                                            "text",
+                                                            "other")),
+                                                  ))
+                                                ],
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Widgets.buildText(
-                                    "${Helpers.formatNumber(_selectedRooms.length.toString())} result${_selectedRooms.length > 1 ? "s" : ""} from search",
-                                    context,
-                                    color: "text.secondary",
-                                    isMedium: true),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                ListView.builder(
-                                  physics: NeverScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 20.0),
-                                      child: RoomItem(
-                                        item: _selectedRooms[index],
-                                        checkin: filter["checkin"].toString(),
-                                        checkout: filter["checkout"].toString(),
-                                        index: index,
-                                        calendar: _data["calendar"] ?? [],
-                                        numRooms: _numRooms,
-                                        numNights: Helpers.dateDiff(
-                                            filter["checkin"].toString(),
-                                            filter["checkout"].toString()),
-                                        roomSelected: _roomSelected,
-                                        handleCheckout: handleCheckout,
-                                        setNumRooms: (Map numRooms) {
-                                          setState(() {
-                                            _numRooms = numRooms;
-                                          });
-                                        },
-                                        setRoomSelected: (int roomSelected) {
-                                          setState(() {
-                                            _roomSelected = roomSelected;
-                                          });
-                                        },
+                                      const SizedBox(
+                                        height: 10.0,
                                       ),
-                                    );
-                                  },
-                                  itemCount: _selectedRooms.length,
-                                ),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                Widgets.buildText("House rules", context,
-                                    color: "text.secondary", isMedium: true),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(10.0),
-                                  decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: Color(0x0d000000)),
-                                      borderRadius:
-                                          BorderRadius.circular(20.0)),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            for (final rule in _data["rules"]
-                                                .getRange(0, 3))
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    bottom: 8.0),
-                                                child: Widgets.buildText(
-                                                    "${rule["title"].toString()}: ${rule["content"]}",
-                                                    context,
-                                                    lines: 2),
-                                              )
-                                          ],
-                                        ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 10.0),
+                                                    child: Widgets.buildText(
+                                                      "Adults",
+                                                      context,
+                                                    ),
+                                                  ),
+                                                  TextFormField(
+                                                    readOnly: true,
+                                                    controller:
+                                                        adultsController,
+                                                    decoration:
+                                                        Widgets.inputDecoration(
+                                                            "",
+                                                            suffixIcon:
+                                                                UnconstrainedBox(
+                                                              child: Helpers
+                                                                  .fetchIcons(
+                                                                      "caret-down",
+                                                                      "regular",
+                                                                      size: 24,
+                                                                      color:
+                                                                          "text.secondary"),
+                                                            ),
+                                                            isOutline: true,
+                                                            borderColor: Colors
+                                                                .transparent,
+                                                            isFloating: true,
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "secondary")),
+                                                    onTap: () async {
+                                                      final res =
+                                                          await HotelModals
+                                                              .filter(filter,
+                                                                  _data);
+                                                      updateData(res);
+                                                    },
+                                                    style: GoogleFonts.nunito(
+                                                        color: Palette.getColor(
+                                                            context,
+                                                            "text",
+                                                            "secondary")),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 20.0),
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 10.0),
+                                                    child: Widgets.buildText(
+                                                      "Children",
+                                                      context,
+                                                    ),
+                                                  ),
+                                                  TextFormField(
+                                                    readOnly: true,
+                                                    controller:
+                                                        childrenController,
+                                                    decoration:
+                                                        Widgets.inputDecoration(
+                                                            "",
+                                                            suffixIcon:
+                                                                UnconstrainedBox(
+                                                              child: Helpers
+                                                                  .fetchIcons(
+                                                                      "caret-down",
+                                                                      "regular",
+                                                                      size: 24,
+                                                                      color:
+                                                                          "text.secondary"),
+                                                            ),
+                                                            isOutline: true,
+                                                            borderColor: Colors
+                                                                .transparent,
+                                                            isFloating: true,
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "secondary")),
+                                                    onTap: () async {
+                                                      final res =
+                                                          await HotelModals
+                                                              .filter(filter,
+                                                                  _data);
+                                                      updateData(res);
+                                                    },
+                                                    style: GoogleFonts.nunito(
+                                                        color: Palette.getColor(
+                                                            context,
+                                                            "text",
+                                                            "secondary")),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 20.0),
+                                          Expanded(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              padding: const EdgeInsets.only(
+                                                  top: 8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 10.0),
+                                                    child: Widgets.buildText(
+                                                      "Rooms",
+                                                      context,
+                                                    ),
+                                                  ),
+                                                  TextFormField(
+                                                    readOnly: true,
+                                                    controller: roomsController,
+                                                    decoration:
+                                                        Widgets.inputDecoration(
+                                                            "",
+                                                            suffixIcon:
+                                                                UnconstrainedBox(
+                                                              child: Helpers
+                                                                  .fetchIcons(
+                                                                      "caret-down",
+                                                                      "regular",
+                                                                      size: 24,
+                                                                      color:
+                                                                          "text.secondary"),
+                                                            ),
+                                                            isOutline: true,
+                                                            borderColor: Colors
+                                                                .transparent,
+                                                            isFloating: true,
+                                                            color: Palette
+                                                                .getColor(
+                                                                    context,
+                                                                    "text",
+                                                                    "secondary")),
+                                                    onTap: () async {
+                                                      final res =
+                                                          await HotelModals
+                                                              .filter(filter,
+                                                                  _data);
+                                                      updateData(res);
+                                                    },
+                                                    style: GoogleFonts.nunito(
+                                                        color: Palette.getColor(
+                                                            context,
+                                                            "text",
+                                                            "secondary")),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      TextButton.icon(
-                                        onPressed: () {
-                                          HotelModals.showRules(_data["rules"],
-                                              _data["title"].toString());
-                                        },
-                                        style: Widgets.buildButton(context,
-                                            background:
-                                                Palette.get("main.primary"),
-                                            radius: 20.0,
-                                            horizontal: 10.0,
-                                            vertical: 10.0),
-                                        label: Widgets.buildText(
-                                            "Read all", context,
-                                            color: "text.white", size: 16.0),
-                                        icon: Helpers.fetchIcons(
-                                            "eye", "regular",
-                                            color: "text.white", size: 20.0),
-                                      )
                                     ],
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 25.0,
-                                ),
-                                Widgets.buildText(
-                                    "More properties similar to ${_data["title"]}",
-                                    context,
-                                    color: "text.secondary",
-                                    isMedium: true,
-                                    lines: 2),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                ConstrainedBox(
-                                    constraints: BoxConstraints.loose(
-                                        Size(screenWidth, 180.0)),
-                                    child: Swiper(
-                                      outer: true,
-                                      layout: SwiperLayout.CUSTOM,
-                                      customLayoutOption: Widgets.customLayout(
-                                          _data["similarHotels"].length,
-                                          screenWidth,
-                                          offset: 80.0),
-                                      itemHeight: 180.0,
-                                      itemWidth: screenWidth,
-                                      loop: true,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        final item =
-                                            _data["similarHotels"][index];
-                                        return Padding(
-                                          padding: const EdgeInsets.only(
-                                              right: 70.0),
-                                          child: HotelItem(
-                                              item: item,
-                                              direction: "horizontal"),
-                                        );
-                                      },
-                                      itemCount: _data["similarHotels"].length,
-                                    )),
+                                )
                               ],
                             ),
-                          if (_selectedTab == 1)
-                            Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Widgets.buildText("Gallery", context,
-                                        isMedium: true),
-                                    Widgets.buildText(
-                                        " (${Helpers.formatNumber((_data["images"].length + _data["rooms"].map((room) => room["images"].length).reduce((a, b) => a + b)).toString())})",
-                                        context,
-                                        isMedium: true,
-                                        color: "main.primary"),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 15.0,
-                                ),
-                                ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      final List<String> photos = index == 0
-                                          ? _data["images"]
-                                          : _data["rooms"][index - 1]["images"];
-
-                                      final String title = index == 0
-                                          ? "All Photos"
-                                          : _data["rooms"][index - 1]["name"]
-                                              .toString();
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 40.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Widgets.buildText(title, context,
-                                                color: "main.primary"),
-                                            const SizedBox(height: 20.0),
-                                            GridView.count(
-                                                crossAxisCount: 3,
-                                                mainAxisSpacing: 15,
-                                                crossAxisSpacing: 15,
-                                                physics:
-                                                    NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                                                shrinkWrap: true,
-                                                children: <Widget>[
-                                                  for (final item in photos)
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        Sheets.showImagePreview(
-                                                            photos, title);
-                                                      },
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
-                                                        child: Image.asset(
-                                                          item,
-                                                          height: 110,
-                                                          width: 110,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    )
-                                                ])
-                                          ],
-                                        ),
-                                      );
+                            const SizedBox(
+                              height: 25.0,
+                            ),
+                            Widgets.buildText(
+                                "${Helpers.formatNumber(_selectedRooms.length.toString())} result${_selectedRooms.length > 1 ? "s" : ""} from search",
+                                context,
+                                color: "text.secondary",
+                                isMedium: true),
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            ListView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              shrinkWrap: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: RoomItem(
+                                    item: _selectedRooms[index],
+                                    checkin: filter["checkin"].toString(),
+                                    checkout: filter["checkout"].toString(),
+                                    index: index,
+                                    calendar: _data["calendar"] ?? [],
+                                    numRooms: _numRooms,
+                                    numNights: Helpers.dateDiff(
+                                        filter["checkin"].toString(),
+                                        filter["checkout"].toString()),
+                                    roomSelected: _roomSelected,
+                                    handleCheckout: handleCheckout,
+                                    setNumRooms: (Map numRooms) {
+                                      setState(() {
+                                        _numRooms = numRooms;
+                                      });
                                     },
-                                    itemCount: _data["rooms"].length + 1)
+                                    setRoomSelected: (int roomSelected) {
+                                      setState(() {
+                                        _roomSelected = roomSelected;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                              itemCount: _selectedRooms.length,
+                            ),
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            Widgets.buildText("House rules", context,
+                                color: "text.secondary", isMedium: true),
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(10.0),
+                              decoration: BoxDecoration(
+                                  border: Border.all(color: Color(0x0d000000)),
+                                  borderRadius: BorderRadius.circular(20.0)),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        for (final rule
+                                            in (_data["rules"] ?? []).getRange(
+                                                0,
+                                                (_data["rules"] ?? []).length >
+                                                        3
+                                                    ? 3
+                                                    : (_data["rules"] ?? [])
+                                                        .length))
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
+                                            child: Widgets.buildText(
+                                                "${rule["title"].toString()}: ${rule["content"]}",
+                                                context,
+                                                lines: 2),
+                                          )
+                                      ],
+                                    ),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      HotelModals.showRules(
+                                          _data["rules"] ?? [],
+                                          _data["title"].toString());
+                                    },
+                                    style: Widgets.buildButton(context,
+                                        background: Palette.get("main.primary"),
+                                        radius: 20.0,
+                                        horizontal: 10.0,
+                                        vertical: 10.0),
+                                    label: Widgets.buildText(
+                                        "Read all", context,
+                                        color: "text.white", size: 16.0),
+                                    icon: Helpers.fetchIcons("eye", "regular",
+                                        color: "text.white", size: 20.0),
+                                  )
+                                ],
+                              ),
+                            ),
+                            if ((_data["relatedListings"] ?? []).isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 25.0,
+                                  ),
+                                  Widgets.buildText(
+                                      "Similar properties to ${_data["title"]}",
+                                      context,
+                                      color: "text.secondary",
+                                      isMedium: true,
+                                      lines: 2),
+                                  const SizedBox(
+                                    height: 15.0,
+                                  ),
+                                  ConstrainedBox(
+                                      constraints: BoxConstraints.loose(
+                                          Size(screenWidth, 180.0)),
+                                      child: Swiper(
+                                        outer: true,
+                                        layout: SwiperLayout.CUSTOM,
+                                        customLayoutOption:
+                                            Widgets.customLayout(
+                                                (_data["relatedListings"] ?? [])
+                                                    .length,
+                                                screenWidth,
+                                                offset: 80.0),
+                                        itemHeight: 180.0,
+                                        itemWidth: screenWidth,
+                                        loop: true,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          final item =
+                                              _data["relatedListings"][index];
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 70.0),
+                                            child: HotelItem(
+                                                item: item,
+                                                direction: "horizontal"),
+                                          );
+                                        },
+                                        itemCount:
+                                            (_data["relatedListings"] ?? [])
+                                                .length,
+                                      )),
+                                ],
+                              ),
+                          ],
+                        ),
+                      if (_selectedTab == 1)
+                        Column(
+                          children: [
+                            Row(
+                              children: [
+                                Widgets.buildText("Gallery", context,
+                                    isMedium: true),
+                                if ((_data["images"] ?? []).length > 0)
+                                  Widgets.buildText(
+                                      " (${Helpers.formatNumber((_data["images"].length + _data["rooms"].map((room) => room["images"].length).reduce((a, b) => a + b)).toString())})",
+                                      context,
+                                      isMedium: true,
+                                      color: "main.primary"),
                               ],
                             ),
-                          if (_selectedTab == 2)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Widgets.buildText("Guest reviews", context,
-                                    isMedium: true),
-                                const SizedBox(
-                                  height: 20.0,
-                                ),
-                                TextFormField(
-                                  decoration: Widgets.inputDecoration(
-                                      "Search in reviews",
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final List<String> photos = index == 0
+                                      ? _data["images"]
+                                      : _data["rooms"][index - 1]["images"];
+
+                                  final String title = index == 0
+                                      ? "All Photos"
+                                      : _data["rooms"][index - 1]["name"]
+                                          .toString();
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.only(bottom: 40.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Widgets.buildText(title, context,
+                                            color: "main.primary"),
+                                        const SizedBox(height: 20.0),
+                                        GridView.count(
+                                            crossAxisCount: 3,
+                                            mainAxisSpacing: 15,
+                                            crossAxisSpacing: 15,
+                                            physics:
+                                                NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                                            shrinkWrap: true,
+                                            children: <Widget>[
+                                              for (final item in photos)
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Sheets.showImagePreview(
+                                                        photos, title);
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                    child: Image.asset(
+                                                      item,
+                                                      height: 110,
+                                                      width: 110,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                )
+                                            ])
+                                      ],
+                                    ),
+                                  );
+                                },
+                                itemCount: (_data["rooms"] ?? []).length +
+                                            (_data["images"] ?? []).length >
+                                        0
+                                    ? 1
+                                    : 0)
+                          ],
+                        ),
+                      if (_selectedTab == 2)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Widgets.buildText("Guest reviews", context,
+                                isMedium: true),
+                            const SizedBox(
+                              height: 20.0,
+                            ),
+                            TextFormField(
+                              decoration:
+                                  Widgets.inputDecoration("Search in reviews",
                                       isOutline: true,
                                       hint: "Search in reviews",
                                       hintColor: Palette.get("text.secondary"),
@@ -1736,548 +1787,522 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                       radius: 40.0,
                                       isFilled: true,
                                       isFloating: true),
-                                  style: GoogleFonts.nunito(
-                                    color: Palette.get("text.secondary"),
-                                    fontSize: 16.0,
+                              style: GoogleFonts.nunito(
+                                color: Palette.get("text.secondary"),
+                                fontSize: 16.0,
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () {},
+                                  child: Chip(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 5),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    backgroundColor:
+                                        Palette.get("background.default"),
+                                    label: Widgets.buildText("Filters", context,
+                                        weight: 500),
                                   ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () {},
-                                      child: Chip(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 5),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        backgroundColor:
-                                            Palette.get("background.default"),
-                                        label: Widgets.buildText(
-                                            "Filters", context,
-                                            weight: 500),
-                                      ),
-                                    )),
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          if (reviewFilter
-                                              .contains("verified")) {
-                                            reviewFilter.remove("verified");
-                                          } else {
-                                            reviewFilter.add("verified");
-                                          }
-                                        });
-                                      },
-                                      child: Chip(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 5),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        backgroundColor: reviewFilter
-                                                .contains("verified")
+                                )),
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (reviewFilter.contains("verified")) {
+                                        reviewFilter.remove("verified");
+                                      } else {
+                                        reviewFilter.add("verified");
+                                      }
+                                    });
+                                  },
+                                  child: Chip(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 5),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    backgroundColor:
+                                        reviewFilter.contains("verified")
                                             ? Palette.get("main.primary")
                                             : Palette.get("background.default"),
-                                        label: FittedBox(
-                                          child: Widgets.buildText(
-                                              "Verified", context,
-                                              weight: 500,
-                                              color: reviewFilter
-                                                      .contains("verified")
+                                    label: FittedBox(
+                                      child: Widgets.buildText(
+                                          "Verified", context,
+                                          weight: 500,
+                                          color:
+                                              reviewFilter.contains("verified")
                                                   ? "text.white"
                                                   : "text.primary"),
-                                        ),
-                                      ),
-                                    )),
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          if (reviewFilter.contains("latest")) {
-                                            reviewFilter.remove("latest");
-                                          } else {
-                                            reviewFilter.add("latest");
-                                          }
-                                        });
-                                      },
-                                      child: Chip(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 5),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        backgroundColor: reviewFilter
-                                                .contains("latest")
+                                    ),
+                                  ),
+                                )),
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (reviewFilter.contains("latest")) {
+                                        reviewFilter.remove("latest");
+                                      } else {
+                                        reviewFilter.add("latest");
+                                      }
+                                    });
+                                  },
+                                  child: Chip(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 5),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    backgroundColor:
+                                        reviewFilter.contains("latest")
                                             ? Palette.get("main.primary")
                                             : Palette.get("background.default"),
-                                        label: FittedBox(
-                                          child: Widgets.buildText(
-                                              "Latest", context,
-                                              weight: 500,
-                                              color: reviewFilter
-                                                      .contains("latest")
-                                                  ? "text.white"
-                                                  : "text.primary"),
-                                        ),
-                                      ),
-                                    )),
-                                    Expanded(
-                                        child: GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          if (reviewFilter.contains("photos")) {
-                                            reviewFilter.remove("photos");
-                                          } else {
-                                            reviewFilter.add("photos");
-                                          }
-                                        });
-                                      },
-                                      child: Chip(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5, horizontal: 5),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        backgroundColor: reviewFilter
-                                                .contains("photos")
+                                    label: FittedBox(
+                                      child: Widgets.buildText(
+                                          "Latest", context,
+                                          weight: 500,
+                                          color: reviewFilter.contains("latest")
+                                              ? "text.white"
+                                              : "text.primary"),
+                                    ),
+                                  ),
+                                )),
+                                Expanded(
+                                    child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      if (reviewFilter.contains("photos")) {
+                                        reviewFilter.remove("photos");
+                                      } else {
+                                        reviewFilter.add("photos");
+                                      }
+                                    });
+                                  },
+                                  child: Chip(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 5, horizontal: 5),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
+                                    backgroundColor:
+                                        reviewFilter.contains("photos")
                                             ? Palette.get("main.primary")
                                             : Palette.get("background.default"),
-                                        label: FittedBox(
-                                          child: Widgets.buildText(
-                                              "With Photos", context,
-                                              weight: 500,
-                                              color: reviewFilter
-                                                      .contains("photos")
-                                                  ? "text.white"
-                                                  : "text.primary"),
-                                        ),
-                                      ),
-                                    )),
+                                    label: FittedBox(
+                                      child: Widgets.buildText(
+                                          "With Photos", context,
+                                          weight: 500,
+                                          color: reviewFilter.contains("photos")
+                                              ? "text.white"
+                                              : "text.primary"),
+                                    ),
+                                  ),
+                                )),
+                              ],
+                            ),
+                            const SizedBox(height: 20.0),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Palette.get("background.paper"),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        blurRadius: 5.0,
+                                        spreadRadius: 0,
+                                        offset: Offset(-1, 1),
+                                        color: Color(0x1A000000))
                                   ],
-                                ),
-                                const SizedBox(height: 20.0),
-                                Container(
-                                  decoration: BoxDecoration(
-                                      color: Palette.get("background.paper"),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            blurRadius: 5.0,
-                                            spreadRadius: 0,
-                                            offset: Offset(-1, 1),
-                                            color: Color(0x1A000000))
-                                      ],
-                                      borderRadius: BorderRadius.circular(10)),
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Column(
-                                    children: [
-                                      for (final category in (_isReviewAll
-                                          ? Defaults.hotelReviewCategories
-                                          : Defaults.hotelReviewCategories
-                                              .getRange(0, 3)))
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                              bottom: 10.0),
-                                          child: Column(children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Widgets.buildText(
-                                                      category["name"]
-                                                          .toString(),
-                                                      context,
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 5.0,
-                                                    ),
-                                                    Widgets.buildText(
-                                                        "(${Helpers.formatNumber((((num.tryParse(_data["reviews"][category["value"].toString()].toString())?.toDouble() ?? 0.0) / 5.0) * 100.0).toString())}%)",
-                                                        context,
-                                                        color: "main.primary")
-                                                  ],
-                                                ),
-                                                if (category["name"]!
-                                                        .toLowerCase() ==
-                                                    "cleanliness")
-                                                  TextButton(
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          _isReviewAll =
-                                                              !_isReviewAll;
-                                                        });
-                                                      },
-                                                      child: Widgets.buildText(
-                                                          _isReviewAll
-                                                              ? "See less"
-                                                              : "See all",
-                                                          context,
-                                                          weight: 500,
-                                                          color:
-                                                              "main.primary"))
-                                              ],
-                                            ),
-                                            SliderTheme(
-                                              data: SliderTheme.of(context)
-                                                  .copyWith(
-                                                      trackHeight: 20.0,
-                                                      thumbShape:
-                                                          RoundSliderThumbShape(
-                                                              enabledThumbRadius:
-                                                                  17),
-                                                      padding:
-                                                          EdgeInsets.all(0.0)),
-                                              child: Slider(
-                                                  inactiveColor:
-                                                      Palette.getColor(
-                                                          context,
-                                                          "background",
-                                                          "textfield"),
-                                                  value: (((num.tryParse(_data[
-                                                                      "reviews"][category[
-                                                                          "value"]
-                                                                      .toString()]
-                                                                  .toString())
-                                                              ?.toDouble() ??
-                                                          0.0) /
-                                                      5.0)),
-                                                  onChanged: (value) {}),
-                                            ),
-                                          ]),
-                                        )
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 20.0),
-                                ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      final review =
-                                          _data["reviews"]["reviews"][index];
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8.0),
-                                        child: Column(
+                                  borderRadius: BorderRadius.circular(10)),
+                              padding: const EdgeInsets.all(15.0),
+                              child: Column(
+                                children: [
+                                  for (final category in (_isReviewAll
+                                      ? Defaults.hotelReviewCategories
+                                      : Defaults.hotelReviewCategories
+                                          .getRange(0, 3)))
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10.0),
+                                      child: Column(children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
                                               children: [
-                                                Row(
-                                                  children: [
-                                                    Helpers.getPhoto(
-                                                        review["photo"] ?? "",
-                                                        height: 60.0),
-                                                    const SizedBox(
-                                                      width: 10.0,
-                                                    ),
-                                                    Row(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Widgets.buildText(
-                                                                review["name"]
-                                                                    .toString(),
-                                                                context,
-                                                                isMedium: true),
-                                                            Widgets.buildText(
-                                                                review["date"]
-                                                                    .toString(),
-                                                                context,
-                                                                color:
-                                                                    "text.secondary"),
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                          width: 5.0,
-                                                        ),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  top: 5.0),
-                                                          child:
-                                                              SvgPicture.string(
-                                                            review["flag"]
-                                                                .toString(),
-                                                            width: 25.0,
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ],
+                                                Widgets.buildText(
+                                                  category["name"].toString(),
+                                                  context,
+                                                ),
+                                                const SizedBox(
+                                                  width: 5.0,
+                                                ),
+                                                Widgets.buildText(
+                                                    "(${Helpers.formatNumber((((num.tryParse(_data["reviews"][category["value"].toString()].toString())?.toDouble() ?? 0.0) / 5.0) * 100.0).toString())}%)",
+                                                    context,
+                                                    color: "main.primary")
+                                              ],
+                                            ),
+                                            if (category["name"]!
+                                                    .toLowerCase() ==
+                                                "cleanliness")
+                                              TextButton(
+                                                  onPressed: () {
+                                                    setState(() {
+                                                      _isReviewAll =
+                                                          !_isReviewAll;
+                                                    });
+                                                  },
+                                                  child: Widgets.buildText(
+                                                      _isReviewAll
+                                                          ? "See less"
+                                                          : "See all",
+                                                      context,
+                                                      weight: 500,
+                                                      color: "main.primary"))
+                                          ],
+                                        ),
+                                        SliderTheme(
+                                          data: SliderTheme.of(context)
+                                              .copyWith(
+                                                  trackHeight: 20.0,
+                                                  thumbShape:
+                                                      RoundSliderThumbShape(
+                                                          enabledThumbRadius:
+                                                              17),
+                                                  padding: EdgeInsets.all(0.0)),
+                                          child: Slider(
+                                              inactiveColor: Palette.getColor(
+                                                  context,
+                                                  "background",
+                                                  "textfield"),
+                                              value: (((num.tryParse(_data[
+                                                                      "reviews"]
+                                                                  [category[
+                                                                          "value"]
+                                                                      .toString()]
+                                                              .toString())
+                                                          ?.toDouble() ??
+                                                      0.0) /
+                                                  5.0)),
+                                              onChanged: (value) {}),
+                                        ),
+                                      ]),
+                                    )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 20.0),
+                            ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final review =
+                                      _data["reviews"]["reviews"][index];
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Helpers.getPhoto(
+                                                    review["photo"] ?? "",
+                                                    height: 60.0),
+                                                const SizedBox(
+                                                  width: 10.0,
                                                 ),
                                                 Row(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    for (var i = 0;
-                                                        i <
-                                                            (num.tryParse(review[
-                                                                            "rating"]
-                                                                        .toString())
-                                                                    ?.toInt() ??
-                                                                0);
-                                                        i += 1)
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                right: 2.0),
-                                                        child: Helpers.fetchIcons(
-                                                            "star", "solid",
-                                                            color:
-                                                                "warning.main",
-                                                            size: 18.0),
-                                                      )
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 60.0),
-                                              child: Column(
-                                                children: [
-                                                  if (review
-                                                      .containsKey("photos"))
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              top: 8.0,
-                                                              bottom: 15.0),
-                                                      child: Wrap(
-                                                        spacing: 10.0,
-                                                        runSpacing: 10.0,
-                                                        runAlignment:
-                                                            WrapAlignment.start,
-                                                        alignment:
-                                                            WrapAlignment.start,
-                                                        children: [
-                                                          for (final photo
-                                                              in review[
-                                                                  "photos"])
-                                                            ClipRRect(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10.0),
-                                                              child: Image.asset(
-                                                                  photo,
-                                                                  height: 120,
-                                                                  fit: BoxFit
-                                                                      .contain),
-                                                            )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  Widgets.buildText(
-                                                      review["review"]
-                                                          .toString(),
-                                                      context,
-                                                      color: "text.disabled",
-                                                      lines: 100),
-                                                  const SizedBox(height: 10.0),
-                                                  Container(
-                                                    decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10),
-                                                        border: Border.all(
-                                                            color: Color(
-                                                                0x33000000))),
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10.0),
-                                                    child: Column(
-                                                      children: [
-                                                        Row(
-                                                          children: [
-                                                            Helpers.fetchIcons(
-                                                                "bed",
-                                                                "regular",
-                                                                size: 16.0,
-                                                                color:
-                                                                    "text.secondary"),
-                                                            const SizedBox(
-                                                                width: 10.0),
-                                                            Widgets.buildText(
-                                                                review["room"]
-                                                                        ["type"]
-                                                                    .toString(),
-                                                                context,
-                                                                color:
-                                                                    "text.secondary")
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 10.0),
-                                                        Row(
-                                                          children: [
-                                                            Helpers.fetchIcons(
-                                                                "calendar-day",
-                                                                "regular",
-                                                                size: 16.0,
-                                                                color:
-                                                                    "text.secondary"),
-                                                            const SizedBox(
-                                                                width: 10.0),
-                                                            Widgets.buildText(
-                                                                "${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()).toString()} Night${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()) > 1 ? "s" : ""} • ${Helpers.formatDistanceDate(review["room"]["checkin"].toString(), review["room"]["checkout"].toString())}",
-                                                                context,
-                                                                color:
-                                                                    "text.secondary")
-                                                          ],
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 10.0),
-                                                  if (review
-                                                      .containsKey("response"))
                                                     Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
                                                       children: [
-                                                        const SizedBox(
-                                                            height: 10.0),
-                                                        Row(
-                                                          children: [
-                                                            Helpers.getPhoto(
-                                                                review["response"]
-                                                                        [
-                                                                        "photo"] ??
-                                                                    "",
-                                                                text: review[
-                                                                            "response"]
-                                                                        ["name"]
-                                                                    .toString(),
-                                                                height: 40.0),
-                                                            const SizedBox(
-                                                              width: 10.0,
-                                                            ),
-                                                            Expanded(
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Widgets.buildText(
-                                                                      "Response from ${review["response"]["name"].toString()}",
-                                                                      context,
-                                                                      color:
-                                                                          "text.secondary"),
-                                                                  Widgets.buildText(
-                                                                      review["date"]
-                                                                          .toString(),
-                                                                      context,
-                                                                      color:
-                                                                          "text.disabled"),
-                                                                ],
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 10.0),
                                                         Widgets.buildText(
-                                                            review["response"]
-                                                                    ["review"]
+                                                            review["name"]
+                                                                .toString(),
+                                                            context,
+                                                            isMedium: true),
+                                                        Widgets.buildText(
+                                                            review["date"]
                                                                 .toString(),
                                                             context,
                                                             color:
-                                                                "text.disabled",
-                                                            lines: 100)
+                                                                "text.secondary"),
                                                       ],
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 5.0,
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 5.0),
+                                                      child: SvgPicture.string(
+                                                        review["flag"]
+                                                            .toString(),
+                                                        width: 25.0,
+                                                      ),
                                                     )
-                                                ],
-                                              ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                for (var i = 0;
+                                                    i <
+                                                        (num.tryParse(review[
+                                                                        "rating"]
+                                                                    .toString())
+                                                                ?.toInt() ??
+                                                            0);
+                                                    i += 1)
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            right: 2.0),
+                                                    child: Helpers.fetchIcons(
+                                                        "star", "solid",
+                                                        color: "warning.main",
+                                                        size: 18.0),
+                                                  )
+                                              ],
                                             )
                                           ],
                                         ),
-                                      );
-                                    },
-                                    itemCount:
-                                        _data["reviews"].containsKey("reviews")
-                                            ? _data["reviews"]["reviews"].length
-                                            : 0),
-                                const SizedBox(height: 20.0),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: TextButton(
-                                      onPressed: () {},
-                                      child: Widgets.buildText(
-                                          "Load More", context,
-                                          color: "main.primary", size: 16.0)),
-                                )
-                              ],
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 60.0),
+                                          child: Column(
+                                            children: [
+                                              if (review.containsKey("photos"))
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 8.0,
+                                                          bottom: 15.0),
+                                                  child: Wrap(
+                                                    spacing: 10.0,
+                                                    runSpacing: 10.0,
+                                                    runAlignment:
+                                                        WrapAlignment.start,
+                                                    alignment:
+                                                        WrapAlignment.start,
+                                                    children: [
+                                                      for (final photo
+                                                          in review["photos"])
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Image.asset(
+                                                              photo,
+                                                              height: 120,
+                                                              fit: BoxFit
+                                                                  .contain),
+                                                        )
+                                                    ],
+                                                  ),
+                                                ),
+                                              Widgets.buildText(
+                                                  review["review"].toString(),
+                                                  context,
+                                                  color: "text.disabled",
+                                                  lines: 100),
+                                              const SizedBox(height: 10.0),
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    border: Border.all(
+                                                        color:
+                                                            Color(0x33000000))),
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Helpers.fetchIcons(
+                                                            "bed", "regular",
+                                                            size: 16.0,
+                                                            color:
+                                                                "text.secondary"),
+                                                        const SizedBox(
+                                                            width: 10.0),
+                                                        Widgets.buildText(
+                                                            review["room"]
+                                                                    ["type"]
+                                                                .toString(),
+                                                            context,
+                                                            color:
+                                                                "text.secondary")
+                                                      ],
+                                                    ),
+                                                    const SizedBox(
+                                                        height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Helpers.fetchIcons(
+                                                            "calendar-day",
+                                                            "regular",
+                                                            size: 16.0,
+                                                            color:
+                                                                "text.secondary"),
+                                                        const SizedBox(
+                                                            width: 10.0),
+                                                        Widgets.buildText(
+                                                            "${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()).toString()} Night${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()) > 1 ? "s" : ""} • ${Helpers.formatDistanceDate(review["room"]["checkin"].toString(), review["room"]["checkout"].toString())}",
+                                                            context,
+                                                            color:
+                                                                "text.secondary")
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10.0),
+                                              if (review
+                                                  .containsKey("response"))
+                                                Column(
+                                                  children: [
+                                                    const SizedBox(
+                                                        height: 10.0),
+                                                    Row(
+                                                      children: [
+                                                        Helpers.getPhoto(
+                                                            review["response"]
+                                                                    ["photo"] ??
+                                                                "",
+                                                            text:
+                                                                review["response"]
+                                                                        ["name"]
+                                                                    .toString(),
+                                                            height: 40.0),
+                                                        const SizedBox(
+                                                          width: 10.0,
+                                                        ),
+                                                        Expanded(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Widgets.buildText(
+                                                                  "Response from ${review["response"]["name"].toString()}",
+                                                                  context,
+                                                                  color:
+                                                                      "text.secondary"),
+                                                              Widgets.buildText(
+                                                                  review["date"]
+                                                                      .toString(),
+                                                                  context,
+                                                                  color:
+                                                                      "text.disabled"),
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                    const SizedBox(
+                                                        height: 10.0),
+                                                    Widgets.buildText(
+                                                        review["response"]
+                                                                ["review"]
+                                                            .toString(),
+                                                        context,
+                                                        color: "text.disabled",
+                                                        lines: 100)
+                                                  ],
+                                                )
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                },
+                                itemCount:
+                                    _data["reviews"].containsKey("reviews")
+                                        ? _data["reviews"]["reviews"].length
+                                        : 0),
+                            const SizedBox(height: 20.0),
+                            SizedBox(
+                              width: double.infinity,
+                              child: TextButton(
+                                  onPressed: () {},
+                                  child: Widgets.buildText("Load More", context,
+                                      color: "main.primary", size: 16.0)),
                             )
-                        ]),
-                      ),
-                    ),
-                  ],
+                          ],
+                        )
+                    ]),
+                  ),
                 ),
-              ),
+              ],
             ),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 10.0, horizontal: 15.0),
-                width: screenWidth,
-                decoration: BoxDecoration(color: Palette.get("text.white")),
-                height: 80.0,
-                child: Row(children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Widgets.buildText("Total Price", context,
-                          color: "text.disabled"),
-                      Row(
-                        children: [
-                          Widgets.buildText(
-                              Helpers.formatCurrency(_data["price"].toString()),
-                              context,
-                              color: "main.primary",
-                              isMedium: true),
-                          Widgets.buildText("/night", context,
-                              color: "text.primary"),
-                        ],
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    width: 50.0,
-                  ),
-                  Expanded(
-                    child: TextButton(
-                        onPressed: () {},
-                        style: Widgets.buildButton(context,
-                            background: Palette.get("main.primary"),
-                            vertical: 15.0,
-                            radius: 40.0),
-                        child: Widgets.buildText("Reserve Now", context,
-                            isMedium: true, color: "text.white")),
-                  )
-                ]),
-              ),
-            )
-          ],
+          ),
         ),
-      ),
+        Positioned(
+          bottom: 0,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+            width: screenWidth,
+            decoration: BoxDecoration(color: Palette.get("text.white")),
+            height: 80.0,
+            child: Row(children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Widgets.buildText("Total Price", context,
+                      color: "text.disabled"),
+                  Row(
+                    children: [
+                      Widgets.buildText(
+                          Helpers.formatCurrency(_data["price"].toString()),
+                          context,
+                          color: "main.primary",
+                          isMedium: true),
+                      Widgets.buildText("/night", context,
+                          color: "text.primary"),
+                    ],
+                  )
+                ],
+              ),
+              const SizedBox(
+                width: 50.0,
+              ),
+              Expanded(
+                child: TextButton(
+                    onPressed: () {},
+                    style: Widgets.buildButton(context,
+                        background: Palette.get("main.primary"),
+                        vertical: 15.0,
+                        radius: 40.0),
+                    child: Widgets.buildText("Reserve Now", context,
+                        isMedium: true, color: "text.white")),
+              )
+            ]),
+          ),
+        )
+      ],
     );
   }
 }

@@ -1,11 +1,12 @@
-import 'package:cribsfinder/utils/defaults.dart';
+import 'dart:convert';
+
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/webview.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../utils/palette.dart';
 
@@ -19,10 +20,16 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   final TextEditingController countryController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   var isChecked = false;
-  var isPasswordVisible = false;
+  var isEmail = false;
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+    ],
+  );
 
   @override
   void initState() {
@@ -32,6 +39,61 @@ class _SignupState extends State<Signup> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void googleSignin() async {
+    try {
+      final result = await _googleSignIn.signIn();
+      print("google: $result");
+    } catch (err) {
+      print("google: $err");
+      Alert.show(context, "",
+          "Google authentication failed! Please retry or sign up with phone number or email address.");
+    }
+  }
+
+  void signup() async {
+    final phone = phoneController.text;
+    final email = emailController.text;
+    try {
+      if ((isEmail && email.isNotEmpty) || phone.isNotEmpty) {
+        if (isChecked) {
+          Alert.showLoading(
+              context,
+              isEmail
+                  ? "Checking your email address"
+                  : "Checking your phone number...");
+          final result =
+              await JWT.checkEmailPhone(isEmail ? email : phone, "NG", isEmail);
+          Alert.hideLoading(context);
+          if (result == "no_account") {
+            if (isEmail) {
+              Navigator.pushNamed(context, "/signup-account-info",
+                  arguments: jsonEncode({"email": email}));
+            } else {
+              Navigator.pushNamed(context, "/signup-verify",
+                  arguments: jsonEncode({"phone": phone}));
+            }
+          } else {
+            Alert.show(context, "",
+                "The ${isEmail ? "email address" : "phone number"} you provided is already in use! Please use another or login to proceed.");
+          }
+        } else {
+          Alert.show(context, "",
+              "Please agree with our terms and conditions to proceed.");
+        }
+      } else {
+        Alert.show(
+            context,
+            "",
+            isEmail
+                ? "Please enter a valid email address to proceed."
+                : "Please enter a valid phone number to proceed.");
+      }
+    } catch (err) {
+      Alert.hideLoading(context);
+      debugPrint(err.toString());
+    }
   }
 
   @override
@@ -50,7 +112,8 @@ class _SignupState extends State<Signup> {
                 children: [
                   TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacementNamed(context, "/splash",
+                            arguments: jsonEncode({"isDone": true}));
                       },
                       child: Container(
                           width: 40.0,
@@ -84,70 +147,60 @@ class _SignupState extends State<Signup> {
                       const SizedBox(
                         height: 30.0,
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Widgets.buildText("Phone Number", context,
-                              color: 'text.primary', size: 13.0, weight: 500),
-                          const SizedBox(
-                            height: 5.0,
-                          ),
-                          TextField(
-                            controller: phoneController,
-                            decoration: Widgets.inputDecoration("",
-                                color: Color(0x99F4F4F4),
-                                isFilled: true,
-                                isOutline: true),
-                            keyboardType: TextInputType.phone,
-                            style: GoogleFonts.nunito(
-                                color: Color(0xFF757575),
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 15.0,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Widgets.buildText("Password", context,
-                              color: 'text.primary', size: 13.0, weight: 500),
-                          const SizedBox(
-                            height: 5.0,
-                          ),
-                          TextField(
-                            controller: passwordController,
-                            decoration: Widgets.inputDecoration("",
-                                color: Color(0x99F4F4F4),
-                                isFilled: true,
-                                isOutline: true,
-                                suffixIcon: UnconstrainedBox(
-                                    child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      isPasswordVisible = !isPasswordVisible;
-                                    });
-                                  },
-                                  child: Helpers.fetchIcons(
-                                      isPasswordVisible ? "eye-crossed" : "eye",
-                                      "solid",
-                                      color: "text.disabled",
-                                      size: 20.0),
-                                ))),
-                            obscureText: !isPasswordVisible,
-                            enableSuggestions: false,
-                            autocorrect: false,
-                            style: GoogleFonts.nunito(
-                                color: Color(0xFF757575),
-                                fontSize: 13.0,
-                                fontWeight: FontWeight.w400),
-                          ),
-                        ],
-                      ),
+                      if (!isEmail)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Widgets.buildText("Phone Number", context,
+                                color: 'text.primary', size: 13.0, weight: 500),
+                            const SizedBox(
+                              height: 5.0,
+                            ),
+                            TextField(
+                              controller: phoneController,
+                              decoration: Widgets.inputDecoration("",
+                                  color: Color(0x99F4F4F4),
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsets.only(
+                                        top: 15.0, left: 10.0),
+                                    child: Widgets.buildText("+234", context,
+                                        color: Palette.get('text.disabled')),
+                                  ),
+                                  isFilled: true,
+                                  isOutline: true),
+                              keyboardType: TextInputType.phone,
+                              style: GoogleFonts.nunito(
+                                  color: Color(0xFF757575),
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
+                      if (isEmail)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Widgets.buildText("Email address", context,
+                                color: 'text.primary', size: 13.0, weight: 500),
+                            const SizedBox(
+                              height: 5.0,
+                            ),
+                            TextField(
+                              controller: emailController,
+                              decoration: Widgets.inputDecoration("",
+                                  color: Color(0x99F4F4F4),
+                                  isFilled: true,
+                                  isOutline: true),
+                              keyboardType: TextInputType.emailAddress,
+                              style: GoogleFonts.nunito(
+                                  color: Color(0xFF757575),
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                          ],
+                        ),
                       const SizedBox(
                         height: 15.0,
                       ),
@@ -182,7 +235,7 @@ class _SignupState extends State<Signup> {
                         width: double.infinity,
                         child: TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, "/signup-verify");
+                              signup();
                             },
                             style: Widgets.buildButton(context,
                                 vertical: 20.0,
@@ -211,7 +264,9 @@ class _SignupState extends State<Signup> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              googleSignin();
+                            },
                             child: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20.0),
@@ -220,12 +275,10 @@ class _SignupState extends State<Signup> {
                                   vertical: 5.0, horizontal: 10.0),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.abc,
-                                    color: Palette.get("text.primary"),
-                                  ),
+                                  Image.asset("assets/images/login-google.jpeg",
+                                      height: 24.0, fit: BoxFit.contain),
                                   const SizedBox(
-                                    width: 10.0,
+                                    width: 5.0,
                                   ),
                                   Widgets.buildText("Google", context)
                                 ],
@@ -236,7 +289,16 @@ class _SignupState extends State<Signup> {
                             width: 10.0,
                           ),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              setState(() {
+                                isEmail = !isEmail;
+                              });
+                              if (isEmail) {
+                                phoneController.text = "";
+                              } else {
+                                emailController.text = "";
+                              }
+                            },
                             child: Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(20.0),
@@ -245,14 +307,19 @@ class _SignupState extends State<Signup> {
                                   vertical: 5.0, horizontal: 10.0),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.mail_outline_rounded,
-                                    color: Palette.get("text.primary"),
-                                  ),
+                                  if (!isEmail)
+                                    Image.asset(
+                                        "assets/images/login-email.jpeg",
+                                        height: 30.0,
+                                        fit: BoxFit.contain),
+                                  if (isEmail)
+                                    Helpers.fetchIcons("circle-phone", "solid",
+                                        color: "main.primary", size: 24.0),
                                   const SizedBox(
-                                    width: 10.0,
+                                    width: 5.0,
                                   ),
-                                  Widgets.buildText("Email", context)
+                                  Widgets.buildText(
+                                      isEmail ? "Phone" : "Email", context)
                                 ],
                               ),
                             ),

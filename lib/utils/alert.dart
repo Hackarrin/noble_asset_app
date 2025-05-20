@@ -53,7 +53,12 @@ abstract class Alert {
                           lines: 3,
                           color: "main.primary"),
                     if (title.isNotEmpty) const SizedBox(height: 15),
-                    Widgets.buildText(message, context,
+                    Widgets.buildText(
+                        message
+                            .split("Exception:")[
+                                message.split("Exception:").length > 1 ? 1 : 0]
+                            .trim(),
+                        context,
                         size: 16.0,
                         isCenter: true,
                         color: "text.secondary",
@@ -99,5 +104,63 @@ abstract class Alert {
 
   static hideLoading(BuildContext context) {
     Loader.hide(context);
+  }
+
+  static Widget showErrorMessage(BuildContext context, String title,
+      {String message = "",
+      String buttonText = "Retry",
+      String image = "nodata",
+      double padding = 0.0,
+      bool isSlim = false,
+      Function? action}) {
+    return Padding(
+      padding: EdgeInsets.only(
+          left: 20.0, right: 20.0, top: padding, bottom: isSlim ? 20.0 : 0.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (!isSlim)
+            Image.asset(
+              "assets/images/$image.gif",
+              width: 100.0,
+              height: 100.0,
+              fit: BoxFit.contain,
+            ),
+          const SizedBox(height: 30.0),
+          if (title.isNotEmpty)
+            Widgets.buildText(title, context, size: 24.0, weight: 500),
+          const SizedBox(height: 5.0),
+          if (message.isNotEmpty)
+            Widgets.buildText(
+                message
+                    .split("Exception:")[
+                        message.split("Exception:").length > 1 ? 1 : 0]
+                    .trim(),
+                lines: 4,
+                context,
+                isCenter: true,
+                color: "text.secondary",
+                size: 13.0,
+                weight: 400),
+          const SizedBox(height: 30.0),
+          SizedBox(
+            width: double.infinity,
+            child: TextButton(
+                style: Widgets.buildButton(context,
+                    background: Palette.get("main.primary"),
+                    vertical: 15.0,
+                    radius: 50.0),
+                onPressed: () {
+                  if (action != null) {
+                    action();
+                  }
+                },
+                child: Widgets.buildText(buttonText, context,
+                    color: "text.white", isMedium: true)),
+          )
+        ],
+      ),
+    );
   }
 }

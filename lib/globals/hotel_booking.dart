@@ -62,8 +62,10 @@ class HotelBooking extends StatelessWidget {
                                     onPressed: () {
                                       if (item["status"].toString() == "0") {
                                       } else {
+                                        print("roomType - ${item["roomType"]}");
                                         Navigator.pushNamed(context, "/hotel",
-                                            arguments: jsonEncode(item));
+                                            arguments: jsonEncode(
+                                                item["roomType"] ?? {}));
                                       }
                                     },
                                     style: Widgets.buildButton(context,
@@ -96,7 +98,8 @@ class HotelBooking extends StatelessWidget {
                                       if (item["status"].toString() == "0") {
                                       } else {
                                         Navigator.pushNamed(context, "/hotel",
-                                            arguments: jsonEncode(item));
+                                            arguments: jsonEncode(
+                                                item["roomType"] ?? {}));
                                       }
                                     },
                                     style: Widgets.buildButton(context,
@@ -133,7 +136,12 @@ class HotelBooking extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10.0),
-        Widgets.buildText(item["title"].toString(), context, isMedium: true),
+        Widgets.buildText(
+            item.containsKey("roomType")
+                ? item["roomType"]["listingName"].toString()
+                : item["title"].toString(),
+            context,
+            isMedium: true),
         SizedBox(height: 15.0),
         Widgets.buildText(
             Helpers.formatDistanceDate(
@@ -153,7 +161,11 @@ class HotelBooking extends StatelessWidget {
               width: 2.0,
             ),
             Expanded(
-              child: Widgets.buildText(item["location"].toString(), context,
+              child: Widgets.buildText(
+                  item.containsKey("roomType")
+                      ? item["roomType"]["location"].toString()
+                      : item["location"].toString(),
+                  context,
                   color: "text.secondary"),
             ),
           ],
@@ -165,7 +177,7 @@ class HotelBooking extends StatelessWidget {
                 Helpers.formatCurrency(item["total"].toString()), context,
                 color: "main.primary", weight: 600),
             Widgets.buildText(
-              "/ ${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString())}night${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString()) > 1 ? "s" : ""}",
+              "/ ${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString())} night${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString()) > 1 ? "s" : ""}",
               context,
             ),
           ],
@@ -182,13 +194,18 @@ class HotelBooking extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(20.0),
-          child: Image.asset(
-              item.containsKey("image")
-                  ? item["image"].toString()
-                  : item["images"][0],
-              width: double.infinity,
-              height: 145.0,
-              fit: BoxFit.cover),
+          child: Helpers.getPhoto(
+            item.containsKey("image")
+                ? item["image"].toString()
+                : item.containsKey("roomType")
+                    ? item["roomType"]["featuredPhoto"].toString()
+                    : "",
+            type: "hotel",
+            text: item.containsKey("roomType")
+                ? item["roomType"]["title"].toString()
+                : item["title"].toString(),
+            height: 145.0,
+          ),
         ),
       ],
     );

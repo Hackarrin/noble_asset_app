@@ -1,4 +1,6 @@
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -27,6 +29,31 @@ class _ResetPasswordState extends State<ResetPassword>
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void handleSubmit() async {
+    try {
+      if (passwordController.text.isEmpty ||
+          newPasswordController.text.isEmpty) {
+        Alert.show(context, "", "Please fill all required fields to proceed");
+        return;
+      }
+      if (confirmPasswordController.text != newPasswordController.text) {
+        Alert.show(context, "", "Please confirm your new password to proceed");
+        return;
+      }
+      Alert.showLoading(context, "Updating...");
+      await JWT.updateSettings({
+        "cpassword": passwordController.text,
+        "password": newPasswordController.text
+      }, "password");
+      Alert.hideLoading(context);
+      Alert.show(context, "", "Password updated successfully!",
+          type: "success");
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
   }
 
   @override
@@ -137,7 +164,10 @@ class _ResetPasswordState extends State<ResetPassword>
                             child: SizedBox(
                               width: double.infinity,
                               child: GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                      context, "/forgot-password");
+                                },
                                 child: Widgets.buildText(
                                     "Forgot Password?", context,
                                     isRight: true, color: "main.primary"),
@@ -156,7 +186,9 @@ class _ResetPasswordState extends State<ResetPassword>
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      handleSubmit();
+                    },
                     style: Widgets.buildButton(context,
                         background: Palette.get("main.primary"),
                         radius: 50.0,

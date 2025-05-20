@@ -1,5 +1,7 @@
 import 'package:cribsfinder/globals/hotel_booking.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -58,10 +60,61 @@ class _ReviewsState extends State<Reviews> with SingleTickerProviderStateMixin {
       "status": 4
     },
   ];
+  String error = "";
+  String search = "";
+  String status = "";
+  Map<String, dynamic> filters = {
+    "listing": {},
+    "dateFrom": "",
+    "dateTo": "",
+    "type": "all",
+  };
+  int page = 0;
+  int perPage = 10;
+  String order = "id";
+  String sortBy = "desc";
+  bool loading = true;
+  bool isLoggedIn = true;
+  List<dynamic> filteredWishlist = [];
+  void fetch() async {
+    try {
+      setState(() {
+        error = "";
+        loading = true;
+      });
+      final res = await JWT.getBookings(
+          search, status, filters, page, perPage, order, sortBy);
+      setState(() {
+        filteredWishlist = res["data"];
+        loading = false;
+      });
+      if (filteredWishlist.isEmpty) {
+        setState(() {
+          error =
+              "You have not added any items yet, but don't worry! Search and explore top listings on Cribsfinder.";
+        });
+      }
+    } catch (err) {
+      setState(() {
+        error = err.toString();
+        loading = false;
+      });
+      print(err);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      final userId = await Helpers.readPref(Defaults.userid);
+      setState(() {
+        isLoggedIn = userId.isNotEmpty;
+      });
+      if (isLoggedIn) {
+        fetch();
+      }
+    });
   }
 
   @override

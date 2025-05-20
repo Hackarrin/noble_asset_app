@@ -30,16 +30,13 @@ class API {
   static final property = path(rootsApi, "property");
   static final filterAutomobiles = path(rootsApi, "search-automobiles");
   static final orders = path(rootsApi, "orders");
-  static final login = path(rootsApi, "login");
-  static final signup = path(rootsApi, "signup");
   static final products = path(rootsApi, "products");
   static final product = path(rootsApi, "product");
-  static final listings = path(rootsApi, "listings");
+  static final listing = path(rootsApi, "listing");
   static final checkout = path(rootsApi, "checkout");
   static final wishlist = path(rootsApi, "wishlist");
   static final cart = path(rootsApi, "cart");
   static final account = path(rootsApi, "account");
-  static final forgotPassword = path(rootsApi, "forgot-password");
   static final contact = path(rootsApi, "support");
   static final pricing = path(rootsApi, "pricing");
 
@@ -68,7 +65,7 @@ class API {
   static final userWishlist = path(rootsUserApi, "wishlist");
   static final billPayments = path(rootsUserApi, "bill-payments");
 
-  static final assetLogos = path(rootsAssets, "logos/");
+  static final assetUsers = path(rootsAssets, "customers/");
   static final assetVendors = path(rootsAssets, "users/");
   static final assetHotels = path(rootsAssets, "listings/");
   static final assetEvents = path(rootsAssets, "events/");

@@ -469,7 +469,7 @@ class _AttractionExploreState extends State<AttractionExplore> {
               padding: const EdgeInsets.only(right: 8.0),
               child: IconButton(
                   onPressed: () {
-                    final country = Sheets.showCountry();
+                    final country = Sheets.showConfirmation();
                   },
                   style: Widgets.buildButton(context,
                       sideColor: Color(0xFFF1F1F1), radius: 30.0),

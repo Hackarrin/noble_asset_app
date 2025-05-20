@@ -47,5 +47,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>To suggest nearby services, this app need to know your location.</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>This application wants to access your TouchID or FaceID.</string>
 	</dict>
 </plist>

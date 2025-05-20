@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:cribsfinder/globals/hotel_booking.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../utils/palette.dart';
 
@@ -20,6 +21,20 @@ class _BookingsState extends State<Bookings>
     with SingleTickerProviderStateMixin {
   var selected = "";
   int _selectedTab = 0;
+  String error = "";
+  String search = "";
+  String status = "0";
+  Map<String, dynamic> filters = {
+    "listing": {},
+    "dateFrom": "",
+    "dateTo": "",
+    "type": "all",
+  };
+  int page = 0;
+  int perPage = 10;
+  String order = "id";
+  String sortBy = "desc";
+  bool loading = true;
   late TabController tabController;
   final bookings = [
     {
@@ -39,7 +54,6 @@ class _BookingsState extends State<Bookings>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 1
     },
@@ -60,7 +74,6 @@ class _BookingsState extends State<Bookings>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 2
     },
@@ -81,7 +94,6 @@ class _BookingsState extends State<Bookings>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 0
     },
@@ -102,7 +114,6 @@ class _BookingsState extends State<Bookings>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 1
     },
@@ -123,55 +134,58 @@ class _BookingsState extends State<Bookings>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 4
     },
-    {
-      "title": "Urban hotels",
-      "image": "assets/images/hotels.jpeg",
-      "location": "Osapa Lagos",
-      "price": 39500,
-      "rating": 4.9,
-      "room": "Deluxe Room",
-      "hotelId": "123456",
-      "checkin": "2025-03-04 12:30:20",
-      "checkout": "2025-04-04 12:30:20",
-      "confirmationCode": "4378nd7343",
-      "vendor": "Tayo Oladele",
-      "adults": "10",
-      "children": 10,
-      "infants": 5,
-      "dateAdded": "2025-03-03 11:00:00",
-      "quantity": 5,
-      "roomType": "Deluxe Room",
-      "type": "",
-      "status": 0
-    },
   ];
-  List<Map<String, dynamic>> filteredBookings = [];
+  bool isLoggedIn = true;
+  List<dynamic> filteredBookings = [];
   void filter() {
     if (_selectedTab == 0) {
       // upcoming
       setState(() {
-        filteredBookings = bookings
-            .where((item) =>
-                item["status"].toString() == "0" ||
-                item["status"].toString() == "1")
-            .toList();
+        status = "0";
       });
     } else if (_selectedTab == 1) {
       // completed
       setState(() {
-        filteredBookings =
-            bookings.where((item) => item["status"].toString() == "4").toList();
+        status = "4";
       });
     } else {
       // cancelled
       setState(() {
-        filteredBookings =
-            bookings.where((item) => item["status"].toString() == "2").toList();
+        status = "2";
       });
+    }
+    fetch();
+  }
+
+  void fetch() async {
+    try {
+      setState(() {
+        error = "";
+        loading = true;
+      });
+      final res = await JWT.getBookings(
+          search, status, filters, page, perPage, order, sortBy);
+      setState(() {
+        filteredBookings = res["data"];
+        loading = false;
+      });
+      if (filteredBookings.isEmpty) {
+        final stat = Defaults.bookingStatus
+            .firstWhere((stat) => stat["value"].toString() == status);
+        setState(() {
+          error =
+              "You don't have any ${stat["label"]?.toLowerCase()} bookings yet, but don't worry! Search and explore top listings on Cribsfinder.";
+        });
+      }
+    } catch (err) {
+      setState(() {
+        error = err.toString();
+        loading = false;
+      });
+      print(err);
     }
   }
 
@@ -179,6 +193,15 @@ class _BookingsState extends State<Bookings>
   void initState() {
     tabController = TabController(length: 3, vsync: this);
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      final userId = await Helpers.readPref(Defaults.userid);
+      setState(() {
+        isLoggedIn = userId.isNotEmpty;
+      });
+      if (isLoggedIn) {
+        fetch();
+      }
+    });
   }
 
   @override
@@ -240,112 +263,82 @@ class _BookingsState extends State<Bookings>
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: DefaultTabController(
-            length: 3,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: Palette.get("text.white"),
-                  ),
-                  child: TabBar(
-                    labelStyle: GoogleFonts.nunito(
-                        fontSize: 15.0, fontWeight: FontWeight.w500),
-                    dividerColor: Colors.transparent,
-                    indicatorWeight: 3.0,
-                    dividerHeight: 2.0,
-                    unselectedLabelColor: Palette.get("text.disabled"),
-                    onTap: (index) {
-                      setState(() {
-                        _selectedTab = index;
-                      });
-                      filter();
-                    },
-                    tabs: [
-                      Tab(text: "Upcoming"),
-                      Tab(text: "Completed"),
-                      Tab(text: "Cancelled"),
+          child: isLoggedIn
+              ? DefaultTabController(
+                  length: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Palette.get("text.white"),
+                        ),
+                        child: TabBar(
+                          labelStyle: GoogleFonts.nunito(
+                              fontSize: 15.0, fontWeight: FontWeight.w500),
+                          dividerColor: Colors.transparent,
+                          indicatorWeight: 3.0,
+                          dividerHeight: 2.0,
+                          unselectedLabelColor: Palette.get("text.disabled"),
+                          onTap: (index) {
+                            setState(() {
+                              _selectedTab = index;
+                            });
+                            filter();
+                          },
+                          tabs: [
+                            Tab(text: "Upcoming"),
+                            Tab(text: "Completed"),
+                            Tab(text: "Cancelled"),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                          child: loading
+                              ? Shimmer.fromColors(
+                                  baseColor: Palette.get("background.neutral"),
+                                  highlightColor:
+                                      Palette.get("background.default"),
+                                  loop: 1,
+                                  child: AbsorbPointer(child: buildContent()),
+                                )
+                              : (error.isNotEmpty
+                                  ? Alert.showErrorMessage(context, "",
+                                      padding: 50.0,
+                                      buttonText: "Retry",
+                                      message: error,
+                                      action: fetch)
+                                  : buildContent()))
                     ],
                   ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
-                    child: filteredBookings.isNotEmpty
-                        ? ListView.builder(
-                            itemBuilder: (BuildContext context, int index) {
-                              final item = filteredBookings[index];
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 15.0, right: 15.0),
-                                child: Column(
-                                  children: [
-                                    if (index > 0)
-                                      SizedBox(
-                                        width: 25.0,
-                                        height: 40.0,
-                                        child: VerticalDivider(
-                                            thickness: 1.0,
-                                            color: Color(0x14000000)),
-                                      ),
-                                    HotelBooking(item: item),
-                                  ],
-                                ),
-                              );
-                            },
-                            itemCount: filteredBookings.length,
-                          )
-                        : Padding(
-                            padding:
-                                const EdgeInsets.only(left: 20.0, right: 20.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  "assets/images/event.gif",
-                                  width: 100.0,
-                                  height: 100.0,
-                                  fit: BoxFit.contain,
-                                ),
-                                const SizedBox(height: 30.0),
-                                Widgets.buildText("No Bookings Yet", context,
-                                    size: 24.0, weight: 500),
-                                const SizedBox(height: 5.0),
-                                Widgets.buildText(
-                                    "You haven't made any bookings yet, but don't worry! Search and explore top listings on Cribsfinder to find the perfect stay.",
-                                    lines: 4,
-                                    context,
-                                    isCenter: true,
-                                    color: "text.secondary",
-                                    size: 13.0,
-                                    weight: 400),
-                                const SizedBox(height: 30.0),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: TextButton(
-                                      style: Widgets.buildButton(context,
-                                          background:
-                                              Palette.get("main.primary"),
-                                          vertical: 15.0,
-                                          radius: 50.0),
-                                      onPressed: () {},
-                                      child: Widgets.buildText(
-                                          "Explore", context,
-                                          color: "text.white", isMedium: true)),
-                                )
-                              ],
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+                )
+              : Alert.showErrorMessage(context, "Login to view your bookings",
+                  buttonText: "Login", action: () {
+                  Navigator.pushNamed(context, "/login");
+                }),
         ),
       ),
+    );
+  }
+
+  Widget buildContent() {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
+      child: loading || filteredBookings.isNotEmpty
+          ? ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                final item =
+                    loading ? bookings[index] : filteredBookings[index];
+                return Padding(
+                  padding: const EdgeInsets.only(
+                      left: 15.0, right: 15.0, bottom: 15.0),
+                  child: HotelBooking(item: item),
+                );
+              },
+              itemCount: loading ? bookings.length : filteredBookings.length,
+            )
+          : Alert.showErrorMessage(context, "No Bookings!",
+              message: error, buttonText: "Explore"),
     );
   }
 }

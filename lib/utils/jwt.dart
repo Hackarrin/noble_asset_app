@@ -1,22 +1,110 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cribsfinder/utils/apis.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/fetch.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class JWT {
-  static register(values) async {
-    final response = await Fetch(API.signup, values).load();
-    if (response["status"] == "success") {
-      // dispatch({
-      //   type: "LOGIN",
-      //   payload: data,
-      // });
-      // setToken(token);
+  static checkEmailPhone(phone, country, bool isEmail) async {
+    final response = await Fetch(API.userLogin, {
+      (isEmail ? "checkEmail" : "checkPhone"): phone,
+      "country": country,
+    }).load();
+    return response["status"].toString();
+  }
+
+  static verifyAccount(code, method, recipient, country) async {
+    final response = await Fetch(API.userLogin, {
+      "code": code,
+      "method": method,
+      "recipient": recipient,
+      "country": country,
+      "verify": "",
+    }).load();
+    final status = response["status"].toString();
+    final data = response["data"] ?? {};
+    if (status != "success") {
+      if (status == "expired_code") {
+        throw Exception(
+            "Your verification code has expired! Please request and try again.");
+      } else if (status == "invalid_code") {
+        throw Exception(
+            "Your verification code is invalid! Please confirm and try again.");
+      } else if (status == "used_code") {
+        throw Exception(
+            "Your verification code has already been used! Please confirm and try again.");
+      } else {
+        throw Exception(
+            "Something went wrong while verifying your account! Please confirm and try again.");
+      }
+    } else if (method == "email") {
+      Helpers.writePref(Defaults.profile, jsonEncode(data));
+    } else {
+      return data;
+    }
+  }
+
+  static sendVerifyCode(recipient, country, method) async {
+    final response = await Fetch(API.userLogin, {
+      "send": "",
+      "recipient": recipient,
+      "country": country,
+      "method": method,
+    }).load();
+
+    if (response["status"].toString() != "success") {
+      throw Exception("Something went wrong! Please try again later.");
+    }
+  }
+
+  static logDevice(status) async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    String deviceId = "";
+    String type = "";
+    String name = "";
+    String os = "";
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      deviceId = androidInfo.id;
+      type = "3";
+      name = "${androidInfo.brand} ${androidInfo.model}";
+      var release = androidInfo.version.release;
+      var sdkInt = androidInfo.version.sdkInt;
+      os = "Android $release (SDK $sdkInt)";
+    } else {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      deviceId = iosInfo.identifierForVendor ?? "";
+      type = "4";
+      name = iosInfo.name ?? "";
+      var systemName = iosInfo.systemName;
+      var version = iosInfo.systemVersion;
+      os = "$systemName $version";
+    }
+    Fetch(API.userLogin, {
+      "name": name,
+      "os": os,
+      "deviceId": deviceId,
+      "status": status,
+      "type": type,
+    }).load();
+  }
+
+  static signup(values) async {
+    final response = await Fetch(API.userSignup, values).load();
+    final status = response["status"] ?? "";
+    final data = response["data"] ?? {};
+    final token = response["token"] ?? "";
+
+    if (status == "success") {
+      Helpers.writePref(Defaults.userid, token);
+      Helpers.writePref(Defaults.profile, jsonEncode(data));
+      logDevice(1);
       return true;
     }
-    if (response["status"] == "email_taken") {
+    if (status == "email_taken") {
       throw Exception(
           "The email address you provided is already in use. Please confirm and try again.");
     }
@@ -25,21 +113,36 @@ class JWT {
   }
 
   static login(values) async {
-    final response = await Fetch(API.login, values).load();
-    if (response["status"] == "success") {
-      // dispatch({
-      //   type: "LOGIN",
-      //   payload: data,
-      // });
-      // setToken(token);
-      return response["cart"];
+    final response = await Fetch(API.userLogin, values).load();
+    final status = response["status"] ?? "";
+    final data = response["data"] ?? {};
+    final token = response["token"] ?? "";
+    if (status == "success") {
+      Helpers.writePref(Defaults.userid, token);
+      Helpers.writePref(Defaults.profile, jsonEncode(data));
+      logDevice(1);
+      return;
     }
     if (response["status"] == "invalid_login") {
       throw Exception(
           "Invalid email address or password! Please confirm and try again");
     }
+    if (response["status"] == "suspended") {
+      throw Exception(
+          "Your account has been placed on hold! Please contact support.");
+    }
     throw Exception(
         "An error occured while we were logging you in! We apologize for this. Please try again later.");
+  }
+
+  static Future<Map<String, dynamic>> getHome() async {
+    final response =
+        await Fetch(API.home, {"userToken": await Helpers.getToken()}).load();
+    if (response["status"] == "success") {
+      return response["data"];
+    }
+    throw Exception(
+        "An error has occured! We apologize for this. Please try again later.");
   }
 
   static fetchWallet(values) async {
@@ -59,21 +162,17 @@ class JWT {
         "An error occured while we were verifying your account! We apologize for this. Please try again later.");
   }
 
-  static requestPasswordReset(values) async {
-    final response = await Fetch(API.forgotPassword, values).load();
+  static requestPasswordReset(email) async {
+    final response = await Fetch(API.forgot, {"email": email}).load();
     if (response["status"] == "success") {
       return true;
     }
-    if (response["status"] == "invalid_email_address") {
-      throw Exception(
-          "The email address you provided is not registered with us! Please confirm and try again or create an account to proceed.");
-    }
     throw Exception(
-        "An error occured while we were checking your account! We apologize for this. Please try again later.");
+        "Your email address is incorrect! Please confirm and try again.");
   }
 
   static resetPassword(values) async {
-    final response = await Fetch(API.forgotPassword, values).load();
+    final response = await Fetch(API.forgot, values).load();
     if (response["status"] == "success") {
       return true;
     }
@@ -114,15 +213,15 @@ class JWT {
     return [];
   }
 
-  static getHotel(hotelId) async {
-    final response = await Fetch(API.hotel, {
-      "hotelId": hotelId,
+  static getHotel(listingId) async {
+    final response = await Fetch(API.listing, {
       "userToken": await Helpers.getToken(),
+      "propertyId": listingId
     }).load();
     if (response["status"] == "success") {
       return response["data"];
     }
-    if (response["status"] == "hotel_not_found") {
+    if (response["status"] == "not_found") {
       throw Exception(
           "The hotel you are looking for does not exists! Please check back later.");
     }
@@ -175,92 +274,6 @@ class JWT {
     throw Exception("An error has occurred! Please check back later.");
   }
 
-  static getEvents() async {
-    final response = await Fetch(API.events, {
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return {};
-  }
-
-  static filterEvents(category, search, page, perPage, sortBy) async {
-    final response = await Fetch(API.filterEvents, {
-      "category": category,
-      "search": search,
-      "page": page,
-      "perPage": perPage,
-      "sortBy": sortBy,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return [];
-  }
-
-  static getEvent(eventId) async {
-    final response = await Fetch(API.event, {
-      "eventId": eventId,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    if (response["status"] == "event_not_found") {
-      throw Exception(
-          "The event you are looking for does not exists! Please check back later.");
-    }
-    throw Exception("An error has occurred! Please check back later.");
-  }
-
-  static getAttractions() async {
-    final response = await Fetch(API.attractions, {
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return {};
-  }
-
-  static filterAttractions(
-      filters, selectedFilters, page, perPage, sortBy, priceSort) async {
-    final response = await Fetch(API.filterAttractions, {
-      ...filters,
-      ...selectedFilters,
-      "location":
-          (filters && filters["location"] && filters["location"]["value"])
-              ? filters["location"]["value"]
-              : "",
-      "page": page,
-      "perPage": perPage,
-      "sortBy": sortBy,
-      "priceSort": priceSort,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return [];
-  }
-
-  static getAttraction(attractionId) async {
-    final response = await Fetch(API.attraction, {
-      "attractionId": attractionId,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    if (response["status"] == "attraction_not_found") {
-      throw Exception(
-          "The attraction you are looking for does not exists! Please check back later.");
-    }
-    throw Exception("An error has occurred! Please check back later.");
-  }
-
   static getAutomobiles() async {
     final response = await Fetch(API.automobiles, {
       "userToken": await Helpers.getToken(),
@@ -307,88 +320,50 @@ class JWT {
     throw Exception("An error has occurred! Please check back later.");
   }
 
-  static getBoats() async {
-    final response = await Fetch(API.boats, {
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return {};
-  }
-
-  static filterBoats(
-      filters, selectedFilters, page, perPage, sortBy, priceSort) async {
-    final response = await Fetch(API.filterBoats, {
-      ...filters,
-      ...selectedFilters,
-      "location":
-          (filters && filters["location"] && filters["location"]["value"])
-              ? filters["location"]["value"]
-              : "",
-      "page": page,
-      "perPage": perPage,
-      "sortBy": sortBy,
-      "priceSort": priceSort,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return [];
-  }
-
-  static getBoat(boatId) async {
-    final response = await Fetch(API.boat, {
-      "boatId": boatId,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    if (response["status"] == "boat_not_found") {
-      throw Exception(
-          "The boat you are looking for does not exists! Please check back later.");
-    }
-    throw Exception("An error has occurred! Please check back later.");
-  }
-
-  static getProperties(type) async {
-    final response = await Fetch(API.properties, {
-      "userToken": await Helpers.getToken(),
-      "type": type,
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    return {};
-  }
-
-  static filterProperties(filters, page, perPage, sortBy) async {
-    final response = await Fetch(API.filterProperties, {
+  static Future<Map<dynamic, dynamic>> getWishlist(
+      search, status, filters, page, perPage, order, sortBy) async {
+    final response = await Fetch(API.userWishlist, {
       ...filters,
       "page": page,
       "perPage": perPage,
       "sortBy": sortBy,
-      "userToken": await Helpers.getToken(),
+      "search": search,
+      "status": status,
     }).load();
     if (response["status"] == "success") {
-      return response["data"];
+      return response;
     }
-    return [];
+    throw Exception(
+        "We cannot fetch your wishlist at the moment! Please check back later.");
   }
 
-  static getProperty(propertyId) async {
-    final response = await Fetch(API.property, {
-      "propertyId": propertyId,
-      "userToken": await Helpers.getToken(),
+  static Future<Map<dynamic, dynamic>> getBookings(
+      search, status, filters, page, perPage, order, sortBy) async {
+    final response = await Fetch(API.bookings, {
+      ...filters,
+      "page": page,
+      "perPage": perPage,
+      "sortBy": sortBy,
+      "search": search,
+      "status": status,
+    }).load();
+    if (response["status"] == "success") {
+      return response;
+    }
+    throw Exception(
+        "We cannot fetch your bookings at the moment! Please check back later.");
+  }
+
+  static Future<Map<String, dynamic>> getBooking(bookingId) async {
+    final response = await Fetch(API.bookings, {
+      "bookingId": bookingId,
     }).load();
     if (response["status"] == "success") {
       return response["data"];
     }
-    if (response["status"] == "property_not_found") {
+    if (response["status"] == "not_found") {
       throw Exception(
-          "The property you are looking for does not exists! Please check back later.");
+          "The booking you are looking for does not exists! Please check back later.");
     }
     throw Exception("An error has occurred! Please check back later.");
   }
@@ -425,26 +400,11 @@ class JWT {
     throw Exception("An error has occurred! Please check back later.");
   }
 
-  static getWishlist() async {
-    final response = await Fetch(API.wishlist, {
-      "get": "",
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] == "success") {
-      return response["data"];
-    }
-    if (response["status"] == "product_not_found") {
-      throw Exception(
-          "The product you are looking for does not exists! Please check back later.");
-    }
-    throw Exception("An error has occurred! Please check back later.");
-  }
-
   static logout() async {
     // dispatch({
     //   type: "LOGOUT",
     // });
-    Fetch(API.login, {logout: "", "userToken": await Helpers.getToken()})
+    Fetch(API.userSignup, {logout: "", "userToken": await Helpers.getToken()})
         .load();
   }
 
@@ -460,19 +420,6 @@ class JWT {
     }
   }
 
-  static submitPropertyEnquiry(values, property) async {
-    final response = await Fetch(API.property, {
-      ...values,
-      "enquiry": "",
-      "property": property,
-      "userToken": await Helpers.getToken(),
-    }).load();
-    if (response["status"] != "success") {
-      throw Exception(
-          "An error ocurred while attempting to send your enquiry! Please try again later.");
-    }
-  }
-
   static getCheckoutSettings() async {
     final response = await Fetch(API.checkout, {
       "getSettings": 1,
@@ -482,10 +429,21 @@ class JWT {
       return response["data"];
     }
     return {};
-    throw Exception("An error has occurred! Please check back later.");
   }
 
-  static submitOrder(
+  static Future<String> getAccessCode(double total) async {
+    final response = await Fetch(API.checkout, {
+      "getAccessCode": 1,
+      "amount": total,
+      "userToken": await Helpers.getToken(),
+    }).load();
+    if (response["status"] == "success") {
+      return response["data"];
+    }
+    return "";
+  }
+
+  static Future<String> submitOrder(
       cart, selectedMethod, processingFee, paymentRef, customer) async {
     final response = await Fetch(API.checkout, {
       "order": "",
@@ -497,7 +455,7 @@ class JWT {
       "userToken": await Helpers.getToken(),
     }).load();
     if (response["status"] == "success") {
-      return response["data"];
+      return response["data"].toString();
     }
     if (response["status"] == "invalid_customer_details") {
       throw Exception(
@@ -515,54 +473,70 @@ class JWT {
       throw Exception(
           "Your payment cannot be verified at the moment! If you were debited, please reach out to support or try again.");
     }
-
     throw Exception("An error has occurred! Please check back later.");
   }
 
-  static updateProfile(values) async {
-    final response = await Fetch(API.account, {
-      "update": "",
-      "fname": values.fname,
-      "lname": values.lname,
-      "phone": values.phone,
-      "address": values.address,
-      "userToken": await Helpers.getToken(),
+  static updateSettings(values, type) async {
+    final response = await Fetch(API.settings, {
+      "update_profile": "",
+      ...values,
+      "type": type,
     }).load();
     if (response["status"] == "success") {
-      // dispatch({
-      //   type: "LOGIN",
-      //   payload: data,
-      // });
+      Helpers.writePref(Defaults.profile, jsonEncode(response["data"]));
+      if (type == "delete_account" || type == "deactivate") {
+        Helpers.logout(person: true);
+      }
       return true;
     }
+    if (response["status"] == "error") {
+      throw Exception(
+          "Something went wrong while updating your profile. Please try again later.");
+    }
+    if (response["status"] == "suspended") {
+      throw Exception(
+          "Your account has been placed on hold! Please contact support.");
+    }
     if (response["status"] == "invalid_fields") {
-      throw Exception("invalid data uploaded! Please check and try again.");
+      throw Exception(
+          "An error has occured! Please fill all the required fields correctly and try again.");
+    }
+    if (response["status"] == "invalid_password") {
+      throw Exception(
+          "The current password provided is incorrect. Please confirm and try again.");
+    }
+    if (response["status"] == "invalid_account") {
+      throw Exception(
+          "Please provide your payout account information to proceed.");
+    }
+    if (response["status"] == "invalid_user") {
+      Helpers.logout();
     }
     throw Exception("An error has occurred! Please check back later.");
   }
 
-  static getBlogs(sort, page, perpage) async {
-    final response = await Fetch(API.blog, {
-      "userToken": await Helpers.getToken(),
-      "sort": sort,
-      "page": page,
-      "perpage": perpage,
+  static getDevices() async {
+    final response = await Fetch(API.misc, {
+      "devices": "",
     }).load();
     if (response["status"] == "success") {
       return response["data"];
     }
-    return {};
+    return [];
   }
 
-  static getBlogCategory(category) async {
-    final response = await Fetch(API.blog, {
-      "userToken": await Helpers.getToken(),
-      "category": category,
+  static logoutDevice(values) async {
+    final response = await Fetch(API.userLogin, {
+      "name": values["name"],
+      "os": values["os"],
+      "deviceId": values["deviceId"],
+      "status": 0,
+      "type": values["type"],
     }).load();
     if (response["status"] == "success") {
-      return response["data"];
+      return true;
     }
-    return {};
+    return false;
   }
 
   static getPricing(category) async {

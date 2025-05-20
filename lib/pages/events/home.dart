@@ -6324,7 +6324,7 @@ class _EventHomeState extends State<EventHome> {
                                   isMedium: true),
                               GestureDetector(
                                 onTap: () {
-                                  Sheets.showCountry();
+                                  Sheets.showConfirmation();
                                 },
                                 child: ClipOval(
                                     child: Image.asset("assets/images/NGN.png",

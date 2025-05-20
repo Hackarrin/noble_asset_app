@@ -1,14 +1,23 @@
+import 'package:cribsfinder/utils/apis.dart';
+
 class Defaults {
   static const String appName = 'Cribsfinder';
   static const String userid = "userid";
   static const String profile = "profile";
   static const String token = "token";
+  static const String prefKey = "3903j4f8h874h8fa";
+  static const String privKey = "privKeyCribs";
   static const String quickAccess = "transfer,deposit,exchange";
   static const String defaultQuickAccess = "transfer,deposit,exchange";
+  static const String isBiometricLogin = "biometric_login";
+  static const String isGuest = "is_guest_login";
 
   static const String pusherApiKey = "50e8fdba9cdd94fa6aca";
   static const String pusherCluster = "mt1";
   static const String pusherBeamKey = "403498d8-d607-4791-b268-ac10b37928c9";
+  static const String paystackKey =
+      "pk_test_e68e8e26ff948dc4efca9a98490cb6feaaea2bc3";
+
   static const String selectedEventCategories = "selected-event-categories";
   static const String selectedAttractionCategories =
       "selected-attraction-categories";
@@ -236,12 +245,8 @@ class Defaults {
   ];
   static const successMessages = [
     "Your reservation has been successfully confirmed, and we are excited to have you as our guest. Thank you.",
-    "Your event booking has been successfully confirmed. We look forward to helping you create an unforgettable experience",
     "Your car rental has been successfully confirmed. We look forward to providing you with an excellent driving experience",
     "Your reservation has been successfully confirmed, and we are excited to have you as our guest. Thank you.",
-    "Your boat rental has been successfully confirmed. We look forward to providing you with an excellent driving experience",
-    "Your reservation has been successfully confirmed, and we are excited to have you as our guest. Thank you.",
-    "Your event booking has been successfully confirmed. We look forward to helping you create an unforgettable experience",
   ];
   static const sections = [
     "Hotel",
@@ -252,6 +257,12 @@ class Defaults {
     "Property",
     "Attraction",
   ];
+  static final sectionsImagesUrl = {
+    "hotel": API.assetHotels,
+    "car": API.assetAutomobiles,
+    "shortlet": API.assetShortlets,
+    "host": API.assetVendors
+  };
   static const bookingStatus = [
     {"label": "Upcoming", "color": "info", "value": "0"},
     {
@@ -274,6 +285,13 @@ class Defaults {
       "color": "info",
       "value": "4",
     },
+  ];
+  static const deviceIcons = [
+    "window-alt",
+    "computer",
+    "laptop",
+    "tablet-android",
+    "mobile-notch"
   ];
   static const walletTransactionType = [
     {

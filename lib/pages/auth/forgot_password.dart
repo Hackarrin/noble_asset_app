@@ -1,9 +1,7 @@
-import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/webview.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -35,6 +33,25 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void send() async {
+    try {
+      if (emailController.text.isEmpty ||
+          !Helpers.isEmail(emailController.text)) {
+        Alert.show(
+            context, "", "Please enter a valid email address to proceed.",
+            type: "success");
+        return;
+      }
+      Alert.showLoading(context, "Requesting...");
+      await JWT.requestPasswordReset(emailController.text);
+      Alert.hideLoading(context);
+      Navigator.pushNamed(context, "/forgot-reset-password");
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
   }
 
   @override
@@ -79,7 +96,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         height: 10.0,
                       ),
                       Widgets.buildText(
-                          "Enter your email address below to request your password reset code.",
+                          "Please enter the email address associated with your account and We will email you a link to reset your password.",
                           context,
                           lines: 10,
                           isCenter: true,
@@ -118,8 +135,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           Expanded(
                             child: TextButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, "/forgot-reset-password");
+                                  send();
                                 },
                                 style: Widgets.buildButton(context,
                                     vertical: 20.0,

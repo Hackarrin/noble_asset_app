@@ -1,11 +1,9 @@
-import 'dart:convert';
-
-import 'package:cribsfinder/globals/hotel_booking.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../utils/palette.dart';
 
@@ -21,9 +19,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     {
       "title": "Manage Account",
       "options": [
-        {"name": "Personal details", "icon": "user", "page": "/account"},
-        {"name": "Login & Security", "icon": "insert-alt", "page": "/security"},
-      ]
+        {
+          "name": "Personal details",
+          "icon": "user",
+          "page": "/account",
+        },
+        {
+          "name": "Login & Security",
+          "icon": "insert-alt",
+          "page": "/security",
+        },
+      ],
+      "isLogInRequired": true
     },
     {
       "title": "Preferences",
@@ -43,7 +50,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           "icon": "bell-notification-social-media",
           "page": "/notifications"
         },
-      ]
+      ],
+      "isLogInRequired": true
     },
     {
       "title": "Travel Activity",
@@ -51,7 +59,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         {"name": "Wishlist", "icon": "wishlist-heart", "page": "2"},
         {"name": "My Reviews", "icon": "feedback-review", "page": "/reviews"},
         {"name": "My Bookings", "icon": "book-alt", "page": "1"},
-      ]
+      ],
+      "isLogInRequired": true
     },
     // {
     //   "title": "Referral & Payment",
@@ -79,7 +88,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           "icon": "group-call",
           "page": "/help"
         },
-        {"name": "How Cribsfinder Works", "icon": "info", "page": "/work"},
+        // {"name": "How Cribsfinder Works", "icon": "info", "page": "/work"},
         {
           "name": "Follow Us on Social Media",
           "icon": "following",
@@ -91,36 +100,49 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     {
       "title": "Legal & Privacy",
       "options": [
-        {"name": "About Cribsfinder", "icon": "user-headset", "page": "/about"},
-        {"name": "FAQ", "icon": "interrogation", "page": "/faq"},
         {
-          "name": "Our Services",
-          "icon": "chatbot-speech-bubble",
-          "page": "/services"
+          "name": "About Cribsfinder",
+          "icon": "user-headset",
+          "page": "https://cribsfinder.com/about"
         },
-        {"name": "Terms of Services", "icon": "info", "page": "/terms"},
-        {"name": "Privacy Policy", "icon": "user-lock", "page": "/privacy"},
-        // {"name": "Legal", "icon": "book-bookmark", "page": "/legal"},
-        // {"name": "Cookies", "icon": "cookie", "page": "/cookies"},
+        {
+          "name": "FAQ",
+          "icon": "interrogation",
+          "page": "https://cribsfinder.com/faq"
+        },
+        {
+          "name": "Terms of Services",
+          "icon": "info",
+          "page": "https://cribsfinder.com/terms"
+        },
+        {
+          "name": "Privacy Policy",
+          "icon": "user-lock",
+          "page": "https://cribsfinder.com/privacy"
+        },
       ]
     }
   ];
-  final profile = {
-    "fname": "Tayo",
-    "lname": "Oladele",
-    "email": "info@cribsfinder.com",
-    "phone": "091833383",
-    "dateAdded": "2025-01-01",
-    "isVerified": "1",
-    "status": "1",
-    "photo": "",
-    "gender": "M",
-    "dob": "1995-01-02",
-    "address": "ibeju Lekki Lagos Nigeria"
-  };
+  bool isLoggedIn = false;
+  String _version = "";
+  Map<String, dynamic> profile = {};
+
+  void get() async {
+    final userId = await Helpers.readPref(Defaults.userid);
+    final details = await Helpers.getProfile();
+    String version = await Helpers.getCurrentVersion();
+    setState(() {
+      profile = details["user"] ?? {};
+      _version = version;
+      isLoggedIn = userId.isNotEmpty;
+    });
+  }
 
   @override
   void initState() {
+    Future.delayed(Duration.zero, () {
+      get();
+    });
     super.initState();
   }
 
@@ -147,7 +169,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.only(right: 15.0),
             child: GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  await Navigator.pushNamed(context, "/account");
+                  get();
+                },
                 child: Helpers.fetchIcons("settings", "regular",
                     color: "text.black", size: 24.0)),
           )
@@ -164,15 +189,15 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Container(
+                if (isLoggedIn)
+                  Container(
                     decoration: BoxDecoration(
                         color: Palette.get("text.white"),
                         borderRadius: BorderRadius.circular(10.0)),
                     child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, "/splash");
+                      onTap: () async {
+                        await Navigator.pushNamed(context, "/account");
+                        get();
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(left: 15.0, right: 15.0),
@@ -189,7 +214,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Helpers.getProfilePhoto(context, height: 70.0),
+                                Helpers.getProfilePhoto(context,
+                                    height: 70.0, profile: profile),
                                 const SizedBox(width: 10.0),
                                 Expanded(
                                   child: Column(
@@ -198,11 +224,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Widgets.buildText(
-                                          "${profile["fname"]} ${profile["lname"]}",
-                                          context,
+                                          profile["name"] ?? "", context,
                                           isMedium: true),
                                       const SizedBox(height: 5.0),
-                                      Row(
+                                      Column(
+                                        spacing: 5.0,
                                         children: [
                                           Row(
                                             children: [
@@ -224,23 +250,19 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           if (profile["isVerified"]
                                                   .toString() ==
                                               "1")
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 8.0),
-                                              child: Row(
-                                                children: [
-                                                  Helpers.fetchIcons(
-                                                      "shield-trust", "solid",
-                                                      color: "success.main",
-                                                      size: 16.0),
-                                                  const SizedBox(width: 5.0),
-                                                  Widgets.buildText(
-                                                      "Verified ID", context,
-                                                      weight: 400,
-                                                      size: 13.0,
-                                                      color: "text.disabled"),
-                                                ],
-                                              ),
+                                            Row(
+                                              children: [
+                                                Helpers.fetchIcons(
+                                                    "shield-trust", "solid",
+                                                    color: "success.main",
+                                                    size: 16.0),
+                                                const SizedBox(width: 5.0),
+                                                Widgets.buildText(
+                                                    "Verified ID", context,
+                                                    weight: 400,
+                                                    size: 13.0,
+                                                    color: "text.disabled"),
+                                              ],
                                             ),
                                         ],
                                       )
@@ -252,7 +274,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                       ),
                     ),
                   ),
-                ),
+                if (!isLoggedIn)
+                  Alert.showErrorMessage(context, "Login to view your account",
+                      isSlim: true, buttonText: "Login", action: () {
+                    Navigator.pushNamed(context, "/login");
+                  }),
                 Padding(
                     padding: EdgeInsets.only(
                         bottom: 20.0, left: 15.0, right: 15.0, top: 20.0),
@@ -260,7 +286,14 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, int index) {
-                        final item = menus[index];
+                        Map item = menus[index];
+                        if (!isLoggedIn) {
+                          item = menus
+                              .where((item) =>
+                                  !item.containsKey("isLogInRequired") ||
+                                  item["isLogInRequired"].toString() == "0")
+                              .toList()[index];
+                        }
                         final List options = (item["options"] ?? []) as List;
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 15.0),
@@ -293,12 +326,13 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                         (BuildContext context, int index) {
                                       final item = options[index];
                                       return GestureDetector(
-                                        onTap: () {
+                                        onTap: () async {
                                           if (item["page"]
                                               .toString()
                                               .startsWith("/")) {
-                                            Navigator.pushNamed(context,
+                                            await Navigator.pushNamed(context,
                                                 item["page"].toString());
+                                            get();
                                           } else if (double.tryParse(
                                                   item["page"].toString()) !=
                                               null) {
@@ -306,6 +340,24 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 context, "/home",
                                                 arguments:
                                                     item["page"].toString());
+                                          } else if (item["page"]
+                                              .toString()
+                                              .startsWith("http")) {
+                                            Helpers.openLink(
+                                                item["page"].toString(),
+                                                item["name"].toString());
+                                          } else if (item["page"].toString() ==
+                                              "share") {
+                                            // share app
+                                            SharePlus.instance
+                                                .share(ShareParams(
+                                              title:
+                                                  "Find top stays and rentals at Cribsfinder",
+                                              subject:
+                                                  "Find top stays and rentals at Cribsfinder",
+                                              text:
+                                                  "Check out the best stays and rental at Cribsfinder. \n cribsfinder.com",
+                                            ));
                                           }
                                         },
                                         child: Container(
@@ -359,24 +411,33 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                               ]),
                         );
                       },
-                      itemCount: menus.length,
+                      itemCount: isLoggedIn
+                          ? menus.length
+                          : menus
+                              .where((item) =>
+                                  !item.containsKey("isLogInRequired") ||
+                                  item["isLogInRequired"].toString() == "0")
+                              .length,
                     )),
-                Padding(
-                  padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                        onPressed: () {},
-                        style: Widgets.buildButton(context,
-                            background: Palette.get("main.primary"),
-                            vertical: 15.0,
-                            radius: 50.0),
-                        child: Widgets.buildText("Logout", context,
-                            isMedium: true, color: "text.white")),
+                if (isLoggedIn)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15.0, right: 15.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                          onPressed: () {
+                            Helpers.logout();
+                          },
+                          style: Widgets.buildButton(context,
+                              background: Palette.get("main.primary"),
+                              vertical: 15.0,
+                              radius: 50.0),
+                          child: Widgets.buildText("Logout", context,
+                              isMedium: true, color: "text.white")),
+                    ),
                   ),
-                ),
                 const SizedBox(height: 10.0),
-                Widgets.buildText("Version 1.0", context, isCenter: true),
+                Widgets.buildText("Version $_version", context, isCenter: true),
                 const SizedBox(height: 10.0),
                 Widgets.buildText(
                     "© ${DateTime.now().year} Cribsfinder LTD. All rights reserved.",

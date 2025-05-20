@@ -1999,14 +1999,16 @@ class HotelModals {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                                decoration: BoxDecoration(
-                                    color: Palette.get("background.neutral"),
-                                    borderRadius: BorderRadius.circular(5.0)),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 10.0),
-                                child: Widgets.buildText("10% Off", context,
-                                    color: "main.primary")),
+                            if (data.containsKey("discount"))
+                              Container(
+                                  decoration: BoxDecoration(
+                                      color: Palette.get("background.neutral"),
+                                      borderRadius: BorderRadius.circular(5.0)),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 5.0, horizontal: 10.0),
+                                  child: Widgets.buildText("10% Off", context,
+                                      color: "main.primary")),
+                            if (!data.containsKey("discount")) SizedBox(),
                             Row(
                               children: [
                                 Helpers.fetchIcons("star", "solid",
@@ -2566,8 +2568,7 @@ class HotelModals {
                                                   Row(
                                                     children: [
                                                       Helpers.fetchIcons(
-                                                          item["icon"]
-                                                              .toString(),
+                                                          "check-double",
                                                           "regular",
                                                           size: 16.0),
                                                       const SizedBox(
@@ -2586,7 +2587,7 @@ class HotelModals {
                                                           .toString() !=
                                                       "Accepted payment methods")
                                                     Widgets.buildText(
-                                                        "• ${item["description"].toString().split("\n").join("\n\n• ")}",
+                                                        "• ${item["content"].toString().split("\n").join("\n\n• ")}",
                                                         context,
                                                         lines: 100),
                                                   if (item["title"]
@@ -2598,12 +2599,7 @@ class HotelModals {
                                                       children: [
                                                         for (final item in [
                                                           "visa",
-                                                          "paypal",
-                                                          "amex",
-                                                          "discover",
                                                           "mastercard",
-                                                          "maestro",
-                                                          "stripe"
                                                         ])
                                                           SvgPicture.asset(
                                                               "assets/images/$item.svg",

@@ -1,9 +1,15 @@
+import 'dart:convert';
+
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:local_auth/local_auth.dart';
 
 import '../../../utils/palette.dart';
 
@@ -24,10 +30,108 @@ class _LoginState extends State<Login> {
   var method = "email";
   var isPasswordVisible = false;
   var isAlreadyLoggedIn = false;
+  var name = "";
+  var profileEmail = "";
+
+  final LocalAuthentication auth = LocalAuthentication();
+  bool canAuthenticate = false;
+  List<BiometricType> availableBiometrics = [];
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+    ],
+  );
+
+  void login() async {
+    try {
+      final email =
+          isAlreadyLoggedIn ? profileEmail : emailController.text.trim();
+      final phone = phoneController.text.replaceAll(" ", "").trim();
+      final password = passwordController.text;
+
+      if (((method == "email" && email.isNotEmpty) || phone.isNotEmpty) &&
+          password.isNotEmpty) {
+        if (Helpers.isEmail(email) || phone.isNotEmpty) {
+          Alert.showLoading(context, "Logging you in...");
+          await JWT.login(
+              {"password": password, "username": email, "method": method});
+          Alert.hideLoading(context);
+
+          Helpers.toHome(context);
+        } else {
+          Alert.show(
+              context, "", "Please provide a valid email address to proceed.",
+              type: "warning");
+        }
+      } else {
+        Alert.show(context, "",
+            "Please fill all the required fields above to proceed.",
+            type: "warning");
+      }
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
+  }
+
+  void googleSignin() async {
+    try {
+      final result = await _googleSignIn.signIn();
+      print("google: $result");
+    } catch (err) {
+      print("google: $err");
+      Alert.show(context, "",
+          "Google authentication failed! Please retry or sign up with phone number or email address.");
+    }
+  }
+
+  void checkFinger() async {
+    try {
+      final bool didAuthenticate = await auth.authenticate(
+          localizedReason: 'Please authenticate to login to account.',
+          options: const AuthenticationOptions(biometricOnly: true));
+      if (didAuthenticate) {
+        setState(() {
+          method = "biometric";
+        });
+        login();
+      } else {
+        Alert.show(context, "Login Error!",
+            "Biometric authentication failed! Please try again or login with your password.");
+      }
+    } on PlatformException {
+      Alert.show(context, "Login Error!",
+          "Biometric authentication failed! Please try again or login with your password.");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      final profile = await Helpers.getProfile();
+      if (profile.isNotEmpty) {
+        setState(() {
+          name = profile["user"]["name"].toString();
+          profileEmail = profile["user"]["email"].toString();
+          isAlreadyLoggedIn = true;
+        });
+
+        final bool canAuthenticateWithBiometrics =
+            await auth.canCheckBiometrics;
+        bool isBiometricEnabled =
+            (num.tryParse(await Helpers.readPref(Defaults.isBiometricLogin))
+                        ?.toInt() ??
+                    0) ==
+                1;
+        availableBiometrics = await auth.getAvailableBiometrics();
+        bool _canAuthenticate =
+            (canAuthenticateWithBiometrics || await auth.isDeviceSupported()) &&
+                isBiometricEnabled;
+        setState(() => canAuthenticate = _canAuthenticate);
+      }
+    });
   }
 
   @override
@@ -51,9 +155,26 @@ class _LoginState extends State<Login> {
                 children: [
                   Column(
                     children: [
-                      const SizedBox(
-                        height: 100.0,
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pushReplacementNamed(context, "/home",
+                                  arguments: jsonEncode({"isDone": true}));
+                            },
+                            child: Container(
+                                width: 40.0,
+                                height: 40.0,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20.0),
+                                    border:
+                                        Border.all(color: Color(0xFFF1F1F1))),
+                                child: UnconstrainedBox(
+                                  child: Helpers.fetchIcons("cross", "solid",
+                                      color: "text.secondary", size: 14.0),
+                                ))),
                       ),
+                      const SizedBox(height: 40.0),
                       Image.asset(
                         "assets/images/logo.png",
                         height: 80.0,
@@ -61,7 +182,7 @@ class _LoginState extends State<Login> {
                       ),
                       Widgets.buildText(
                         isAlreadyLoggedIn
-                            ? "Welcome Back, Ola"
+                            ? "Welcome Back, $name"
                             : "Access your Account",
                         context,
                         isMedium: true,
@@ -87,42 +208,6 @@ class _LoginState extends State<Login> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Widgets.buildText("Country Code", context,
-                                color: 'text.primary', size: 13.0, weight: 500),
-                            const SizedBox(
-                              height: 5.0,
-                            ),
-                            TextField(
-                              controller: countryController,
-                              readOnly: true,
-                              decoration: Widgets.inputDecoration("",
-                                  color: Color(0x99F4F4F4),
-                                  isFilled: true,
-                                  isOutline: true,
-                                  suffixIcon: UnconstrainedBox(
-                                      child: Helpers.fetchIcons(
-                                          "caret-down", "solid",
-                                          color: "text.disabled", size: 20.0))),
-                              style: GoogleFonts.nunito(
-                                  color: Color(0xFF757575),
-                                  fontSize: 13.0,
-                                  fontWeight: FontWeight.w400),
-                              onTap: () async {
-                                final selected = await Sheets.showOptions(
-                                    "Country", "", Defaults.hotelCategories);
-                              },
-                            ),
-                          ],
-                        ),
-                      if (method == "phone" && !isAlreadyLoggedIn)
-                        const SizedBox(
-                          height: 15.0,
-                        ),
-                      if (method == "phone" && !isAlreadyLoggedIn)
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
                             Widgets.buildText("Phone Number", context,
                                 color: 'text.primary', size: 13.0, weight: 500),
                             const SizedBox(
@@ -130,10 +215,18 @@ class _LoginState extends State<Login> {
                             ),
                             TextField(
                               controller: phoneController,
-                              decoration: Widgets.inputDecoration("",
-                                  color: Color(0x99F4F4F4),
-                                  isFilled: true,
-                                  isOutline: true),
+                              decoration: Widgets.inputDecoration(
+                                "",
+                                color: Color(0x99F4F4F4),
+                                isFilled: true,
+                                isOutline: true,
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 15.0, left: 10.0),
+                                  child: Widgets.buildText("+234", context,
+                                      color: Palette.get('text.disabled')),
+                                ),
+                              ),
                               keyboardType: TextInputType.phone,
                               style: GoogleFonts.nunito(
                                   color: Color(0xFF757575),
@@ -230,7 +323,7 @@ class _LoginState extends State<Login> {
                           Expanded(
                             child: TextButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(context, "/home");
+                                  login();
                                 },
                                 style: Widgets.buildButton(context,
                                     vertical: 20.0,
@@ -242,50 +335,39 @@ class _LoginState extends State<Login> {
                                     weight: 500,
                                     size: 16.0)),
                           ),
-                          if (isAlreadyLoggedIn)
+                          if (isAlreadyLoggedIn && canAuthenticate)
                             Padding(
                               padding: const EdgeInsets.only(left: 15.0),
-                              child: Container(
-                                  width: 56.0,
-                                  height: 56.0,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(56.0),
-                                      color: Palette.get("background.paper"),
-                                      boxShadow: [
-                                        BoxShadow(
-                                            offset: Offset(-1, 1),
-                                            blurRadius: 12,
-                                            spreadRadius: 0,
-                                            color: Color(0x0D000000))
-                                      ]),
-                                  child: UnconstrainedBox(
-                                    child: Helpers.fetchIcons(
-                                        "fingerprint", "regular",
-                                        size: 30.0, color: "main.primary"),
-                                  )),
+                              child: GestureDetector(
+                                onTap: () {
+                                  checkFinger();
+                                },
+                                child: Container(
+                                    width: 56.0,
+                                    height: 56.0,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(56.0),
+                                        color: Palette.get("background.paper"),
+                                        boxShadow: [
+                                          BoxShadow(
+                                              offset: Offset(-1, 1),
+                                              blurRadius: 12,
+                                              spreadRadius: 0,
+                                              color: Color(0x0D000000))
+                                        ]),
+                                    child: UnconstrainedBox(
+                                      child: Helpers.fetchIcons(
+                                          "fingerprint", "regular",
+                                          size: 30.0, color: "main.primary"),
+                                    )),
+                              ),
                             )
                         ],
                       ),
                       const SizedBox(
                         height: 20.0,
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isAlreadyLoggedIn = !isAlreadyLoggedIn;
-                          });
-                        },
-                        child: Widgets.buildText(
-                            isAlreadyLoggedIn
-                                ? "View Standard Interface"
-                                : "View Already logged-in interface",
-                            context,
-                            isUnderlined: true),
-                      ),
-                      if (!isAlreadyLoggedIn)
-                        const SizedBox(
-                          height: 20.0,
-                        ),
                       if (!isAlreadyLoggedIn)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -305,7 +387,9 @@ class _LoginState extends State<Login> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                googleSignin();
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(20.0),
@@ -336,6 +420,11 @@ class _LoginState extends State<Login> {
                                   method =
                                       method == "phone" ? "email" : "phone";
                                 });
+                                if (method == "email") {
+                                  phoneController.text = "";
+                                } else {
+                                  emailController.text = "";
+                                }
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -377,7 +466,7 @@ class _LoginState extends State<Login> {
                               isAlreadyLoggedIn = false;
                             });
                           } else {
-                            Navigator.pushNamed(context, "/get-started");
+                            Navigator.pushNamed(context, "/signup");
                           }
                         },
                         child: Wrap(
@@ -390,11 +479,19 @@ class _LoginState extends State<Login> {
                                     : "Don't have an account?   ",
                                 context,
                                 color: "text.secondary"),
-                            Widgets.buildText(
-                                isAlreadyLoggedIn ? "Logout" : "Sign Up",
-                                context,
-                                isUnderlined: true,
-                                color: "main.primary"),
+                            GestureDetector(
+                              onTap: () {
+                                Helpers.logout(person: true);
+                                setState(() {
+                                  isAlreadyLoggedIn = false;
+                                });
+                              },
+                              child: Widgets.buildText(
+                                  isAlreadyLoggedIn ? "Logout" : "Sign Up",
+                                  context,
+                                  isUnderlined: true,
+                                  color: "main.primary"),
+                            ),
                           ],
                         ),
                       )

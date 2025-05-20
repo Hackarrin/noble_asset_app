@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/globals/shortlet_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/jwt.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 
 import '../../utils/palette.dart';
 
@@ -30,10 +32,6 @@ class _CheckoutState extends State<Checkout>
   TextEditingController adultsController = TextEditingController();
   TextEditingController childrenController = TextEditingController();
   TextEditingController roomsController = TextEditingController();
-  final LatLng _center = const LatLng(6.5244, 3.3792);
-  int _selectedImageIndex = 0;
-  int _selectedTab = 0;
-  bool _isReviewAll = false;
   List<String> reviewFilter = ["verified", "latest"];
   bool isDescriptionExpanded = false;
 
@@ -45,10 +43,6 @@ class _CheckoutState extends State<Checkout>
     "rooms": 0
   };
   List<Map<String, dynamic>> _selectedRooms = [];
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
 
   Map<String, dynamic> _customer = {
     "fname": "",
@@ -78,7 +72,6 @@ class _CheckoutState extends State<Checkout>
   String _paymentRef = "";
   Map _settings = {};
   bool _verifyWallet = false;
-  bool _isSubmittingOrder = false;
   String _orderId = "";
   List _cart = [];
   int _activeStep = 0;
@@ -92,23 +85,34 @@ class _CheckoutState extends State<Checkout>
   final addressController = TextEditingController();
   final arrivalController = TextEditingController();
 
+  final _paystack = Paystack();
+
   void processPaystack() async {
     try {
-      setState(() {
-        _isSubmittingOrder = true;
-      });
-      confirmOrder("ffhjdf");
+      Alert.showLoading(context, "Initializing...");
+      final init = await _paystack.initialize(Defaults.paystackKey, true);
+      if (init) {
+        final accessCode = await JWT.getAccessCode(_total);
+        if (accessCode.isNotEmpty) {
+          final response = await _paystack.launch(accessCode);
+          if (response.status == "success") {
+            Alert.hideLoading(context);
+            confirmOrder(response.reference);
+          }
+          return;
+        }
+      }
+      throw Exception(
+          "An error occured while attempting to process payment! Please try again later.");
     } catch (err) {
-      // enqueueSnackbar(
-      //   err.message || "An error has occured! Please try again later.",
-      //   {
-      //     variant: "error",
-      //   }
-      // );
+      Alert.hideLoading(context);
+      Alert.show(
+          context,
+          "",
+          err.toString().isNotEmpty
+              ? err.toString()
+              : "An error has occured! Please try again later.");
     }
-    setState(() {
-      _isSubmittingOrder = false;
-    });
   }
 
   void confirmOrder(String transactionRef) async {
@@ -124,29 +128,8 @@ class _CheckoutState extends State<Checkout>
         transactionRef = _paymentRef;
       }
       if (_total == 0 || (_selectedMethod.isNotEmpty && _total > 0)) {
-        setState(() {
-          _isSubmittingOrder = true;
-        });
-        final cartJSON = jsonEncode(_cart.map((item) {
-          if (item["listingType"].toString() == "6") {
-            return {
-              "listingId": item["listingId"],
-              "options": {
-                ...item["options"],
-                "selectedRoom": item["tickets"][num.tryParse(
-                                (item["options"]["selectedRoom"] ?? 0)
-                                    .toString())
-                            ?.toInt() ??
-                        0]["id"] ??
-                    "",
-              },
-              "type": item["listingType"],
-            };
-          }
-          if (item["listingType"] == "2" ||
-              item["listingType"] == "4" ||
-              item["listingType"] == "1" ||
-              item["listingType"] == "3") {
+        final List<Map<String, dynamic>> cartJSON = _cart.map((item) {
+          if (item["listingType"] == "1" || item["listingType"] == "2") {
             return {
               "listingId": item["listingId"],
               "options": item["options"],
@@ -157,21 +140,21 @@ class _CheckoutState extends State<Checkout>
             "listingId": item["listingId"],
             "options": {
               ...item["options"],
-              "selectedRoom": (item["options"]["selectedRoom"] != "" &&
-                      item["rooms"] &&
-                      item["rooms"].length > 0 &&
-                      item["rooms"]
-                          .where((room, index) =>
-                              index.toString() ==
-                              item["options"]["selectedRoom"].toString())
-                          .toList()[0]["id"]) ??
-                  "",
+              "selectedRoom": item["options"]["selectedRoom"] != "" &&
+                      item.containsKey("rooms") &&
+                      item["rooms"].length > 0
+                  ? item["rooms"][num.tryParse(
+                          item["options"]["selectedRoom"].toString()) ??
+                      0]["id"]
+                  : "",
             },
             "type": item["listingType"],
           };
-        }));
-        final res = await JWT.submitOrder(
-            "[]", _selectedMethod, _processingFee, transactionRef, _customer);
+        }).toList();
+        Alert.showLoading(context, "Processing order...");
+        final res = await JWT.submitOrder(jsonEncode(cartJSON), _selectedMethod,
+            _processingFee, transactionRef, _customer);
+        Alert.hideLoading(context);
         // update cart.
         final storage = await Helpers.readPref("cart");
         final cartDetails = storage.isNotEmpty ? jsonDecode(storage) : [];
@@ -182,21 +165,18 @@ class _CheckoutState extends State<Checkout>
           _orderId = res;
         });
       } else {
-        // enqueueSnackbar("Please provide all required information to proceed.", {
-        //   variant: "warning",
-        // });
+        Alert.show(
+            context, "", "Please provide all required information to proceed.");
       }
     } catch (err) {
-      // enqueueSnackbar(
-      //   err.message || "An error has occured! Please try again later.",
-      //   {
-      //     variant: "error",
-      //   }
-      // );
+      Alert.hideLoading(context);
+      Alert.show(
+          context,
+          "",
+          err.toString().isNotEmpty
+              ? err.toString()
+              : "An error has occured! Please try again later.");
     }
-    setState(() {
-      _isSubmittingOrder = false;
-    });
   }
 
   void handlePay() {
@@ -213,14 +193,36 @@ class _CheckoutState extends State<Checkout>
         });
       }
     } else {
-      // enqueueSnackbar("Please select a payment method to proceed.", {
-      //   variant: "warning",
-      // });
+      Alert.show(context, "", "Please select a payment method to proceed.");
     }
   }
 
   void getSettings() async {
     try {
+      // set customer info
+      final profile = await Helpers.getProfile();
+      final userDetails = profile["user"];
+      final name = userDetails["name"].toString().split(" ");
+      fnameController.text = name[0].toString();
+      lnameController.text = name.length > 1 ? name[1].toString() : "";
+      emailController.text = userDetails["email"].toString();
+      phoneController.text = userDetails["phone"].toString();
+      addressController.text = userDetails["address"].toString();
+      setState(() {
+        _customer = {
+          "fname": name[0].toString(),
+          "lname": name.length > 1 ? name[1].toString() : "",
+          "address": userDetails["address"].toString(),
+          "phone": userDetails["phone"].toString(),
+          "info": "",
+          "email": userDetails["email"].toString(),
+          "uid": userDetails["uid"].toString(),
+          "isGuest": 1,
+          "arrivalTime": "",
+          "country": userDetails["country"].toString()
+        };
+      });
+
       final storage = await Helpers.readPref("cart");
       List cartDetails = storage.isNotEmpty ? jsonDecode(storage) : [];
       final cart = cartDetails.where((item) => item["isCheckout"]).toList();
@@ -253,8 +255,6 @@ class _CheckoutState extends State<Checkout>
         };
       }
       setState(() => _cart = cart);
-      final settings = await JWT.getCheckoutSettings();
-      setState(() => _settings = settings);
 
       String startDate = cart[0].containsKey("options") &&
               cart[0]["options"].containsKey("dateFrom")
@@ -480,6 +480,9 @@ class _CheckoutState extends State<Checkout>
                     ?.toInt() ??
                 0);
       }
+
+      final settings = await JWT.getCheckoutSettings();
+      setState(() => _settings = settings);
       double processingFee =
           ((num.tryParse(settings["processing_fee"].toString())?.toDouble() ??
                       0) /
@@ -515,255 +518,277 @@ class _CheckoutState extends State<Checkout>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      backgroundColor: Palette.getColor(context, "background", "default"),
-      appBar: AppBar(
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        leading: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Color(0xfff1f1f1), width: 1),
-            color: Colors.transparent,
-            shape: BoxShape.circle,
+    return PopScope(
+      canPop: _activeStep == 0 || _orderId.isNotEmpty,
+      onPopInvokedWithResult: (didPop, result) {
+        if (_activeStep > 0) {
+          setState(() {
+            _activeStep -= 1;
+          });
+          return;
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Palette.getColor(context, "background", "default"),
+        appBar: AppBar(
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          leading: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Color(0xfff1f1f1), width: 1),
+              color: Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            margin: const EdgeInsets.only(left: 15.0),
+            child: IconButton(
+                onPressed: () {
+                  if (_activeStep > 0) {
+                    setState(() {
+                      _activeStep -= 1;
+                    });
+                  } else {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: Helpers.fetchIcons(
+                  "arrow-small-left",
+                  "solid",
+                  size: 24,
+                  color: "text.other",
+                )),
           ),
-          margin: const EdgeInsets.only(left: 15.0),
-          child: IconButton(
-              onPressed: () {
-                if (_activeStep > 0) {
-                  setState(() {
-                    _activeStep -= 1;
-                  });
-                } else {
-                  Navigator.pop(context);
-                }
-              },
-              icon: Helpers.fetchIcons(
-                "arrow-small-left",
-                "solid",
-                size: 24,
-                color: "text.other",
-              )),
+          title: Widgets.buildText(
+              "Reserve ${_cart.isNotEmpty ? Defaults.sections[num.tryParse(_cart[0]["listingType"].toString())?.toInt() ?? 0] : ""}",
+              context,
+              isMedium: true),
+          elevation: 0,
+          backgroundColor: Palette.getColor(context, "background", "paper"),
+          foregroundColor: Palette.getColor(context, "text", "disabled"),
         ),
-        title: Widgets.buildText(
-            "Reserve ${_cart.isNotEmpty ? Defaults.sections[num.tryParse(_cart[0]["listingType"].toString())?.toInt() ?? 0] : ""}",
-            context,
-            isMedium: true),
-        elevation: 0,
-        backgroundColor: Palette.getColor(context, "background", "paper"),
-        foregroundColor: Palette.getColor(context, "text", "disabled"),
-      ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(
-                  top: 15.0, left: 15.0, right: 15.0, bottom: 80.0),
-              child: SingleChildScrollView(
-                child: Column(
+        body: SafeArea(
+          child: _orderId.isNotEmpty
+              ? Alert.showErrorMessage(context, "Payment confirmed",
+                  message: Defaults.successMessages[
+                      num.tryParse(_cart[0]["listingType"].toString())
+                              ?.toInt() ??
+                          0],
+                  buttonText: "View booking", action: () {
+                  Navigator.pushNamed(context, "/booking",
+                      arguments: jsonEncode({"orderId": _orderId}));
+                }, image: "success")
+              : Stack(
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Palette.get("background.paper"),
-                          borderRadius: BorderRadius.circular(10.0),
-                          border: Border.all(color: Color(0x0D000000))),
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          top: 15.0, left: 15.0, right: 15.0, bottom: 80.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Palette.get("background.paper"),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                  border: Border.all(color: Color(0x0D000000))),
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: EasyStepper(
+                                      activeStep: _activeStep,
+                                      internalPadding: 0,
+                                      showLoadingAnimation: false,
+                                      stepRadius: 15.0,
+                                      disableScroll: true,
+                                      enableStepTapping: false,
+                                      showStepBorder: false,
+                                      fitWidth: true,
+                                      finishedStepBackgroundColor:
+                                          Colors.transparent,
+                                      lineStyle: LineStyle(
+                                          lineType: LineType.normal,
+                                          defaultLineColor: Color(0x1A000000),
+                                          lineThickness: 5.0,
+                                          lineLength: 80.0,
+                                          finishedLineColor:
+                                              Palette.get("main.primary")),
+                                      steps: [
+                                        EasyStep(
+                                          customStep: Opacity(
+                                            opacity: _activeStep >= 0 ? 1 : 0.3,
+                                            child: SvgPicture.asset(
+                                                _activeStep >= 0
+                                                    ? "assets/images/stepper-selected.svg"
+                                                    : 'assets/images/stepper-1.svg',
+                                                width: 30.0,
+                                                height: 30.0,
+                                                fit: BoxFit.contain),
+                                          ),
+                                        ),
+                                        EasyStep(
+                                          customStep: Opacity(
+                                            opacity: _activeStep >= 1 ? 1 : 0.3,
+                                            child: SvgPicture.asset(
+                                                _activeStep >= 1
+                                                    ? "assets/images/stepper-selected.svg"
+                                                    : 'assets/images/stepper-2.svg',
+                                                width: 60.0,
+                                                height: 60.0,
+                                                fit: BoxFit.contain),
+                                          ),
+                                        ),
+                                        EasyStep(
+                                          customStep: Opacity(
+                                            opacity: _activeStep >= 2 ? 1 : 0.3,
+                                            child: SvgPicture.asset(
+                                                _activeStep >= 2
+                                                    ? "assets/images/stepper-selected.svg"
+                                                    : 'assets/images/stepper-3.svg',
+                                                width: 60.0,
+                                                height: 60.0,
+                                                fit: BoxFit.contain),
+                                          ),
+                                        ),
+                                      ],
+                                      onStepReached: (index) =>
+                                          setState(() => _activeStep = index),
+                                    ),
+                                  ),
+                                  if (_activeStep == 0)
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: CustomerInformation(
+                                          customer: _customer,
+                                          rules: _cart.isNotEmpty
+                                              ? _cart[0]["generalRules"] ?? {}
+                                              : {},
+                                          fnameController: fnameController,
+                                          lnameController: lnameController,
+                                          phoneController: phoneController,
+                                          emailController: emailController,
+                                          addressController: addressController,
+                                          arrivalController: arrivalController,
+                                          handleUpdate: (name, value) {
+                                            setState(() {
+                                              _customer[name] = value;
+                                            });
+                                          }),
+                                    ),
+                                  if (_activeStep == 1 &&
+                                      _cart[0]["listingType"].toString() == "0")
+                                    SizedBox(
+                                        width: double.infinity,
+                                        child: HotelItem(
+                                          item:
+                                              _cart.isNotEmpty ? _cart[0] : {},
+                                          direction: "horizontal",
+                                          isBordered: false,
+                                        )),
+                                  if (_activeStep == 1 &&
+                                      _cart[0]["listingType"].toString() == "3")
+                                    SizedBox(
+                                        width: double.infinity,
+                                        child: ShortletItem(
+                                          item:
+                                              _cart.isNotEmpty ? _cart[0] : {},
+                                          direction: "horizontal",
+                                          isBordered: false,
+                                        )),
+                                ],
+                              ),
+                            ),
+                            if (_activeStep == 1)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: HotelInformation(
+                                  item: _cart.isNotEmpty ? _cart[0] : {},
+                                  values: _values,
+                                  total: _total,
+                                  processingFee: _processingFee,
+                                ),
+                              ),
+                            if (_activeStep == 2)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: PaymentInformation(
+                                  method: _selectedMethod,
+                                  setMethod: (method) {
+                                    setState(() {
+                                      _selectedMethod = method;
+                                    });
+                                  },
+                                  walletBalance: _walletBalance,
+                                  setPaymentReference: () => {},
+                                  total: _total,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: 76.0,
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10.0, horizontal: 30.0),
+                          decoration: BoxDecoration(
+                              color: Color(0xFFFDFDFD),
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(15.0),
+                                  topRight: Radius.circular(15.0)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color(0x08000000),
+                                  spreadRadius: 0,
+                                  blurRadius: 4,
+                                  offset: Offset(
+                                      1, -5), // changes position of shadow
+                                ),
+                              ]),
+                          child: SizedBox(
                             width: double.infinity,
-                            child: EasyStepper(
-                              activeStep: _activeStep,
-                              internalPadding: 0,
-                              showLoadingAnimation: false,
-                              stepRadius: 15.0,
-                              disableScroll: true,
-                              enableStepTapping: false,
-                              showStepBorder: false,
-                              fitWidth: true,
-                              finishedStepBackgroundColor: Colors.transparent,
-                              lineStyle: LineStyle(
-                                  lineType: LineType.normal,
-                                  defaultLineColor: Color(0x1A000000),
-                                  lineThickness: 5.0,
-                                  lineLength: 80.0,
-                                  finishedLineColor:
-                                      Palette.get("main.primary")),
-                              steps: [
-                                EasyStep(
-                                  customStep: Opacity(
-                                    opacity: _activeStep >= 0 ? 1 : 0.3,
-                                    child: SvgPicture.asset(
-                                        _activeStep >= 0
-                                            ? "assets/images/stepper-selected.svg"
-                                            : 'assets/images/stepper-1.svg',
-                                        width: 30.0,
-                                        height: 30.0,
-                                        fit: BoxFit.contain),
-                                  ),
-                                ),
-                                EasyStep(
-                                  customStep: Opacity(
-                                    opacity: _activeStep >= 1 ? 1 : 0.3,
-                                    child: SvgPicture.asset(
-                                        _activeStep >= 1
-                                            ? "assets/images/stepper-selected.svg"
-                                            : 'assets/images/stepper-2.svg',
-                                        width: 60.0,
-                                        height: 60.0,
-                                        fit: BoxFit.contain),
-                                  ),
-                                ),
-                                EasyStep(
-                                  customStep: Opacity(
-                                    opacity: _activeStep >= 2 ? 1 : 0.3,
-                                    child: SvgPicture.asset(
-                                        _activeStep >= 2
-                                            ? "assets/images/stepper-selected.svg"
-                                            : 'assets/images/stepper-3.svg',
-                                        width: 60.0,
-                                        height: 60.0,
-                                        fit: BoxFit.contain),
-                                  ),
-                                ),
-                              ],
-                              onStepReached: (index) =>
-                                  setState(() => _activeStep = index),
+                            child: TextButton(
+                              onPressed: () async {
+                                if (_activeStep == 0) {
+                                  if (_customer["fname"].isNotEmpty &&
+                                      _customer["lname"].isNotEmpty &&
+                                      _customer["email"].isNotEmpty &&
+                                      _customer["phone"].isNotEmpty) {
+                                    setState(() {
+                                      _activeStep = 1;
+                                    });
+                                  } else {
+                                    Alert.show(context, '',
+                                        "Please fill all the required details before proceeding.",
+                                        type: "error");
+                                  }
+                                } else if (_activeStep == 1) {
+                                  setState(() {
+                                    _activeStep = 2;
+                                  });
+                                } else if (_activeStep == 2) {
+                                  handlePay();
+                                }
+                              },
+                              style: Widgets.buildButton(context,
+                                  background: Palette.get("main.primary"),
+                                  radius: 40.0),
+                              child: Widgets.buildText(
+                                  _activeStep == 1
+                                      ? "Confirm and Pay"
+                                      : (_activeStep == 2 ? "Pay" : "Continue"),
+                                  context,
+                                  isMedium: true,
+                                  color: "text.white"),
                             ),
                           ),
-                          if (_activeStep == 0)
-                            SizedBox(
-                              width: double.infinity,
-                              child: CustomerInformation(
-                                  customer: _customer,
-                                  rules: _cart.isNotEmpty
-                                      ? _cart[0]["generalRules"] ?? {}
-                                      : {},
-                                  fnameController: fnameController,
-                                  lnameController: lnameController,
-                                  phoneController: phoneController,
-                                  emailController: emailController,
-                                  addressController: addressController,
-                                  arrivalController: arrivalController,
-                                  handleUpdate: (name, value) {
-                                    setState(() {
-                                      _customer[name] = value;
-                                    });
-                                  }),
-                            ),
-                          if (_activeStep == 1 &&
-                              _cart[0]["listingType"].toString() == "0")
-                            SizedBox(
-                                width: double.infinity,
-                                child: HotelItem(
-                                  item: _cart.isNotEmpty ? _cart[0] : {},
-                                  direction: "horizontal",
-                                  isBordered: false,
-                                )),
-                          if (_activeStep == 1 &&
-                              _cart[0]["listingType"].toString() == "3")
-                            SizedBox(
-                                width: double.infinity,
-                                child: ShortletItem(
-                                  item: _cart.isNotEmpty ? _cart[0] : {},
-                                  direction: "horizontal",
-                                  isBordered: false,
-                                )),
-                        ],
-                      ),
-                    ),
-                    if (_activeStep == 1)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: HotelInformation(
-                          item: _cart.isNotEmpty ? _cart[0] : {},
-                          values: _values,
-                          total: _total,
-                          processingFee: _processingFee,
-                        ),
-                      ),
-                    if (_activeStep == 2)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: PaymentInformation(
-                          method: _selectedMethod,
-                          setMethod: (method) {
-                            setState(() {
-                              _selectedMethod = method;
-                            });
-                          },
-                          walletBalance: _walletBalance,
-                          setPaymentReference: () => {},
-                          total: _total,
-                        ),
-                      ),
+                        ))
                   ],
                 ),
-              ),
-            ),
-            Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 76.0,
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 30.0),
-                  decoration: BoxDecoration(
-                      color: Color(0xFFFDFDFD),
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15.0),
-                          topRight: Radius.circular(15.0)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Color(0x08000000),
-                          spreadRadius: 0,
-                          blurRadius: 4,
-                          offset: Offset(1, -5), // changes position of shadow
-                        ),
-                      ]),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: TextButton(
-                      onPressed: () async {
-                        if (_activeStep == 0) {
-                          setState(() {
-                            _activeStep = 1;
-                          });
-                          // if (_customer["fname"].isNotEmpty &&
-                          //     _customer["lname"].isNotEmpty &&
-                          //     _customer["email"].isNotEmpty &&
-                          //     _customer["phone"].isNotEmpty) {
-                          //   setState(() {
-                          //     _activeStep = 1;
-                          //   });
-                          // } else {
-                          //   enqueueSnackbar(
-                          //       "Please fill all the required details before proceeding.",
-                          //       {
-                          //         variant: "error",
-                          //       });
-                          // }
-                        } else if (_activeStep == 1) {
-                          setState(() {
-                            _activeStep = 2;
-                          });
-                        }
-                      },
-                      style: Widgets.buildButton(context,
-                          background: Palette.get("main.primary"),
-                          radius: 40.0),
-                      child: Widgets.buildText(
-                          _activeStep == 1
-                              ? "Confirm and Pay"
-                              : (_activeStep == 2 ? "Pay" : "Continue"),
-                          context,
-                          isMedium: true,
-                          color: "text.white"),
-                    ),
-                  ),
-                ))
-          ],
         ),
       ),
     );

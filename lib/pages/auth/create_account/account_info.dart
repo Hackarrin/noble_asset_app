@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,13 +19,66 @@ class SignupAccountInfo extends StatefulWidget {
 class _SignupAccountInfoState extends State<SignupAccountInfo> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String phone = "";
 
   var isChecked = false;
   var isPasswordVisible = false;
 
+  void signup() async {
+    try {
+      final name = nameController.text.trim();
+      final email = emailController.text.trim();
+      final password = passwordController.text;
+
+      if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
+        if (name.split(" ").length > 1) {
+          if (Helpers.isEmail(email)) {
+            Alert.showLoading(context, "Creating your account...");
+            await JWT.signup({
+              "firstName": name.split(" ")[0],
+              "lastName": name.split(" ")[1],
+              "country": "NG",
+              "password": password,
+              "phone": phone,
+              "email": email,
+            });
+            Alert.hideLoading(context);
+            Helpers.toHome(context);
+          } else {
+            Alert.show(
+                context, "", "Please provide a valid email address to proceed.",
+                type: "warning");
+          }
+        } else {
+          Alert.show(context, "",
+              "Please provide your first and last names to proceed.",
+              type: "warning");
+        }
+      } else {
+        Alert.show(context, "",
+            "Please fill all the required fields above to proceed.",
+            type: "warning");
+      }
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
+  }
+
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments != null) {
+        final data = jsonDecode(arguments.toString());
+        setState(() {
+          phone = data["phone"] ?? "";
+          emailController.text = data["email"] ?? "";
+        });
+      }
+    });
   }
 
   @override
@@ -60,18 +117,13 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                   const SizedBox(height: 40.0),
                   Column(
                     children: [
-                      Widgets.buildText(
-                        "Continue with email",
-                        context,
-                        isMedium: true,
-                        size: 24.0,
-                        weight: 500,
-                      ),
+                      Widgets.buildText("Finish your account creation", context,
+                          isMedium: true, size: 24.0, weight: 500, lines: 2),
                       const SizedBox(
                         height: 10.0,
                       ),
                       Widgets.buildText(
-                          "Fill your information below or continue with google or Phone Number.",
+                          "Fill your information below to finish your account creation.",
                           context,
                           lines: 10,
                           isCenter: true,
@@ -90,13 +142,13 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                           ),
                           TextField(
                             controller: nameController,
-                            readOnly: true,
                             decoration: Widgets.inputDecoration(
                               "",
                               color: Color(0x99F4F4F4),
                               isFilled: true,
                               isOutline: true,
                             ),
+                            keyboardType: TextInputType.name,
                             style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
@@ -122,7 +174,49 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                                 color: Color(0x99F4F4F4),
                                 isFilled: true,
                                 isOutline: true),
-                            keyboardType: TextInputType.phone,
+                            keyboardType: TextInputType.emailAddress,
+                            style: GoogleFonts.nunito(
+                                color: Color(0xFF757575),
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 15.0,
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Widgets.buildText("Password", context,
+                              color: 'text.primary', size: 13.0, weight: 500),
+                          const SizedBox(
+                            height: 5.0,
+                          ),
+                          TextField(
+                            controller: passwordController,
+                            decoration: Widgets.inputDecoration("",
+                                color: Color(0x99F4F4F4),
+                                isFilled: true,
+                                isOutline: true,
+                                suffixIcon: UnconstrainedBox(
+                                    child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isPasswordVisible = !isPasswordVisible;
+                                    });
+                                  },
+                                  child: Helpers.fetchIcons(
+                                      isPasswordVisible ? "eye-crossed" : "eye",
+                                      "solid",
+                                      color: "text.disabled",
+                                      size: 20.0),
+                                ))),
+                            obscureText: !isPasswordVisible,
+                            enableSuggestions: false,
+                            keyboardType: TextInputType.visiblePassword,
+                            autocorrect: false,
                             style: GoogleFonts.nunito(
                                 color: Color(0xFF757575),
                                 fontSize: 13.0,
@@ -164,7 +258,7 @@ class _SignupAccountInfoState extends State<SignupAccountInfo> {
                         width: double.infinity,
                         child: TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, "/signup-location");
+                              signup();
                             },
                             style: Widgets.buildButton(context,
                                 vertical: 20.0,

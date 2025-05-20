@@ -1,6 +1,8 @@
-import 'package:cribsfinder/utils/defaults.dart';
+import 'dart:convert';
+
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,12 +20,51 @@ class SignupVerify extends StatefulWidget {
 class _SignupVerifyState extends State<SignupVerify> {
   final TextEditingController controller = TextEditingController();
 
-  var isChecked = false;
-  var isPasswordVisible = false;
+  String phone = "";
+
+  void resendPhoneCode() async {
+    try {
+      Alert.showLoading(context, "Sending...");
+      await JWT.sendVerifyCode(phone, "NG", "sms");
+      Alert.show(context, "", "Verification code has been sent!",
+          type: "success");
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
+  }
+
+  void verify() async {
+    try {
+      final code = controller.text;
+      if (code.isNotEmpty) {
+        Alert.showLoading(context, "Verifying...");
+        await JWT.verifyAccount(code, "sms", phone, "NG");
+        Alert.hideLoading(context);
+        Navigator.pushNamed(context, "/signup-account-info",
+            arguments: jsonEncode({"phone": phone}));
+      } else {
+        Alert.show(context, "", "Please provide a valid code to proceed",
+            type: "warning");
+      }
+    } catch (err) {
+      Alert.hideLoading(context);
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      final arguments = ModalRoute.of(context)?.settings.arguments;
+      if (arguments != null) {
+        final data = jsonDecode(arguments.toString());
+        setState(() {
+          phone = data["phone"] ?? "";
+        });
+      }
+    });
   }
 
   @override
@@ -73,7 +114,7 @@ class _SignupVerifyState extends State<SignupVerify> {
                         height: 10.0,
                       ),
                       Widgets.buildText(
-                          "Enter the code we sent over SMS to +234 09039525697",
+                          "Enter the code we sent over SMS to +234 $phone",
                           context,
                           lines: 10,
                           isCenter: true,
@@ -97,7 +138,8 @@ class _SignupVerifyState extends State<SignupVerify> {
                                   context, "background", "default"),
                               pinBoxRadius: 10.0,
                               controller: controller,
-                              defaultBorderColor: Colors.transparent,
+                              defaultBorderColor:
+                                  Palette.get("background.textfield"),
                               hasTextBorderColor:
                                   Palette.getColor(context, "main", "primary"),
                               highlightColor:
@@ -123,29 +165,22 @@ class _SignupVerifyState extends State<SignupVerify> {
                               "Didn't received the code? ", context,
                               color: "text.secondary"),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              resendPhoneCode();
+                            },
                             child: Widgets.buildText("Resend", context,
                                 isUnderlined: true, color: "main.primary"),
                           ),
                         ],
                       ),
                       const SizedBox(
-                        height: 15.0,
-                      ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Widgets.buildText("More option", context,
-                            isUnderlined: true, weight: 500),
-                      ),
-                      const SizedBox(
-                        height: 15.0,
+                        height: 20.0,
                       ),
                       SizedBox(
                         width: double.infinity,
                         child: TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(
-                                  context, "/signup-account-info");
+                              verify();
                             },
                             style: Widgets.buildButton(context,
                                 vertical: 20.0,

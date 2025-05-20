@@ -1,6 +1,8 @@
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../utils/palette.dart';
 
@@ -74,7 +76,8 @@ class _SignupLocationState extends State<SignupLocation> {
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await Permission.location.request();
                           Navigator.pushNamed(context, "/signup-notification");
                         },
                         style: Widgets.buildButton(context,
@@ -86,11 +89,6 @@ class _SignupLocationState extends State<SignupLocation> {
                             "Allow Location Access", context,
                             color: "text.white", weight: 500, size: 16.0)),
                   ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  Widgets.buildText("Enter your location manually", context,
-                      color: "main.primary", isMedium: true),
                 ],
               )),
         )));

@@ -1,11 +1,10 @@
-import 'dart:convert';
-
-import 'package:cribsfinder/globals/hotel_booking.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
+import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/palette.dart';
 
@@ -17,34 +16,60 @@ class Devices extends StatefulWidget {
 }
 
 class _DevicesState extends State<Devices> with SingleTickerProviderStateMixin {
-  final devices = [
-    {
-      "name": "GSA",
-      "icon": "brand-apple",
-      "os": "iOS",
-      "location": "ibeju lekki lagos Nigeria",
-      "date": "2025-03-22 08:00:00",
-      "status": "0"
-    },
-    {
-      "name": "Samsung S20",
-      "icon": "brand-android",
-      "os": "Android 18.0",
-      "location": "ibeju lekki lagos Nigeria",
-      "date": "2025-03-22 08:00:00",
-      "status": "1"
-    },
-  ];
+  List devices = [];
   var enableBiometric = false;
+
+  bool loading = true;
+  String error = "";
+  void fetch() async {
+    try {
+      setState(() {
+        error = "";
+        loading = true;
+      });
+      final res = await JWT.getDevices();
+      setState(() {
+        devices = res;
+        loading = false;
+      });
+      if (devices.isEmpty) {
+        setState(() {
+          error = "You don't have any devices yet!";
+        });
+      }
+    } catch (err) {
+      setState(() {
+        error = err.toString();
+        loading = false;
+      });
+      print(err);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, fetch);
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void handleLogout(item) async {
+    try {
+      final res = await Sheets.showConfirmation();
+      if (res) {
+        Alert.showLoading(context, "Logging out...");
+        await JWT.logoutDevice(item);
+        Alert.hideLoading(context);
+        Alert.show(context, "", "Device has been logged out!", type: "success");
+        fetch();
+      }
+    } catch (err) {
+      print(err);
+    }
   }
 
   @override
@@ -85,100 +110,122 @@ class _DevicesState extends State<Devices> with SingleTickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 20.0, left: 15.0, right: 15.0, top: 20.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Palette.get("background.paper"),
-                          borderRadius: BorderRadius.circular(20.0),
-                          border: Border.all(color: Color(0x1A000000))),
-                      padding: const EdgeInsets.only(
-                          left: 15.0, right: 15.0, top: 10.0, bottom: 5.0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (BuildContext context, int index) {
-                          final item = devices[index];
-                          return GestureDetector(
-                            onTap: () {
-                              if (item["page"].toString().startsWith("/")) {
-                                Navigator.pushNamed(
-                                    context, item["page"].toString());
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  border: Border(
-                                      top: index == 0
-                                          ? BorderSide.none
-                                          : BorderSide(
-                                              color: Color(0x1A000000)))),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
+                error.isNotEmpty
+                    ? Alert.showErrorMessage(context, "",
+                        message: error, buttonText: "Retry", action: fetch)
+                    : Padding(
+                        padding: EdgeInsets.only(
+                            bottom: 20.0, left: 15.0, right: 15.0, top: 20.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: Palette.get("background.paper"),
+                              borderRadius: BorderRadius.circular(20.0),
+                              border: Border.all(color: Color(0x1A000000))),
+                          padding: const EdgeInsets.only(
+                              left: 15.0, right: 15.0, top: 10.0, bottom: 5.0),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (BuildContext context, int index) {
+                              final item = devices[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  if (item["status"].toString() == "1") {
+                                    handleLogout(item);
+                                  }
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border(
+                                          top: index == 0
+                                              ? BorderSide.none
+                                              : BorderSide(
+                                                  color: Color(0x1A000000)))),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 20.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Helpers.fetchIcons(
-                                                item["icon"].toString(),
-                                                "solid",
-                                                size: 16.0),
-                                            const SizedBox(width: 5.0),
-                                            Widgets.buildText(
-                                                "${item["os"].toString()} · ${item["name"].toString()}",
-                                                context,
-                                                size: 14.0,
-                                                weight: 400,
-                                                color: "text.primary"),
-                                          ],
-                                        ),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                              color: Palette.get(
-                                                  item["status"].toString() ==
-                                                          "0"
-                                                      ? "error.main"
-                                                      : "main.primary"),
-                                              borderRadius:
-                                                  BorderRadius.circular(5.0)),
-                                          padding: const EdgeInsets.all(5.0),
-                                          child: Widgets.buildText(
-                                              item["status"].toString() == "0"
-                                                  ? "Logged-out"
-                                                  : "Logged-in",
-                                              context,
-                                              size: 11.0,
-                                              weight: 500,
-                                              color: "text.white"),
-                                        ),
-                                      ]),
-                                  const SizedBox(
-                                    height: 10.0,
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  Helpers.fetchIcons(
+                                                      Defaults.deviceIcons[
+                                                          num.tryParse(item[
+                                                                          "type"]
+                                                                      .toString())
+                                                                  ?.toInt() ??
+                                                              0],
+                                                      "regular",
+                                                      size: 16.0),
+                                                  const SizedBox(width: 5.0),
+                                                  Expanded(
+                                                    child: Widgets.buildText(
+                                                        "${item["os"].toString()} · ${item["name"].toString()}",
+                                                        context,
+                                                        size: 14.0,
+                                                        weight: 400,
+                                                        lines: 2,
+                                                        color: "text.primary"),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Column(
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                      color: Palette.get(item[
+                                                                      "status"]
+                                                                  .toString() ==
+                                                              "0"
+                                                          ? "error.main"
+                                                          : "main.primary"),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              5.0)),
+                                                  padding:
+                                                      const EdgeInsets.all(5.0),
+                                                  child: Widgets.buildText(
+                                                      item["status"]
+                                                                  .toString() ==
+                                                              "0"
+                                                          ? "Logged-out"
+                                                          : "Logged-in",
+                                                      context,
+                                                      size: 11.0,
+                                                      weight: 500,
+                                                      color: "text.white"),
+                                                ),
+                                              ],
+                                            ),
+                                          ]),
+                                      const SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      FittedBox(
+                                        child: Widgets.buildText(
+                                            "${item["location"].toString()} · ${Helpers.formatDate(item["lastLogin"].toString(), formatString: "dd MMM yyyy hh:mma")}",
+                                            context,
+                                            size: 12.0,
+                                            weight: 400,
+                                            color: "text.primary"),
+                                      ),
+                                    ],
                                   ),
-                                  FittedBox(
-                                    child: Widgets.buildText(
-                                        "${item["location"].toString()} · ${Helpers.formatDate(item["date"].toString(), formatString: "dd MMM yyyy hh:mma")}",
-                                        context,
-                                        size: 12.0,
-                                        weight: 400,
-                                        color: "text.primary"),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        itemCount: devices.length,
-                      ),
-                    )),
+                                ),
+                              );
+                            },
+                            itemCount: devices.length,
+                          ),
+                        )),
               ],
             ),
           ),

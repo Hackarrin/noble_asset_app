@@ -1,4 +1,9 @@
+import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/apis.dart';
+import 'package:cribsfinder/utils/fetch.dart';
 import 'package:cribsfinder/utils/helpers.dart';
+import 'package:cribsfinder/utils/jwt.dart';
+import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 
@@ -12,28 +17,48 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
-  final profile = {
-    "fname": "Tayo",
-    "lname": "Oladele",
-    "email": "info@cribsfinder.com",
-    "phone": "091833383",
-    "dateAdded": "2025-01-01",
-    "isVerified": "1",
-    "status": "1",
-    "photo": "",
-    "gender": "M",
-    "dob": "1995-01-02",
-    "address": "ibeju Lekki Lagos Nigeria"
-  };
+  Map<String, dynamic> profile = {};
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      get();
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void get() async {
+    final details = await Helpers.getProfile();
+    setState(() {
+      profile = details["user"] ?? {};
+    });
+  }
+
+  void handleSubmit(image) async {
+    try {
+      Alert.showLoading(context, "Updating...");
+      final photo = await Fetch(API.misc, {},
+              method: "file", isFormData: true, file: image)
+          .load();
+      print("photo $photo $image");
+      if (photo.isNotEmpty && photo["status"].toString() == "success") {
+        await JWT.updateSettings({"photo": photo["data"].toString()}, "photo");
+        get();
+        Alert.hideLoading(context);
+        Alert.show(context, "", "Profile updated successfully!",
+            type: "success");
+        return;
+      }
+      throw Exception("An error has occured! Please try again later.");
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
   }
 
   @override
@@ -108,22 +133,27 @@ class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
                                     color: "text.disabled"),
                               ),
                               const SizedBox(height: 30.0),
-                              Stack(
-                                children: [
-                                  Helpers.getProfilePhoto(context,
-                                      height: 100.0),
-                                  Positioned(
-                                      bottom: 0.0,
-                                      right: 0.0,
-                                      child: Helpers.fetchIcons(
-                                          "pen-circle", "solid",
-                                          color: "main.primary", size: 24.0))
-                                ],
+                              GestureDetector(
+                                onTap: () async {
+                                  final image = await Sheets.chooseImage(
+                                      "Select your profile picture");
+                                  handleSubmit(image);
+                                },
+                                child: Stack(
+                                  children: [
+                                    Helpers.getProfilePhoto(context,
+                                        height: 100.0, profile: profile),
+                                    Positioned(
+                                        bottom: 0.0,
+                                        right: 0.0,
+                                        child: Helpers.fetchIcons(
+                                            "pen-circle", "solid",
+                                            color: "main.primary", size: 24.0))
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 10.0),
-                              Widgets.buildText(
-                                  "${profile["fname"]} ${profile["lname"]}",
-                                  context,
+                              Widgets.buildText(profile["name"], context,
                                   isMedium: true),
                             ],
                           )),
@@ -149,7 +179,7 @@ class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
                           case 0:
                             item = {
                               "label": "Full name",
-                              "value": "${profile["fname"]} ${profile["lname"]}"
+                              "value": profile["name"]
                             };
                             break;
                           case 1:
@@ -160,44 +190,27 @@ class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
                             break;
                           case 2:
                             item = {
-                              "label": "Gender",
-                              "value": profile["gender"].toString() == "M"
-                                  ? "Male"
-                                  : "Female"
-                            };
-                            break;
-                          case 3:
-                            item = {
                               "label": "Email",
                               "value": profile["email"],
                               "isVerified": profile["isVerified"].toString()
                             };
                             break;
-                          case 4:
+                          case 3:
                             item = {
                               "label": "Address",
                               "value": profile["address"],
                             };
                             break;
-                          case 5:
-                            item = {
-                              "label": "Date of Birth",
-                              "value": profile["dob"].toString().isNotEmpty
-                                  ? Helpers.formatDate(
-                                      profile["dob"].toString(),
-                                      formatString: "MMM dd, yyyy")
-                                  : "",
-                            };
-                            break;
                         }
-                        return index == 6
+                        return index == 4
                             ? Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   TextButton(
-                                      onPressed: () {
-                                        Navigator.pushNamed(
+                                      onPressed: () async {
+                                        await Navigator.pushNamed(
                                             context, "/edit-profile");
+                                        get();
                                       },
                                       style: Widgets.buildButton(context,
                                           background:
@@ -215,6 +228,7 @@ class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.center,
+                                  spacing: 20.0,
                                   children: [
                                     Widgets.buildText(
                                         item["label"].toString(), context,
@@ -224,44 +238,51 @@ class _AccountState extends State<Account> with SingleTickerProviderStateMixin {
                                     const SizedBox(
                                       height: 15.0,
                                     ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        if (item.containsKey("isVerified"))
-                                          Container(
-                                            decoration: BoxDecoration(
-                                                color: Palette.get(
-                                                    item["isVerified"]
-                                                                .toString() ==
-                                                            "0"
-                                                        ? "error.main"
-                                                        : "main.primary"),
-                                                borderRadius:
-                                                    BorderRadius.circular(5.0)),
-                                            padding: const EdgeInsets.all(5.0),
-                                            child: Widgets.buildText(
-                                                item["isVerified"].toString() ==
-                                                        "0"
-                                                    ? "Pending verification"
-                                                    : "Verified",
-                                                context,
-                                                size: 12.0,
-                                                weight: 500,
-                                                color: "text.white"),
-                                          ),
-                                        Widgets.buildText(
-                                            item["value"].toString(), context,
-                                            size: 14.0,
-                                            weight: 400,
-                                            color: "text.primary"),
-                                      ],
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          if (item.containsKey("isVerified"))
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                  color: Palette.get(
+                                                      item["isVerified"]
+                                                                  .toString() ==
+                                                              "0"
+                                                          ? "error.main"
+                                                          : "main.primary"),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          5.0)),
+                                              padding:
+                                                  const EdgeInsets.all(5.0),
+                                              child: Widgets.buildText(
+                                                  item["isVerified"]
+                                                              .toString() ==
+                                                          "0"
+                                                      ? "Pending verification"
+                                                      : "Verified",
+                                                  context,
+                                                  size: 12.0,
+                                                  weight: 500,
+                                                  color: "text.white"),
+                                            ),
+                                          Widgets.buildText(
+                                              item["value"].toString(), context,
+                                              size: 14.0,
+                                              weight: 400,
+                                              lines: 3,
+                                              isRight: true,
+                                              color: "text.primary"),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               );
                       },
-                      itemCount: 7,
+                      itemCount: 5,
                     ),
                   ),
                 ),

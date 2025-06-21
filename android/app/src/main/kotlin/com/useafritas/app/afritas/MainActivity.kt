@@ -1,4 +1,4 @@
-package com.cribsfinder.app
+package com.cribsfinder.mobile
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

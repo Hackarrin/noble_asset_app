@@ -65,6 +65,6 @@ class DefaultFirebaseOptions {
     projectId: 'cribsfinder-dda93',
     databaseURL: 'https://cribsfinder-dda93-default-rtdb.firebaseio.com',
     storageBucket: 'cribsfinder-dda93.firebasestorage.app',
-    iosBundleId: 'com.cribsfinder.app',
+    iosBundleId: 'com.cribsfinder.mobile',
   );
 }

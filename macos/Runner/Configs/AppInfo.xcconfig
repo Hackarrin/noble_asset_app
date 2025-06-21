@@ -8,7 +8,7 @@
 PRODUCT_NAME = cribsfinder
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.cribsfinder.app
+PRODUCT_BUNDLE_IDENTIFIER = com.cribsfinder.mobile
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.cribsfinder.app. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 com.cribsfinder.mobile. All rights reserved.

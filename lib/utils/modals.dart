@@ -674,7 +674,7 @@ class Sheets {
                         top: 15.0, left: 15.0, right: 15.0, bottom: 50.0),
                     child: EventItem(item: item, direction: "horizontal"),
                   ),
-                if (type == "automobile")
+                if (type == "car")
                   Padding(
                     padding: EdgeInsets.only(
                         top: 15.0, left: 15.0, right: 15.0, bottom: 30.0),

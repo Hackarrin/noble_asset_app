@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:cribsfinder/globals/automobile_item.dart';
 import 'package:cribsfinder/globals/hotel_item.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
 import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
@@ -320,7 +322,11 @@ class _WishlistState extends State<Wishlist>
                     },
                     color: Palette.get("warning.main")),
               ],
-              child: HotelItem(item: item, direction: "horizontal"),
+              child: item["type"].toString() == "0"
+                  ? HotelItem(item: item, direction: "horizontal")
+                  : (item["type"].toString() != "1"
+                      ? AutomobileItem(item: item, direction: "horizontal")
+                      : ShortletItem(item: item, direction: "horizontal")),
             ),
           );
         },

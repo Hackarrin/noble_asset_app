@@ -5,15 +5,17 @@ import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/palette.dart';
 import 'package:cribsfinder/utils/widget.dart';
-import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HotelModals {
-  static Future<Map<String, dynamic>> filters(Map<String, dynamic> filter,
-      List recentSearches, List neighbourhoods, List brands, int total) async {
-    Map<String, dynamic> result = filter;
+  static Future<Map<String, dynamic>> filters(
+      Map<String, dynamic> selectedFilters,
+      Map<String, dynamic> filters,
+      int total,
+      bool isRental) async {
+    Map<String, dynamic> result = selectedFilters;
     TextEditingController startDateController = TextEditingController();
     TextEditingController endDateController = TextEditingController();
     TextEditingController locationController = TextEditingController();
@@ -37,7 +39,6 @@ class HotelModals {
         builder: (context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            final screenWidth = MediaQuery.sizeOf(context).width;
             return Padding(
               padding: const EdgeInsets.only(bottom: 15.0),
               child: Column(
@@ -112,9 +113,8 @@ class HotelModals {
                         GestureDetector(
                           onTap: () async {
                             final res = await filterOther(
-                                filter, neighbourhoods, brands, total);
+                                selectedFilters, filters, total, isRental);
                             setState(() {
-                              filter = res;
                               result = res;
                             });
                           },
@@ -205,7 +205,8 @@ class HotelModals {
                                             onTap: () async {
                                               final res =
                                                   await Sheets.selectDate(
-                                                      filter["startDate"]
+                                                      selectedFilters[
+                                                              "startDate"]
                                                           .toString(),
                                                       title:
                                                           "Select start date");
@@ -254,7 +255,7 @@ class HotelModals {
                                             onTap: () async {
                                               final res =
                                                   await Sheets.selectDate(
-                                                      filter["endDate"]
+                                                      selectedFilters["endDate"]
                                                           .toString(),
                                                       title: "select end date");
                                               result["endDate"] = res;
@@ -588,35 +589,6 @@ class HotelModals {
                               ),
                             ),
                             const SizedBox(height: 20.0),
-                            Widgets.buildText("Recent Searches", context,
-                                isMedium: true),
-                            const SizedBox(
-                              height: 10.0,
-                            ),
-                            ConstrainedBox(
-                                constraints: BoxConstraints.loose(
-                                    Size(screenWidth, 180.0)),
-                                child: Swiper(
-                                  outer: true,
-                                  layout: SwiperLayout.CUSTOM,
-                                  customLayoutOption: Widgets.customLayout(
-                                      recentSearches.length, screenWidth,
-                                      offset: 80.0),
-                                  itemHeight: 180.0,
-                                  itemWidth: screenWidth,
-                                  loop: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    final item = recentSearches[index];
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 70.0),
-                                      child: HotelItem(
-                                          item: item, direction: "horizontal"),
-                                    );
-                                  },
-                                  itemCount: recentSearches.length,
-                                )),
                           ],
                         ),
                       ),
@@ -678,9 +650,12 @@ class HotelModals {
     return result;
   }
 
-  static Future<Map<String, dynamic>> filterOther(Map<String, dynamic> filter,
-      List neighbourhoods, List brands, int total) async {
-    Map<String, dynamic> result = filter;
+  static Future<Map<String, dynamic>> filterOther(
+      Map<String, dynamic> selectedFilters,
+      Map<String, dynamic> filters,
+      int total,
+      bool isRental) async {
+    Map<String, dynamic> result = selectedFilters;
     TextEditingController startDateController = TextEditingController();
     TextEditingController endDateController = TextEditingController();
     TextEditingController locationController = TextEditingController();
@@ -699,22 +674,19 @@ class HotelModals {
     var seeMoreFacilities = false;
     var seeMoreNeighbourhood = false;
     var seeMoreBrand = false;
-    List selectedCategories = (filter["categories"] ?? [])
-        .map((item) => item["value"].toString())
-        .toList();
-    List selectedFacilities = (filter["facilities"] ?? [])
-        .map((item) => item["value"].toString())
-        .toList();
-    List selectedPolicies = (filter["policy"] ?? []).toList();
-    List selectedBrands = (filter["brands"] ?? [])
-        .map((item) => item["value"].toString())
-        .toList();
-    List selectedRatings = filter["property_rating"] ?? [];
-    List selectedNeighbourhood = (filter["neighbourhood"] ?? [])
-        .map((item) => item["value"].toString())
-        .toList();
+    List selectedCategories = (selectedFilters["categories"] ?? []).toList();
+    List selectedFacilities = (selectedFilters["facilities"] ?? []).toList();
+    List selectedBrands = (selectedFilters["brands"] ?? []).toList();
+    List selectedRatings = selectedFilters["property_rating"] ?? [];
+    List selectedNeighbourhood =
+        (selectedFilters["neighbourhood"] ?? []).toList();
     Map<String, dynamic> bedroomBathrooms =
-        filter["bedroom_bathroom"] ?? {"bedroom": 0, "bathroom": 0};
+        selectedFilters["bedroom_bathroom"] ?? {"bedroom": 0, "bathroom": 0};
+
+    final categories = filters["categories"] ?? [];
+    final brands = filters["brands"] ?? [];
+    final facilities = filters["facilities"] ?? [];
+    final neighbourhoods = filters["neighbourhood"] ?? [];
 
     await showModalBottomSheet(
         elevation: 10,
@@ -823,9 +795,13 @@ class HotelModals {
                                       runSpacing: 10.0,
                                       children: [
                                         for (var category in (seeMoreCategories
-                                            ? Defaults.hotelCategories
-                                            : Defaults.hotelCategories
-                                                .getRange(0, 10)
+                                            ? categories
+                                            : categories
+                                                .getRange(
+                                                    0,
+                                                    categories.length >= 10
+                                                        ? 10
+                                                        : categories.length)
                                                 .toList()))
                                           UnconstrainedBox(
                                             child: GestureDetector(
@@ -836,28 +812,16 @@ class HotelModals {
                                                   setState(() {
                                                     selectedCategories.remove(
                                                         category["value"]);
-                                                    filter["categories"] = Defaults
-                                                        .hotelCategories
-                                                        .where((category) =>
-                                                            selectedCategories
-                                                                .contains(
-                                                                    category[
-                                                                        "value"]))
-                                                        .toList();
+                                                    result["categories"] =
+                                                        selectedCategories;
                                                   });
                                                 } else {
                                                   // add
                                                   setState(() {
                                                     selectedCategories
                                                         .add(category["value"]);
-                                                    filter["categories"] = Defaults
-                                                        .hotelCategories
-                                                        .where((category) =>
-                                                            selectedCategories
-                                                                .contains(
-                                                                    category[
-                                                                        "value"]))
-                                                        .toList();
+                                                    result["categories"] =
+                                                        selectedCategories;
                                                   });
                                                 }
                                               },
@@ -886,14 +850,21 @@ class HotelModals {
                                                         horizontal: 15.0),
                                                 child: Row(
                                                   children: [
-                                                    Image.asset(
-                                                        "assets/images/hotel-categories.png",
-                                                        width: 24,
-                                                        height: 24,
-                                                        fit: BoxFit.contain),
+                                                    Helpers.fetchIcons(
+                                                        isRental
+                                                            ? "steering-wheel"
+                                                            : "bed",
+                                                        "regular",
+                                                        size: 14.0,
+                                                        color: selectedCategories
+                                                                .contains(
+                                                                    category[
+                                                                        "value"])
+                                                            ? "text.black"
+                                                            : "text.secondary"),
                                                     const SizedBox(width: 5.0),
                                                     Widgets.buildText(
-                                                        category["label"]
+                                                        category["name"]
                                                             .toString(),
                                                         context,
                                                         color: selectedCategories
@@ -910,36 +881,38 @@ class HotelModals {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  UnconstrainedBox(
-                                    child: TextButton(
-                                      onPressed: () {
-                                        setState(() => seeMoreCategories =
-                                            !seeMoreCategories);
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Widgets.buildText(
-                                              seeMoreCategories
-                                                  ? "See less"
-                                                  : "See more",
-                                              context,
-                                              color: "main.primary",
-                                              weight: 500),
-                                          const SizedBox(width: 5.0),
-                                          Helpers.fetchIcons(
-                                              seeMoreCategories
-                                                  ? "caret-up"
-                                                  : "caret-down",
-                                              "solid",
-                                              color: "main.primary",
-                                              size: 24)
-                                        ],
+                                  if (categories.length > 10)
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                  if (categories.length > 10)
+                                    UnconstrainedBox(
+                                      child: TextButton(
+                                        onPressed: () {
+                                          setState(() => seeMoreCategories =
+                                              !seeMoreCategories);
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Widgets.buildText(
+                                                seeMoreCategories
+                                                    ? "See less"
+                                                    : "See more",
+                                                context,
+                                                color: "main.primary",
+                                                weight: 500),
+                                            const SizedBox(width: 5.0),
+                                            Helpers.fetchIcons(
+                                                seeMoreCategories
+                                                    ? "caret-up"
+                                                    : "caret-down",
+                                                "solid",
+                                                color: "main.primary",
+                                                size: 24)
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -968,21 +941,25 @@ class HotelModals {
                                     child: Slider(
                                         inactiveColor: Palette.getColor(
                                             context, "background", "textfield"),
-                                        min: num.tryParse(filter["minPrice"]
+                                        min: num.tryParse(filters["price"][0]
+                                                        ["minPrice"]
                                                     .toString())
                                                 ?.toDouble() ??
                                             0.0,
-                                        max: num.tryParse(filter["maxPrice"]
+                                        max: num.tryParse(filters["price"][0]
+                                                        ["maxPrice"]
                                                     .toString())
                                                 ?.toDouble() ??
                                             0.0,
                                         value: num.tryParse(
-                                                    filter["price"].toString())
+                                                    result["price"]["max"].toString())
                                                 ?.toDouble() ??
                                             0.0,
                                         onChanged: (value) {
-                                          setState(() => filter["price"] =
-                                              value.toString());
+                                          setState(() => result["price"] = {
+                                                "min": 0,
+                                                "max": value
+                                              });
                                         }),
                                   ),
                                   const SizedBox(height: 20.0),
@@ -1016,7 +993,8 @@ class HotelModals {
                                                             "primary")))),
                                             child: Widgets.buildText(
                                                 Helpers.formatCurrency(
-                                                    filter["minPrice"]
+                                                    filters["price"][0]
+                                                            ["minPrice"]
                                                         .toString()),
                                                 context,
                                                 isMedium: true,
@@ -1050,7 +1028,8 @@ class HotelModals {
                                                             "primary")))),
                                             child: Widgets.buildText(
                                                 Helpers.formatCurrency(
-                                                    filter["maxPrice"]
+                                                    filters["price"][0]
+                                                            ["maxPrice"]
                                                         .toString()),
                                                 context,
                                                 isMedium: true,
@@ -1086,9 +1065,13 @@ class HotelModals {
                                       runSpacing: 10.0,
                                       children: [
                                         for (var item in (seeMoreFacilities
-                                            ? Defaults.hotelFacilities
-                                            : Defaults.hotelFacilities
-                                                .getRange(0, 10)
+                                            ? facilities
+                                            : facilities
+                                                .getRange(
+                                                    0,
+                                                    facilities.length >= 10
+                                                        ? 10
+                                                        : facilities.length)
                                                 .toList()))
                                           UnconstrainedBox(
                                             child: GestureDetector(
@@ -1099,26 +1082,16 @@ class HotelModals {
                                                   setState(() {
                                                     selectedFacilities
                                                         .remove(item["value"]);
-                                                    filter["facilities"] = Defaults
-                                                        .hotelFacilities
-                                                        .where((item) =>
-                                                            selectedFacilities
-                                                                .contains(item[
-                                                                    "value"]))
-                                                        .toList();
+                                                    result["facilities"]
+                                                        .remove(item["value"]);
                                                   });
                                                 } else {
                                                   // add
                                                   setState(() {
                                                     selectedFacilities
                                                         .add(item["value"]);
-                                                    filter["facilities"] = Defaults
-                                                        .hotelFacilities
-                                                        .where((item) =>
-                                                            selectedFacilities
-                                                                .contains(item[
-                                                                    "value"]))
-                                                        .toList();
+                                                    result["facilities"]
+                                                        .add(item["value"]);
                                                   });
                                                 }
                                               },
@@ -1149,14 +1122,28 @@ class HotelModals {
                                                 child: Row(
                                                   children: [
                                                     Helpers.fetchIcons(
-                                                      item["icon"],
+                                                      (isRental
+                                                              ? Defaults
+                                                                  .automobileAmenities
+                                                              : Defaults
+                                                                  .hotelFacilities)
+                                                          .firstWhere(
+                                                              (facility) =>
+                                                                  facility[
+                                                                          "value"]
+                                                                      .toString() ==
+                                                                  item["value"]
+                                                                      .toString(),
+                                                              orElse: () => {
+                                                                    "icon":
+                                                                        "wishlist-star"
+                                                                  })["icon"],
                                                       "regular",
                                                       size: 16,
                                                     ),
                                                     const SizedBox(width: 5.0),
                                                     Widgets.buildText(
-                                                        item["label"]
-                                                            .toString(),
+                                                        item["name"].toString(),
                                                         context,
                                                         color: selectedFacilities
                                                                 .contains(item[
@@ -1171,36 +1158,38 @@ class HotelModals {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  UnconstrainedBox(
-                                    child: TextButton(
-                                      onPressed: () {
-                                        setState(() => seeMoreFacilities =
-                                            !seeMoreFacilities);
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Widgets.buildText(
-                                              seeMoreFacilities
-                                                  ? "See less"
-                                                  : "See more",
-                                              context,
-                                              color: "main.primary",
-                                              weight: 500),
-                                          const SizedBox(width: 5.0),
-                                          Helpers.fetchIcons(
-                                              seeMoreFacilities
-                                                  ? "caret-up"
-                                                  : "caret-down",
-                                              "solid",
-                                              color: "main.primary",
-                                              size: 24)
-                                        ],
+                                  if (facilities.length > 10)
+                                    const SizedBox(
+                                      height: 5.0,
+                                    ),
+                                  if (facilities.length > 10)
+                                    UnconstrainedBox(
+                                      child: TextButton(
+                                        onPressed: () {
+                                          setState(() => seeMoreFacilities =
+                                              !seeMoreFacilities);
+                                        },
+                                        child: Row(
+                                          children: [
+                                            Widgets.buildText(
+                                                seeMoreFacilities
+                                                    ? "See less"
+                                                    : "See more",
+                                                context,
+                                                color: "main.primary",
+                                                weight: 500),
+                                            const SizedBox(width: 5.0),
+                                            Helpers.fetchIcons(
+                                                seeMoreFacilities
+                                                    ? "caret-up"
+                                                    : "caret-down",
+                                                "solid",
+                                                color: "main.primary",
+                                                size: 24)
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -1236,7 +1225,7 @@ class HotelModals {
                                                   setState(() {
                                                     selectedRatings
                                                         .remove(i.toString());
-                                                    filter["property_rating"] =
+                                                    result["property_rating"] =
                                                         selectedRatings;
                                                   });
                                                 } else {
@@ -1244,7 +1233,7 @@ class HotelModals {
                                                   setState(() {
                                                     selectedRatings
                                                         .add(i.toString());
-                                                    filter["property_rating"] =
+                                                    result["property_rating"] =
                                                         selectedRatings;
                                                   });
                                                 }
@@ -1299,36 +1288,6 @@ class HotelModals {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  UnconstrainedBox(
-                                    child: TextButton(
-                                      onPressed: () {
-                                        setState(() => seeMoreFacilities =
-                                            !seeMoreFacilities);
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Widgets.buildText(
-                                              seeMoreFacilities
-                                                  ? "See less"
-                                                  : "See more",
-                                              context,
-                                              color: "main.primary",
-                                              weight: 500),
-                                          const SizedBox(width: 5.0),
-                                          Helpers.fetchIcons(
-                                              seeMoreFacilities
-                                                  ? "caret-up"
-                                                  : "caret-down",
-                                              "solid",
-                                              color: "main.primary",
-                                              size: 24)
-                                        ],
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -1359,7 +1318,13 @@ class HotelModals {
                                                     neighbourhoods.length <= 10
                                                 ? neighbourhoods
                                                 : neighbourhoods
-                                                    .getRange(0, 10)
+                                                    .getRange(
+                                                        0,
+                                                        neighbourhoods.length >=
+                                                                10
+                                                            ? 10
+                                                            : neighbourhoods
+                                                                .length)
                                                     .toList()))
                                           UnconstrainedBox(
                                             child: GestureDetector(
@@ -1370,26 +1335,16 @@ class HotelModals {
                                                   setState(() {
                                                     selectedNeighbourhood
                                                         .remove(item["value"]);
-                                                    filter["neighbourhood"] =
-                                                        neighbourhoods
-                                                            .where((item) =>
-                                                                selectedNeighbourhood
-                                                                    .contains(item[
-                                                                        "value"]))
-                                                            .toList();
+                                                    result["neighbourhood"] =
+                                                        selectedNeighbourhood;
                                                   });
                                                 } else {
                                                   // add
                                                   setState(() {
                                                     selectedNeighbourhood
                                                         .add(item["value"]);
-                                                    filter["neighbourhood"] =
-                                                        neighbourhoods
-                                                            .where((item) =>
-                                                                selectedNeighbourhood
-                                                                    .contains(item[
-                                                                        "value"]))
-                                                            .toList();
+                                                    result["neighbourhood"] =
+                                                        selectedNeighbourhood;
                                                   });
                                                 }
                                               },
@@ -1465,7 +1420,9 @@ class HotelModals {
                                 ],
                               ),
                             ),
+                            if (!isRental)
                             const SizedBox(height: 20.0),
+                            if(!isRental)
                             Container(
                               decoration: BoxDecoration(
                                 color: Palette.getColor(
@@ -1697,7 +1654,13 @@ class HotelModals {
                                         for (var item in (seeMoreBrand ||
                                                 brands.length <= 10
                                             ? brands
-                                            : brands.getRange(0, 10).toList()))
+                                            : brands
+                                                .getRange(
+                                                    0,
+                                                    brands.length >= 10
+                                                        ? 10
+                                                        : brands.length)
+                                                .toList()))
                                           UnconstrainedBox(
                                             child: GestureDetector(
                                               onTap: () {
@@ -1707,24 +1670,16 @@ class HotelModals {
                                                   setState(() {
                                                     selectedBrands
                                                         .remove(item["value"]);
-                                                    filter["brands"] = brands
-                                                        .where((item) =>
-                                                            selectedBrands
-                                                                .contains(item[
-                                                                    "value"]))
-                                                        .toList();
+                                                    result["brands"] =
+                                                        selectedBrands;
                                                   });
                                                 } else {
                                                   // add
                                                   setState(() {
                                                     selectedBrands
                                                         .add(item["value"]);
-                                                    filter["brands"] = brands
-                                                        .where((item) =>
-                                                            selectedBrands
-                                                                .contains(item[
-                                                                    "value"]))
-                                                        .toList();
+                                                    result["brands"] =
+                                                        selectedBrands;
                                                   });
                                                 }
                                               },
@@ -1801,105 +1756,105 @@ class HotelModals {
                               ),
                             ),
                             const SizedBox(height: 20.0),
-                            const SizedBox(height: 20.0),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Palette.getColor(
-                                    context, "background", "paper"),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Widgets.buildText(
-                                      "Reservation Policy", context,
-                                      weight: 500),
-                                  const SizedBox(
-                                    height: 20.0,
-                                  ),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: Wrap(
-                                      spacing: 10.0,
-                                      runSpacing: 10.0,
-                                      children: [
-                                        for (var item
-                                            in Defaults.reservationPolicies)
-                                          UnconstrainedBox(
-                                            child: GestureDetector(
-                                              onTap: () {
-                                                if (selectedPolicies
-                                                    .contains(item["value"])) {
-                                                  // remove
-                                                  setState(() {
-                                                    selectedPolicies
-                                                        .remove(item["value"]);
-                                                    filter["policy"] =
-                                                        selectedPolicies;
-                                                  });
-                                                } else {
-                                                  // add
-                                                  setState(() {
-                                                    selectedPolicies
-                                                        .add(item["value"]);
-                                                    filter["policy"] =
-                                                        selectedPolicies;
-                                                  });
-                                                }
-                                              },
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                    color: selectedPolicies.contains(item["value"])
-                                                        ? Palette.getColor(
-                                                            context,
-                                                            "background",
-                                                            "default")
-                                                        : Palette.getColor(
-                                                            context,
-                                                            "background",
-                                                            "paper"),
-                                                    border: Border.all(
-                                                        color: selectedPolicies.contains(item["value"])
-                                                            ? Palette.getColor(
-                                                                context, "text", "black")
-                                                            : Palette.getColor(
-                                                                context,
-                                                                "background",
-                                                                "textfield")),
-                                                    borderRadius: BorderRadius.circular(25.0)),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 10.0,
-                                                        horizontal: 15.0),
-                                                child: Widgets.buildText(
-                                                    item["label"].toString(),
-                                                    context,
-                                                    color: selectedPolicies
-                                                            .contains(
-                                                                item["value"])
-                                                        ? "text.black"
-                                                        : "text.secondary"),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // const SizedBox(height: 20.0),
+                            // Container(
+                            //   decoration: BoxDecoration(
+                            //     color: Palette.getColor(
+                            //         context, "background", "paper"),
+                            //     borderRadius: BorderRadius.circular(20.0),
+                            //   ),
+                            //   padding: const EdgeInsets.all(20.0),
+                            //   child: Column(
+                            //     crossAxisAlignment: CrossAxisAlignment.start,
+                            //     children: [
+                            //       Widgets.buildText(
+                            //           "Reservation Policy", context,
+                            //           weight: 500),
+                            //       const SizedBox(
+                            //         height: 20.0,
+                            //       ),
+                            //       SizedBox(
+                            //         width: double.infinity,
+                            //         child: Wrap(
+                            //           spacing: 10.0,
+                            //           runSpacing: 10.0,
+                            //           children: [
+                            //             for (var item
+                            //                 in Defaults.reservationPolicies)
+                            //               UnconstrainedBox(
+                            //                 child: GestureDetector(
+                            //                   onTap: () {
+                            //                     if (selectedPolicies
+                            //                         .contains(item["value"])) {
+                            //                       // remove
+                            //                       setState(() {
+                            //                         selectedPolicies
+                            //                             .remove(item["value"]);
+                            //                         selectedFilters["policy"] =
+                            //                             selectedPolicies;
+                            //                       });
+                            //                     } else {
+                            //                       // add
+                            //                       setState(() {
+                            //                         selectedPolicies
+                            //                             .add(item["value"]);
+                            //                         selectedFilters["policy"] =
+                            //                             selectedPolicies;
+                            //                       });
+                            //                     }
+                            //                   },
+                            //                   child: Container(
+                            //                     decoration: BoxDecoration(
+                            //                         color: selectedPolicies.contains(item["value"])
+                            //                             ? Palette.getColor(
+                            //                                 context,
+                            //                                 "background",
+                            //                                 "default")
+                            //                             : Palette.getColor(
+                            //                                 context,
+                            //                                 "background",
+                            //                                 "paper"),
+                            //                         border: Border.all(
+                            //                             color: selectedPolicies.contains(item["value"])
+                            //                                 ? Palette.getColor(
+                            //                                     context, "text", "black")
+                            //                                 : Palette.getColor(
+                            //                                     context,
+                            //                                     "background",
+                            //                                     "textfield")),
+                            //                         borderRadius: BorderRadius.circular(25.0)),
+                            //                     padding:
+                            //                         const EdgeInsets.symmetric(
+                            //                             vertical: 10.0,
+                            //                             horizontal: 15.0),
+                            //                     child: Widgets.buildText(
+                            //                         item["label"].toString(),
+                            //                         context,
+                            //                         color: selectedPolicies
+                            //                                 .contains(
+                            //                                     item["value"])
+                            //                             ? "text.black"
+                            //                             : "text.secondary"),
+                            //                   ),
+                            //                 ),
+                            //               ),
+                            //           ],
+                            //         ),
+                            //       ),
+                            //       const SizedBox(
+                            //         height: 5.0,
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15.0, vertical: 0.0),
+                    padding: const EdgeInsets.only(
+                        left: 15.0, right: 15.0, bottom: 20.0),
                     child: Row(
                       children: [
                         Expanded(
@@ -1913,16 +1868,21 @@ class HotelModals {
                                   vertical: 15.0,
                                   radius: 45.0),
                               child: Widgets.buildText(
-                                  "Search all ${Helpers.formatNumber(total.toString())} results",
-                                  context,
-                                  isMedium: true,
-                                  color: "text.white")),
+                                  "Filter results", context,
+                                  isMedium: true, color: "text.white")),
                         ),
                         TextButton(
                             onPressed: () {
                               setState(() {
                                 result["categories"] = [];
-                                result["price"] = result["minPrice"].toString();
+                                result["price"] = {
+                                  "min": 0,
+                                  "max": num.tryParse(filters["price"][0]
+                                                  ["maxPrice"]
+                                              .toString())
+                                          ?.toDouble() ??
+                                      0.0
+                                };
                                 result["facilities"] = [];
                                 result["property_rating"] = [];
                                 result["neighbourhood"] = [];
@@ -1931,7 +1891,6 @@ class HotelModals {
                                   "bathroom": 0
                                 };
                                 result["brands"] = [];
-                                result["policy"] = [];
 
                                 seeMoreCategories = false;
                                 seeMoreFacilities = false;
@@ -1939,7 +1898,6 @@ class HotelModals {
                                 seeMoreBrand = false;
                                 selectedCategories = [];
                                 selectedFacilities = [];
-                                selectedPolicies = [];
                                 selectedBrands = [];
                                 selectedRatings = [];
                                 selectedNeighbourhood = [];

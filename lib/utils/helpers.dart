@@ -648,13 +648,13 @@ class Helpers {
     try {
       if (item["favourite"].toString() == "1") {
         JWT.removeWishlist(item["listingId"], type);
-        Alert.show(
-            navigatorKey.currentContext!, "", "Listing removed from wishlist",
+        Alert.show(navigatorKey.currentContext!, "",
+            "${type == "1" ? "Rental" : "Listing"} removed from wishlist",
             type: "success");
       } else {
         JWT.addWishlist(item["listingId"], type);
-        Alert.show(
-            navigatorKey.currentContext!, "", "Listing added to wishlist",
+        Alert.show(navigatorKey.currentContext!, "",
+            "${type == "1" ? "Rental" : "Listing"} added to wishlist",
             type: "success");
       }
     } catch (err) {

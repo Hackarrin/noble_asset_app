@@ -392,6 +392,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
   late TabController tabController;
   var loading = false;
   var error = "";
+  List<int> roomsSelected = [];
 
   void fetch() async {
     try {
@@ -399,7 +400,9 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
         error = "";
         loading = true;
       });
+      print("dante ${_data["images"]}");
       final res = await JWT.getHotel(_data["listingId"]);
+      print("dante ${res["images"]}");
       setState(() {
         _data = res;
         _selectedRooms = _data["rooms"] ?? [];
@@ -469,26 +472,29 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
 
   void handleCheckout({isBuyNow = true}) {
     try {
-      final selectedRoom = _roomSelected > -1
-          ? _roomSelected
-          : _data["rooms"].indexWhere(
-              (room) => room["price"].toString() == _data["price"].toString());
-      Helpers.addToCart(_data, 0, {
-        "dateFrom": Helpers.formatDate(filter["checkin"]),
-        "dateTo": Helpers.formatDate(filter["checkout"]),
-        "selectedRoom": selectedRoom,
-        "numRooms": num.tryParse(
-                    (_numRooms[_data["rooms"][selectedRoom]["name"]] ?? "1")
-                        .toString())
-                ?.toInt() ??
-            1,
-        "numNights": Helpers.dateDiff(
-            filter["checkin"].toString(), filter["checkout"].toString()),
-        "adults": num.tryParse(filter["adults"].toString())?.toInt() ?? 1,
-        "children": num.tryParse(filter["children"].toString())?.toInt() ?? 1,
-      });
+      if (roomsSelected.isEmpty) {
+        Alert.show(
+            context, "", "Please select your preferred room(s) to proceed.");
+        return;
+      }
+      final selectedRoom = roomsSelected.isNotEmpty ? roomsSelected : {};
+      Helpers.addToCart(
+          _data,
+          0,
+          {
+            "dateFrom": Helpers.formatDate(filter["checkin"]),
+            "dateTo": Helpers.formatDate(filter["checkout"]),
+            "selectedRoom": selectedRoom,
+            "numRooms": _numRooms,
+            "numNights": Helpers.dateDiff(
+                filter["checkin"].toString(), filter["checkout"].toString()),
+            "adults": num.tryParse(filter["adults"].toString())?.toInt() ?? 1,
+            "children":
+                num.tryParse(filter["children"].toString())?.toInt() ?? 1,
+          },
+          isBuyNow: true);
     } catch (err) {
-      // console.log(err);
+      print(err);
     }
   }
 
@@ -619,9 +625,11 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                     children: [
                                       for (var i = 0;
                                           i <
-                                              (_data["images"].length > 6
+                                              ((_data["images"] ?? []).length >
+                                                      6
                                                   ? 6
-                                                  : _data["images"].length);
+                                                  : (_data["images"] ?? [])
+                                                      .length);
                                           i += 1)
                                         Stack(
                                           children: [
@@ -687,7 +695,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                               color: "warning.main"),
                           const SizedBox(width: 5.0),
                           Widgets.buildText(
-                              "${_data["rating"]} (${Helpers.formatNumber(_data["totalReviews"] ?? "0")})",
+                              "${_data["rating"]} (${Helpers.formatNumber(_data["totalReviews"].toString())} reviews)",
                               context,
                               color: "text.secondary",
                               weight: 500)
@@ -758,7 +766,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                   ],
                 ),
                 const SizedBox(
-                  height: 15.0,
+                  height: 0.0,
                 ),
                 Padding(
                   padding: const EdgeInsets.only(
@@ -774,98 +782,68 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                                height: 120.0,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    final item = index == 6
-                                        ? "more"
-                                        : (_data["amenities"] ?? [])[index];
-                                    return Padding(
-                                      padding:
-                                          const EdgeInsets.only(right: 10.0),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          if (index == 6) {
-                                            print("open stuff");
-                                          }
-                                        },
-                                        child: Container(
-                                          height: 140.0,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 15.0, vertical: 10.0),
-                                          decoration: BoxDecoration(
-                                              color: Palette.getColor(context,
-                                                  "background", "default"),
+                            Wrap(
+                              children: [
+                                for (var item in (_data["amenities"] ?? []))
+                                  Container(
+                                    height: 90,
+                                    width: 120,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 15.0, vertical: 10.0),
+                                    decoration: BoxDecoration(
+                                        color: Palette.getColor(
+                                            context, "background", "default"),
+                                        borderRadius:
+                                            BorderRadius.circular(20.0)),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: Palette.get(
+                                                    "background.paper"),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        10.0)),
+                                            padding: EdgeInsets.all(10.0),
+                                            child: ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(20.0)),
-                                          child: Center(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                      color: Palette.get(
-                                                          "background.paper"),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.0)),
-                                                  padding: EdgeInsets.all(10.0),
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    child: Defaults
-                                                            .hotelAmenities
-                                                            .containsKey(
-                                                                item.toString())
-                                                        ? Helpers.fetchIcons(
-                                                            Defaults
-                                                                .hotelAmenities[
-                                                                    item.toString()]![
-                                                                    "icon"]
-                                                                .toString(),
-                                                            "solid",
-                                                            size: 40.0,
-                                                            color:
-                                                                "main.primary")
-                                                        : const SizedBox(
-                                                            width: 40,
-                                                            height: 40),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 5.0),
-                                                FittedBox(
-                                                  child: Widgets.buildText(
-                                                      Defaults.hotelAmenities
-                                                              .containsKey(item
-                                                                  .toString())
-                                                          ? Defaults
-                                                              .hotelAmenities[
-                                                                  item.toString()]![
-                                                                  "name"]
-                                                              .toString()
-                                                          : item.toString(),
-                                                      context),
-                                                )
-                                              ],
+                                                  BorderRadius.circular(10.0),
+                                              child: Defaults.hotelAmenities
+                                                      .containsKey(
+                                                          item.toString())
+                                                  ? Helpers.fetchIcons(
+                                                      Defaults.hotelAmenities[
+                                                              item.toString()]![
+                                                              "icon"]
+                                                          .toString(),
+                                                      "solid",
+                                                      size: 30.0,
+                                                      color: "main.primary")
+                                                  : const SizedBox(
+                                                      width: 30, height: 30),
                                             ),
                                           ),
-                                        ),
+                                          const SizedBox(height: 0.0),
+                                          FittedBox(
+                                            child: Widgets.buildText(
+                                                Defaults.hotelAmenities
+                                                        .containsKey(
+                                                            item.toString())
+                                                    ? Defaults.hotelAmenities[
+                                                            item.toString()]![
+                                                            "name"]
+                                                        .toString()
+                                                    : item.toString(),
+                                                context),
+                                          )
+                                        ],
                                       ),
-                                    );
-                                  },
-                                  itemCount:
-                                      (_data["amenities"] ?? []).length > 6
-                                          ? 7
-                                          : (_data["amenities"] ?? []).length,
-                                )),
-                            const SizedBox(
-                              height: 25.0,
+                                    ),
+                                  )
+                              ],
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1558,7 +1536,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                     numNights: Helpers.dateDiff(
                                         filter["checkin"].toString(),
                                         filter["checkout"].toString()),
-                                    roomSelected: _roomSelected,
+                                    roomsSelected: roomsSelected,
                                     handleCheckout: handleCheckout,
                                     setNumRooms: (Map numRooms) {
                                       setState(() {
@@ -1567,7 +1545,15 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                     },
                                     setRoomSelected: (int roomSelected) {
                                       setState(() {
-                                        _roomSelected = roomSelected;
+                                        roomsSelected = [
+                                          ...roomsSelected,
+                                          roomSelected
+                                        ];
+                                      });
+                                    },
+                                    setRoomUnSelected: (int roomSelected) {
+                                      setState(() {
+                                        roomsSelected.remove(roomSelected);
                                       });
                                     },
                                   ),
@@ -1650,30 +1636,20 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                   const SizedBox(
                                     height: 15.0,
                                   ),
-                                  ConstrainedBox(
-                                      constraints: BoxConstraints.loose(
-                                          Size(screenWidth, 180.0)),
-                                      child: Swiper(
-                                        outer: true,
-                                        layout: SwiperLayout.CUSTOM,
-                                        customLayoutOption:
-                                            Widgets.customLayout(
-                                                (_data["relatedListings"] ?? [])
-                                                    .length,
-                                                screenWidth,
-                                                offset: 80.0),
-                                        itemHeight: 180.0,
-                                        itemWidth: screenWidth,
-                                        loop: true,
+                                  SizedBox(
+                                      width: screenWidth,
+                                      height: 180.0,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           final item =
                                               _data["relatedListings"][index];
-                                          return Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 70.0),
+                                          return SizedBox(
+                                            width: screenWidth - 70,
                                             child: HotelItem(
                                                 item: item,
+                                                offset: 10,
                                                 direction: "horizontal"),
                                           );
                                         },
@@ -1707,10 +1683,10 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                 shrinkWrap: true,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemBuilder: (context, index) {
-                                  final List<String> photos = index == 0
-                                      ? _data["images"]
-                                      : _data["rooms"][index - 1]["images"];
-
+                                  final List<dynamic> photos = index == 0
+                                      ? _data["images"] ?? []
+                                      : _data["rooms"][index - 1]["images"] ??
+                                          [];
                                   final String title = index == 0
                                       ? "All Photos"
                                       : _data["rooms"][index - 1]["name"]
@@ -1723,8 +1699,9 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Widgets.buildText(title, context,
-                                            color: "main.primary"),
-                                        const SizedBox(height: 20.0),
+                                            color: "main.primary",
+                                            isMedium: true),
+                                        const SizedBox(height: 10.0),
                                         GridView.count(
                                             crossAxisCount: 3,
                                             mainAxisSpacing: 15,
@@ -1739,17 +1716,10 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                     Sheets.showImagePreview(
                                                         photos, title);
                                                   },
-                                                  child: ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    child: Image.asset(
-                                                      item,
-                                                      height: 110,
-                                                      width: 110,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
+                                                  child: Helpers.getPhoto(item,
+                                                      height: 110.0,
+                                                      radius: 10.0,
+                                                      type: "hotel"),
                                                 )
                                             ])
                                       ],
@@ -1757,10 +1727,9 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                   );
                                 },
                                 itemCount: (_data["rooms"] ?? []).length +
-                                            (_data["images"] ?? []).length >
-                                        0
-                                    ? 1
-                                    : 0)
+                                    ((_data["images"] ?? []).length > 0
+                                        ? 1
+                                        : 0))
                           ],
                         ),
                       if (_selectedTab == 2)
@@ -1772,141 +1741,141 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                             const SizedBox(
                               height: 20.0,
                             ),
-                            TextFormField(
-                              decoration:
-                                  Widgets.inputDecoration("Search in reviews",
-                                      isOutline: true,
-                                      hint: "Search in reviews",
-                                      hintColor: Palette.get("text.secondary"),
-                                      prefixIcon: UnconstrainedBox(
-                                        child: Helpers.fetchIcons(
-                                            "search", "regular",
-                                            size: 20.0, color: "main.primary"),
-                                      ),
-                                      color: Palette.get("background.default"),
-                                      radius: 40.0,
-                                      isFilled: true,
-                                      isFloating: true),
-                              style: GoogleFonts.nunito(
-                                color: Palette.get("text.secondary"),
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                    child: GestureDetector(
-                                  onTap: () {},
-                                  child: Chip(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 5),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    backgroundColor:
-                                        Palette.get("background.default"),
-                                    label: Widgets.buildText("Filters", context,
-                                        weight: 500),
-                                  ),
-                                )),
-                                Expanded(
-                                    child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      if (reviewFilter.contains("verified")) {
-                                        reviewFilter.remove("verified");
-                                      } else {
-                                        reviewFilter.add("verified");
-                                      }
-                                    });
-                                  },
-                                  child: Chip(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 5),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    backgroundColor:
-                                        reviewFilter.contains("verified")
-                                            ? Palette.get("main.primary")
-                                            : Palette.get("background.default"),
-                                    label: FittedBox(
-                                      child: Widgets.buildText(
-                                          "Verified", context,
-                                          weight: 500,
-                                          color:
-                                              reviewFilter.contains("verified")
-                                                  ? "text.white"
-                                                  : "text.primary"),
-                                    ),
-                                  ),
-                                )),
-                                Expanded(
-                                    child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      if (reviewFilter.contains("latest")) {
-                                        reviewFilter.remove("latest");
-                                      } else {
-                                        reviewFilter.add("latest");
-                                      }
-                                    });
-                                  },
-                                  child: Chip(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 5),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    backgroundColor:
-                                        reviewFilter.contains("latest")
-                                            ? Palette.get("main.primary")
-                                            : Palette.get("background.default"),
-                                    label: FittedBox(
-                                      child: Widgets.buildText(
-                                          "Latest", context,
-                                          weight: 500,
-                                          color: reviewFilter.contains("latest")
-                                              ? "text.white"
-                                              : "text.primary"),
-                                    ),
-                                  ),
-                                )),
-                                Expanded(
-                                    child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      if (reviewFilter.contains("photos")) {
-                                        reviewFilter.remove("photos");
-                                      } else {
-                                        reviewFilter.add("photos");
-                                      }
-                                    });
-                                  },
-                                  child: Chip(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 5, horizontal: 5),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(20)),
-                                    backgroundColor:
-                                        reviewFilter.contains("photos")
-                                            ? Palette.get("main.primary")
-                                            : Palette.get("background.default"),
-                                    label: FittedBox(
-                                      child: Widgets.buildText(
-                                          "With Photos", context,
-                                          weight: 500,
-                                          color: reviewFilter.contains("photos")
-                                              ? "text.white"
-                                              : "text.primary"),
-                                    ),
-                                  ),
-                                )),
-                              ],
-                            ),
-                            const SizedBox(height: 20.0),
+                            // TextFormField(
+                            //   decoration:
+                            //       Widgets.inputDecoration("Search in reviews",
+                            //           isOutline: true,
+                            //           hint: "Search in reviews",
+                            //           hintColor: Palette.get("text.secondary"),
+                            //           prefixIcon: UnconstrainedBox(
+                            //             child: Helpers.fetchIcons(
+                            //                 "search", "regular",
+                            //                 size: 20.0, color: "main.primary"),
+                            //           ),
+                            //           color: Palette.get("background.default"),
+                            //           radius: 40.0,
+                            //           isFilled: true,
+                            //           isFloating: true),
+                            //   style: GoogleFonts.nunito(
+                            //     color: Palette.get("text.secondary"),
+                            //     fontSize: 16.0,
+                            //   ),
+                            // ),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //   children: [
+                            //     Expanded(
+                            //         child: GestureDetector(
+                            //       onTap: () {},
+                            //       child: Chip(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             vertical: 5, horizontal: 5),
+                            //         shape: RoundedRectangleBorder(
+                            //             borderRadius:
+                            //                 BorderRadius.circular(20)),
+                            //         backgroundColor:
+                            //             Palette.get("background.default"),
+                            //         label: Widgets.buildText("Filters", context,
+                            //             weight: 500),
+                            //       ),
+                            //     )),
+                            //     Expanded(
+                            //         child: GestureDetector(
+                            //       onTap: () {
+                            //         setState(() {
+                            //           if (reviewFilter.contains("verified")) {
+                            //             reviewFilter.remove("verified");
+                            //           } else {
+                            //             reviewFilter.add("verified");
+                            //           }
+                            //         });
+                            //       },
+                            //       child: Chip(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             vertical: 5, horizontal: 5),
+                            //         shape: RoundedRectangleBorder(
+                            //             borderRadius:
+                            //                 BorderRadius.circular(20)),
+                            //         backgroundColor:
+                            //             reviewFilter.contains("verified")
+                            //                 ? Palette.get("main.primary")
+                            //                 : Palette.get("background.default"),
+                            //         label: FittedBox(
+                            //           child: Widgets.buildText(
+                            //               "Verified", context,
+                            //               weight: 500,
+                            //               color:
+                            //                   reviewFilter.contains("verified")
+                            //                       ? "text.white"
+                            //                       : "text.primary"),
+                            //         ),
+                            //       ),
+                            //     )),
+                            //     Expanded(
+                            //         child: GestureDetector(
+                            //       onTap: () {
+                            //         setState(() {
+                            //           if (reviewFilter.contains("latest")) {
+                            //             reviewFilter.remove("latest");
+                            //           } else {
+                            //             reviewFilter.add("latest");
+                            //           }
+                            //         });
+                            //       },
+                            //       child: Chip(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             vertical: 5, horizontal: 5),
+                            //         shape: RoundedRectangleBorder(
+                            //             borderRadius:
+                            //                 BorderRadius.circular(20)),
+                            //         backgroundColor:
+                            //             reviewFilter.contains("latest")
+                            //                 ? Palette.get("main.primary")
+                            //                 : Palette.get("background.default"),
+                            //         label: FittedBox(
+                            //           child: Widgets.buildText(
+                            //               "Latest", context,
+                            //               weight: 500,
+                            //               color: reviewFilter.contains("latest")
+                            //                   ? "text.white"
+                            //                   : "text.primary"),
+                            //         ),
+                            //       ),
+                            //     )),
+                            //     Expanded(
+                            //         child: GestureDetector(
+                            //       onTap: () {
+                            //         setState(() {
+                            //           if (reviewFilter.contains("photos")) {
+                            //             reviewFilter.remove("photos");
+                            //           } else {
+                            //             reviewFilter.add("photos");
+                            //           }
+                            //         });
+                            //       },
+                            //       child: Chip(
+                            //         padding: const EdgeInsets.symmetric(
+                            //             vertical: 5, horizontal: 5),
+                            //         shape: RoundedRectangleBorder(
+                            //             borderRadius:
+                            //                 BorderRadius.circular(20)),
+                            //         backgroundColor:
+                            //             reviewFilter.contains("photos")
+                            //                 ? Palette.get("main.primary")
+                            //                 : Palette.get("background.default"),
+                            //         label: FittedBox(
+                            //           child: Widgets.buildText(
+                            //               "With Photos", context,
+                            //               weight: 500,
+                            //               color: reviewFilter.contains("photos")
+                            //                   ? "text.white"
+                            //                   : "text.primary"),
+                            //         ),
+                            //       ),
+                            //     )),
+                            //   ],
+                            // ),
+                            // const SizedBox(height: 20.0),
                             Container(
                               decoration: BoxDecoration(
                                   color: Palette.get("background.paper"),
@@ -2007,6 +1976,8 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 8.0),
                                     child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           mainAxisAlignment:
@@ -2086,7 +2057,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                         ),
                                         Padding(
                                           padding:
-                                              const EdgeInsets.only(left: 60.0),
+                                              const EdgeInsets.only(left: 10.0),
                                           child: Column(
                                             children: [
                                               if (review.containsKey("photos"))
@@ -2125,58 +2096,58 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                                   color: "text.disabled",
                                                   lines: 100),
                                               const SizedBox(height: 10.0),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    border: Border.all(
-                                                        color:
-                                                            Color(0x33000000))),
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Column(
-                                                  children: [
-                                                    Row(
-                                                      children: [
-                                                        Helpers.fetchIcons(
-                                                            "bed", "regular",
-                                                            size: 16.0,
-                                                            color:
-                                                                "text.secondary"),
-                                                        const SizedBox(
-                                                            width: 10.0),
-                                                        Widgets.buildText(
-                                                            review["room"]
-                                                                    ["type"]
-                                                                .toString(),
-                                                            context,
-                                                            color:
-                                                                "text.secondary")
-                                                      ],
-                                                    ),
-                                                    const SizedBox(
-                                                        height: 10.0),
-                                                    Row(
-                                                      children: [
-                                                        Helpers.fetchIcons(
-                                                            "calendar-day",
-                                                            "regular",
-                                                            size: 16.0,
-                                                            color:
-                                                                "text.secondary"),
-                                                        const SizedBox(
-                                                            width: 10.0),
-                                                        Widgets.buildText(
-                                                            "${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()).toString()} Night${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()) > 1 ? "s" : ""} • ${Helpers.formatDistanceDate(review["room"]["checkin"].toString(), review["room"]["checkout"].toString())}",
-                                                            context,
-                                                            color:
-                                                                "text.secondary")
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                              // Container(
+                                              //   decoration: BoxDecoration(
+                                              //       borderRadius:
+                                              //           BorderRadius.circular(
+                                              //               10),
+                                              //       border: Border.all(
+                                              //           color:
+                                              //               Color(0x33000000))),
+                                              //   padding:
+                                              //       const EdgeInsets.all(10.0),
+                                              //   child: Column(
+                                              //     children: [
+                                              //       Row(
+                                              //         children: [
+                                              //           Helpers.fetchIcons(
+                                              //               "bed", "regular",
+                                              //               size: 16.0,
+                                              //               color:
+                                              //                   "text.secondary"),
+                                              //           const SizedBox(
+                                              //               width: 10.0),
+                                              //           Widgets.buildText(
+                                              //               review["room"]
+                                              //                       ["type"]
+                                              //                   .toString(),
+                                              //               context,
+                                              //               color:
+                                              //                   "text.secondary")
+                                              //         ],
+                                              //       ),
+                                              //       const SizedBox(
+                                              //           height: 10.0),
+                                              //       Row(
+                                              //         children: [
+                                              //           Helpers.fetchIcons(
+                                              //               "calendar-day",
+                                              //               "regular",
+                                              //               size: 16.0,
+                                              //               color:
+                                              //                   "text.secondary"),
+                                              //           const SizedBox(
+                                              //               width: 10.0),
+                                              //           Widgets.buildText(
+                                              //               "${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()).toString()} Night${Helpers.dateDiff(review["room"]["checkin"].toString(), review["room"]["checkout"].toString()) > 1 ? "s" : ""} • ${Helpers.formatDistanceDate(review["room"]["checkin"].toString(), review["room"]["checkout"].toString())}",
+                                              //               context,
+                                              //               color:
+                                              //                   "text.secondary")
+                                              //         ],
+                                              //       ),
+                                              //     ],
+                                              //   ),
+                                              // ),
                                               const SizedBox(height: 10.0),
                                               if (review
                                                   .containsKey("response"))
@@ -2242,14 +2213,14 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                     _data["reviews"].containsKey("reviews")
                                         ? _data["reviews"]["reviews"].length
                                         : 0),
-                            const SizedBox(height: 20.0),
-                            SizedBox(
-                              width: double.infinity,
-                              child: TextButton(
-                                  onPressed: () {},
-                                  child: Widgets.buildText("Load More", context,
-                                      color: "main.primary", size: 16.0)),
-                            )
+                            // const SizedBox(height: 20.0),
+                            // SizedBox(
+                            //   width: double.infinity,
+                            //   child: TextButton(
+                            //       onPressed: () {},
+                            //       child: Widgets.buildText("Load More", context,
+                            //           color: "main.primary", size: 16.0)),
+                            // )
                           ],
                         )
                     ]),
@@ -2276,7 +2247,21 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                   Row(
                     children: [
                       Widgets.buildText(
-                          Helpers.formatCurrency(_data["price"].toString()),
+                          Helpers.formatCurrency(roomsSelected.isEmpty
+                              ? _data["price"].toString()
+                              : roomsSelected
+                                  .map((i) => _selectedRooms[i])
+                                  .map((i) =>
+                                      (num.tryParse(i["price"].toString())
+                                              ?.toDouble() ??
+                                          0) *
+                                      (num.tryParse(_numRooms[
+                                                      i["name"].toString()]
+                                                  .toString())
+                                              ?.toDouble() ??
+                                          0))
+                                  .reduce((v, e) => e + v)
+                                  .toString()),
                           context,
                           color: "main.primary",
                           isMedium: true),
@@ -2291,7 +2276,9 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
               ),
               Expanded(
                 child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      handleCheckout();
+                    },
                     style: Widgets.buildButton(context,
                         background: Palette.get("main.primary"),
                         vertical: 15.0,

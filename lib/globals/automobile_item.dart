@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/palette.dart';
 import 'package:cribsfinder/utils/widget.dart';
-import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -15,6 +14,7 @@ class AutomobileItem extends StatelessWidget {
       this.direction = "vertical",
       this.isBordered = true,
       this.action,
+      this.wishlistAction,
       this.close});
 
   final Function? action;
@@ -22,10 +22,12 @@ class AutomobileItem extends StatelessWidget {
   final double offset;
   final bool isBordered;
   final String direction;
+  final Function? wishlistAction;
   final Map<String, dynamic> item;
 
   @override
   Widget build(BuildContext context) {
+    print("dante: $item");
     return Column(children: [
       GestureDetector(
         onTap: () {
@@ -51,28 +53,24 @@ class AutomobileItem extends StatelessWidget {
                             ? Border.all(color: Color(0x0d000000))
                             : null,
                         borderRadius: BorderRadius.circular(30.0)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [itemPhoto(context), itemContent(context)],
-                    ),
+                    child: direction == "horizontal"
+                        ? Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              itemPhoto(context),
+                              Expanded(child: itemContent(context))
+                            ],
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              itemPhoto(context),
+                              itemContent(context)
+                            ],
+                          ),
                   )
                 ],
               ),
-              if (direction == "vertical")
-                Positioned(
-                    top: 20,
-                    left: 30,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          color: Palette.get("background.paper"),
-                          borderRadius: BorderRadius.circular(80)),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                      child: Widgets.buildText(
-                        item["listedBy"],
-                        context,
-                      ),
-                    )),
             ],
           ),
         ),
@@ -95,21 +93,25 @@ class AutomobileItem extends StatelessWidget {
                 item["title"].toString(),
                 context,
                 weight: direction == "vertical" ? 500 : 400,
-                size: direction == "vertical" ? 16.0 : 13.0,
+                size: direction == "vertical" ? 16.0 : 14.0,
               ),
-              if (direction == "vertical")
-                Container(
-                  decoration: BoxDecoration(
-                      color: Palette.get("background.default"),
-                      borderRadius: BorderRadius.circular(10.0)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: Widgets.buildText(item["type"].toString(), context,
-                      color: "main.primary", weight: 500),
-                )
+              Container(
+                decoration: BoxDecoration(
+                    color: Palette.get("background.default"),
+                    borderRadius: BorderRadius.circular(10.0)),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 10.0,
+                    vertical: direction == "vertical" ? 5.0 : 0.0),
+                child: Widgets.buildText(item["type"].toString(), context,
+                    color: "main.primary", weight: 500),
+              )
             ],
           ),
-          SizedBox(height: direction == "vertical" ? 10.0 : 15.0),
+          SizedBox(height: direction == "vertical" ? 10.0 : 5.0),
+          if (direction == "horizontal")
+            Widgets.buildText(item["description"].toString(), context,
+                size: 13.0, lines: 2),
+          SizedBox(height: direction == "vertical" ? 0.0 : 15.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -135,29 +137,13 @@ class AutomobileItem extends StatelessWidget {
                     ],
                   ),
                 ),
-              if (direction == "horizontal" &&
-                  item.containsKey("isNew") &&
-                  item["isNew"].toString() == "1")
-                Container(
-                  decoration: BoxDecoration(
-                      color: Palette.get("background.default"),
-                      borderRadius: BorderRadius.circular(10.0)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: Widgets.buildText("New to Cribsfinder", context,
-                      color: "main.primary"),
-                ),
-              if (direction == "horizontal" && !item.containsKey("isNew") ||
-                  item["isNew"].toString() == "0")
+              if (direction == "horizontal")
                 Row(
                   spacing: 5.0,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Helpers.fetchIcons("star", "solid", color: "warning.main"),
                     Widgets.buildText(item["rating"].toString(), context),
-                    Widgets.buildText(
-                        "(${Helpers.formatCurrency(item["reviews"].toString())}+)",
-                        context,
-                        color: "text.disabled")
                   ],
                 ),
               Row(
@@ -166,40 +152,40 @@ class AutomobileItem extends StatelessWidget {
                       Helpers.formatCurrency(item["price"].toString()), context,
                       color: "main.primary", isMedium: true, size: 13.0),
                   Widgets.buildText(
-                    "/night",
+                    "/day",
                     context,
                   ),
                 ],
               ),
             ],
           ),
-          if (direction == "vertical")
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              child: Divider(color: Color(0x1A000000)),
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: Divider(color: Color(0x1A000000)),
+          ),
           if (direction == "vertical")
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               spacing: 5.0,
               children: [
-                Row(
-                  spacing: 5.0,
-                  children: [
-                    Helpers.fetchIcons("user", "solid",
-                        color: "main.primary", size: 16.0),
-                    Widgets.buildText(
-                        "${Helpers.formatNumber(item["passengers"])} Seats",
-                        context,
-                        color: "text.secondary")
-                  ],
-                ),
+                if (item.containsKey("capacity"))
+                  Row(
+                    spacing: 5.0,
+                    children: [
+                      Helpers.fetchIcons("user", "solid",
+                          color: "main.primary", size: 16.0),
+                      Widgets.buildText(
+                          "${Helpers.formatNumber((item["capacity"] ?? item["seats"]).toString())} Seats",
+                          context,
+                          color: "text.secondary")
+                    ],
+                  ),
                 Row(
                   spacing: 5.0,
                   children: [
                     Helpers.fetchIcons("gas-pump", "solid",
                         color: "main.primary", size: 16.0),
-                    Widgets.buildText(item["power"], context,
+                    Widgets.buildText(item["fuelType"].toString(), context,
                         color: "text.secondary")
                   ],
                 ),
@@ -208,11 +194,59 @@ class AutomobileItem extends StatelessWidget {
                   children: [
                     Helpers.fetchIcons("steering-wheel", "solid",
                         color: "main.primary", size: 16.0),
-                    Widgets.buildText(item["steering"], context,
+                    Widgets.buildText(item["steering"].toString(), context,
                         color: "text.secondary")
                   ],
                 )
               ],
+            ),
+          if (direction == "horizontal")
+            SizedBox(
+              width: double.infinity,
+              child: Wrap(
+                spacing: 10.0,
+                runSpacing: 5.0,
+                runAlignment: WrapAlignment.center,
+                alignment: WrapAlignment.start,
+                children: [
+                  if (item.containsKey("capacity"))
+                    FittedBox(
+                      child: Row(
+                        spacing: 5.0,
+                        children: [
+                          Helpers.fetchIcons("user", "solid",
+                              color: "main.primary", size: 16.0),
+                          Widgets.buildText(
+                              "${Helpers.formatNumber(item["capacity"].toString())} Seats",
+                              context,
+                              color: "text.secondary")
+                        ],
+                      ),
+                    ),
+                  FittedBox(
+                    child: Row(
+                      spacing: 5.0,
+                      children: [
+                        Helpers.fetchIcons("gas-pump", "solid",
+                            color: "main.primary", size: 16.0),
+                        Widgets.buildText(item["fuelType"].toString(), context,
+                            color: "text.secondary")
+                      ],
+                    ),
+                  ),
+                  FittedBox(
+                    child: Row(
+                      spacing: 5.0,
+                      children: [
+                        Helpers.fetchIcons("steering-wheel", "solid",
+                            color: "main.primary", size: 16.0),
+                        Widgets.buildText(item["steering"].toString(), context,
+                            color: "text.secondary")
+                      ],
+                    ),
+                  )
+                ],
+              ),
             )
         ],
       ),
@@ -223,38 +257,34 @@ class AutomobileItem extends StatelessWidget {
     return Stack(
       children: [
         SizedBox(
-            height: direction == "vertical" ? 200.0 : 145.0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20.0),
-              child: Swiper(
-                loop: true,
-                itemBuilder: (BuildContext context, int index) {
-                  final image = (item["images"] ?? [item["image"]])[index];
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(20.0),
-                    child: Image.asset(image.toString(),
-                        width: double.infinity,
-                        height: direction == "vertical" ? 200.0 : 145.0,
-                        fit: BoxFit.cover),
-                  );
-                },
-                itemCount: (item["images"] ?? [item["image"]]).length,
-                pagination: SwiperPagination(),
-              ),
-            )),
+            height: direction == "vertical" ? 200.0 : 180.0,
+            width: direction == "vertical" ? double.infinity : 150.0,
+            child: Helpers.getPhoto(
+                item.containsKey("photo")
+                    ? item["photo"].toString()
+                    : (item["image"] ?? item["featuredPhoto"]).toString(),
+                type: "car",
+                text: item["title"].toString(),
+                radius: 20.0,
+                height: direction == "vertical" ? 200.0 : 145.0)),
         if (isBordered)
           Positioned(
             top: 10.0,
             right: close != null ? 60.0 : 10.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Helpers.wishlist(item, "1");
+                if (wishlistAction != null) {
+                  wishlistAction!(item);
+                }
+              },
               child: CircleAvatar(
                 backgroundColor:
                     Palette.getColor(context, "background", "paper"),
                 radius: 20.0,
                 child: Helpers.fetchIcons(
                   "heart",
-                  "regular",
+                  item["favourite"].toString() == "0" ? "regular" : "solid",
                   size: 20.0,
                   color: "main.primary",
                 ),

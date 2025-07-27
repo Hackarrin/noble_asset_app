@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cribsfinder/globals/automobile_item.dart';
 import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/globals/shortlet_item.dart';
 import 'package:cribsfinder/utils/alert.dart';
@@ -93,6 +94,7 @@ class _CheckoutState extends State<Checkout>
       final init = await _paystack.initialize(Defaults.paystackKey, true);
       if (init) {
         final accessCode = await JWT.getAccessCode(_total);
+        print("accessCode $accessCode");
         if (accessCode.isNotEmpty) {
           final response = await _paystack.launch(accessCode);
           if (response.status == "success") {
@@ -140,12 +142,16 @@ class _CheckoutState extends State<Checkout>
             "listingId": item["listingId"],
             "options": {
               ...item["options"],
-              "selectedRoom": item["options"]["selectedRoom"] != "" &&
+              "selectedRooms": item["options"]["selectedRoom"].length > 0 &&
                       item.containsKey("rooms") &&
                       item["rooms"].length > 0
-                  ? item["rooms"][num.tryParse(
-                          item["options"]["selectedRoom"].toString()) ??
-                      0]["id"]
+                  ? item["rooms"]
+                      .where((room) => item["options"]["selectedRoom"]
+                              .contains(item["rooms"].indexOf(room))
+                          ? true
+                          : false)
+                      .map((room) => room["id"])
+                      .toList()
                   : "",
             },
             "type": item["listingType"],
@@ -153,7 +159,7 @@ class _CheckoutState extends State<Checkout>
         }).toList();
         Alert.showLoading(context, "Processing order...");
         final res = await JWT.submitOrder(jsonEncode(cartJSON), _selectedMethod,
-            _processingFee, transactionRef, _customer);
+            _processingFee, transactionRef, _customer, _total);
         Alert.hideLoading(context);
         // update cart.
         final storage = await Helpers.readPref("cart");
@@ -180,6 +186,7 @@ class _CheckoutState extends State<Checkout>
   }
 
   void handlePay() {
+    print("total $_total $_selectedMethod");
     if (_total == 0) {
       confirmOrder("");
     } else if (_selectedMethod == "paystack") {
@@ -239,7 +246,7 @@ class _CheckoutState extends State<Checkout>
         };
       }
       if (cart[0]["listingType"].toString() == "6" ||
-          cart[0]["listingType"].toString() == "2" ||
+          cart[0]["listingType"].toString() == "1" ||
           cart[0]["listingType"].toString() == "4") {
         cart[0]["generalRules"] = {
           "checkin": cart[0]["options"].containsKey("time")
@@ -307,16 +314,7 @@ class _CheckoutState extends State<Checkout>
       }
 
       String numRooms = "";
-      if (cart[0]["listingType"].toString() == "1") {
-        numRooms = cart[0]["options"].containsKey("selectedRoom")
-            ? cart[0]["options"]["selectedRoom"]
-                .keys
-                .map((ticket) =>
-                    "${Helpers.formatNumber(cart[0]["options"]["selectedRoom"][ticket].toString())} $ticket")
-                .toList()
-                .join(", ")
-            : "";
-      } else if (cart[0]["listingType"].toString() == "6") {
+      if (cart[0]["listingType"].toString() == "6") {
         final totalTickets =
             (num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ??
                     0) +
@@ -328,7 +326,7 @@ class _CheckoutState extends State<Checkout>
                     0);
         numRooms =
             "$totalTickets ${cart[0]["tickets"][(num.tryParse(cart[0]["options"]["selectedRoom"].toString())?.toInt() ?? 0)]["name"] ?? ""}";
-      } else if (cart[0]["listingType"].toString() == "2") {
+      } else if (cart[0]["listingType"].toString() == "1") {
         numRooms =
             "${cart[0]["options"]["numNights"]} day${(num.tryParse(cart[0]["options"]["numNights"].toString())?.toInt() ?? 0) > 1 ? "s" : ""}";
       } else if (cart[0]["listingType"].toString() == "4") {
@@ -336,40 +334,35 @@ class _CheckoutState extends State<Checkout>
             "${cart[0]["options"]["numNights"]} hour${(num.tryParse(cart[0]["options"]["numNights"].toString())?.toInt() ?? 0) > 1 ? "s" : ""}";
       } else {
         numRooms = (cart[0]["listingType"].toString() == "0" ||
-                    cart[0]["listingType"].toString() == "3") &&
+                    cart[0]["listingType"].toString() == "2") &&
                 cart[0].containsKey("options") &&
                 cart[0]['options'].containsKey("numNights")
             ? Helpers.formatNumber(cart[0]['options']["numNights"].toString())
             : "";
         numRooms =
-            "$numRooms ${cart[0]["listingType"].toString() == "3" ? "day" : "night"}${((cart[0]["listingType"].toString() == "0" || cart[0]["listingType"].toString() == "3") && ((num.tryParse(cart[0]["options"]["numNights"].toString())?.toInt() ?? 0) > 1)) ? "s" : ""}";
+            "$numRooms ${cart[0]["listingType"].toString() == "2" ? "day" : "night"}${((cart[0]["listingType"].toString() == "0" || cart[0]["listingType"].toString() == "2") && ((num.tryParse(cart[0]["options"]["numNights"].toString())?.toInt() ?? 0) > 1)) ? "s" : ""}";
       }
+
       String selectedRoom = "";
       if (cart[0]["listingType"].toString() == "0") {
         selectedRoom = cart[0].containsKey("rooms") &&
-                cart[0]["rooms"].length > 0
-            ? cart[0]["rooms"][
-                    (num.tryParse(cart[0]["options"]["selectedRoom"].toString())
-                            ?.toInt() ??
-                        0)]["name"]
+                cart[0]["rooms"].length > 0 &&
+                cart[0]["options"]["selectedRoom"].length > 0
+            ? cart[0]["options"]["selectedRoom"]
+                .fold(
+                    "",
+                    (v, e) =>
+                        "$v\n ${cart[0]["rooms"][num.tryParse(e.toString())?.toInt() ?? 0]["name"] ?? ""}")
                 .toString()
             : "";
+      } else if (cart[0]["listingType"].toString() == "1") {
+        final selectedLocations = cart[0].containsKey("options")
+            ? cart[0]["options"]["selectedRoom"]
+            : {};
+        selectedRoom = selectedLocations["pickupLocation"];
       }
       String selected = "";
-      if (cart[0]["listingType"].toString() == "1") {
-        final tickets = cart[0].containsKey("options")
-            ? cart[0]["options"]["selectedRoom"] ?? {}
-            : {};
-        final totalTickets = tickets.values
-            .map((item) => num.tryParse(item.toString())?.toInt() ?? 0)
-            .toList()
-            .reduce((prev, total) => prev + total);
-        selectedRoom =
-            "${Helpers.formatNumber(totalTickets.toString())} Ticket${totalTickets > 1 ? "s" : ""} for ${Helpers.formatNumber(totalTickets.toString())} Adult${totalTickets > 1 ? "s" : ""}";
-      } else if (cart[0]["listingType"].toString() == "4") {
-        selectedRoom =
-            "${Helpers.formatNumber((num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ?? 0).toString())} Occupant${(num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ?? 0) > 1 ? "s" : ""}";
-      } else if (cart[0]["listingType"].toString() == "6") {
+      if (cart[0]["listingType"].toString() == "6") {
         final totalTickets =
             (num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ??
                     0) +
@@ -382,14 +375,19 @@ class _CheckoutState extends State<Checkout>
         selected = "$totalTickets Ticket${totalTickets > 1 ? "s" : ""}";
         selected =
             "$selected for ${cart[0].containsKey("options") && cart[0]["options"].containsKey("adults") ? Helpers.formatNumber(cart[0]["options"]["adults"].toString()) : ""} Adult${(num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ?? 0) > 1 ? "s" : ""} ${cart[0].containsKey("options") && cart[0]["options"].containsKey("children") ? Helpers.formatNumber(cart[0]["options"]["children"].toString()) : ""} Child${(num.tryParse(cart[0]["options"]["children"].toString())?.toInt() ?? 0) > 1 ? "ren" : ""} ${cart[0].containsKey("options") && cart[0]["options"].containsKey("infants") ? Helpers.formatNumber(cart[0]["options"]["infants"].toString()) : ""} Infant${(num.tryParse(cart[0]["options"]["infants"].toString())?.toInt() ?? 0) > 1 ? "s" : ""}";
-      } else if (cart[0]["listingType"].toString() != "2" &&
+      } else if (cart[0]["listingType"].toString() == "1") {
+        final selectedLocations = cart[0]["options"]["selectedRoom"] ?? {};
+        selected = selectedLocations["dropoffLocation"] ?? "";
+      } else if (cart[0]["listingType"].toString() != "1" &&
           cart[0]["listingType"].toString() != "4") {
-        selected = cart[0].containsKey("options") &&
-                cart[0]["options"].containsKey("numRooms")
-            ? Helpers.formatNumber(cart[0]["options"]["numRooms"].toString())
-            : "";
-        selected =
-            "$selected room${(num.tryParse(cart[0]["options"]["numRooms"].toString())?.toInt() ?? 0) > 1 ? "s" : ""}";
+        final numberRooms = cart[0].containsKey("options")
+            ? cart[0]["options"]["numRooms"]
+            : {};
+        selected = numberRooms.keys.fold(
+                "",
+                (p, c) =>
+                    "$p${p != "" ? ", " : ""}${numberRooms[c]} $c ${((num.tryParse(cart[0]["listingType"].toString())?.toInt() ?? 0) == 0 ? "room${(num.tryParse(numberRooms[c].toString())?.toInt() ?? 0) > 1 ? "s" : ""}" : "")}") ??
+            "";
         selected =
             "$selected for ${cart[0].containsKey("options") && cart[0]["options"].containsKey("adults") ? Helpers.formatNumber(cart[0]["options"]["adults"].toString()) : ""} Adult${(num.tryParse(cart[0]["options"]["adults"].toString())?.toInt() ?? 0) > 1 ? "s" : ""} ${cart[0].containsKey("options") && cart[0]["options"].containsKey("children") ? Helpers.formatNumber(cart[0]["options"]["children"].toString()) : ""} Child${(num.tryParse(cart[0]["options"]["children"].toString())?.toInt() ?? 0) > 1 ? "ren" : ""}";
       }
@@ -403,22 +401,7 @@ class _CheckoutState extends State<Checkout>
             "selectedRoom": selectedRoom
           });
       double subtotal = 0;
-      if (cart[0]["listingType"].toString() == "1") {
-        final tickets = cart[0].containsKey("options")
-            ? cart[0]["options"]["selectedRoom"] ?? {}
-            : {};
-        subtotal = tickets.keys
-            .map((ticket) =>
-                (num.tryParse(tickets[ticket].toString())?.toInt() ?? 0) *
-                (num.tryParse(cart[0]["tickets"]
-                            .firstWhere((item) =>
-                                item["name"].toString() == ticket)["price"]
-                            .toString())
-                        ?.toDouble() ??
-                    0))
-            .toList()
-            .reduce((prev, total) => prev + total);
-      } else if (cart[0]["listingType"].toString() == "6") {
+      if (cart[0]["listingType"].toString() == "6") {
         final ticket = cart[0]["tickets"][
             (num.tryParse(cart[0]["options"]["selectedRoom"].toString())
                     ?.toInt() ??
@@ -437,7 +420,7 @@ class _CheckoutState extends State<Checkout>
                     0) *
                 (num.tryParse(ticket["infantPrice"].toString())?.toDouble() ??
                     0));
-      } else if (cart[0]["listingType"].toString() == "2" ||
+      } else if (cart[0]["listingType"].toString() == "1" ||
           cart[0]["listingType"].toString() == "4") {
         final price = Helpers.handleCalendarEntry([
           cart[0]["options"]["dateFrom"].toString(),
@@ -455,30 +438,33 @@ class _CheckoutState extends State<Checkout>
                 0);
         subtotal = price * duration * quantity;
       } else {
-        final price = Helpers.handleCalendarEntry(
-            [
-              cart[0]["options"]["dateFrom"].toString(),
-              cart[0]["options"]["dateTo"].toString()
-            ],
-            cart[0]["calendar"] ?? [],
-            (num.tryParse(cart[0]["rooms"][
-                            (num.tryParse(cart[0]["options"]["selectedRoom"].toString())
-                                    ?.toInt() ??
-                                0)]["price"]
-                        .toString())
-                    ?.toDouble() ??
-                0),
-            cart[0]["rooms"][
-                    (num.tryParse(cart[0]["options"]["selectedRoom"].toString())
-                            ?.toInt() ??
-                        0)]["id"]
-                .toString());
-        subtotal = price *
-            (num.tryParse(cart[0]["options"]["numRooms"].toString())?.toInt() ??
-                0) *
-            (num.tryParse(cart[0]["options"]["numNights"].toString())
-                    ?.toInt() ??
-                0);
+        final roomsSelected = cart[0]["options"]["selectedRoom"] ?? [];
+        print("roomsSelected $roomsSelected");
+        final numNights =
+            num.tryParse(cart[0]["options"]["numNights"].toString())?.toInt() ??
+                0;
+        for (var i = 0; i < roomsSelected.length; i += 1) {
+          final selectedRoom =
+              num.tryParse(roomsSelected[i].toString())?.toInt() ?? 0;
+          final roomName = cart[0]["rooms"][selectedRoom]["name"] ?? "";
+          final price = Helpers.handleCalendarEntry(
+              [
+                cart[0]["options"]["dateFrom"].toString(),
+                cart[0]["options"]["dateTo"].toString()
+              ],
+              cart[0]["calendar"] ?? [],
+              num.tryParse(cart[0]["rooms"][selectedRoom]["price"].toString())
+                      ?.toDouble() ??
+                  0,
+              cart[0].containsKey("rooms")
+                  ? cart[0]["rooms"][selectedRoom]["id"].toString()
+                  : "");
+          final numRooms =
+              num.tryParse(cart[0]["options"]["numRooms"][roomName].toString())
+                      ?.toDouble() ??
+                  0;
+          subtotal += price * numRooms * numNights;
+        }
       }
 
       final settings = await JWT.getCheckoutSettings();
@@ -499,7 +485,7 @@ class _CheckoutState extends State<Checkout>
         _total = subtotal + processingFee;
       });
     } catch (err) {
-      print(err);
+      print("err $err");
       // console.log(err);
     }
   }
@@ -574,7 +560,7 @@ class _CheckoutState extends State<Checkout>
                           0],
                   buttonText: "View booking", action: () {
                   Navigator.pushNamed(context, "/booking",
-                      arguments: jsonEncode({"orderId": _orderId}));
+                      arguments: jsonEncode({"bookingId": _orderId}));
                 }, image: "success")
               : Stack(
                   children: [
@@ -687,10 +673,20 @@ class _CheckoutState extends State<Checkout>
                                           isBordered: false,
                                         )),
                                   if (_activeStep == 1 &&
-                                      _cart[0]["listingType"].toString() == "3")
+                                      _cart[0]["listingType"].toString() == "2")
                                     SizedBox(
                                         width: double.infinity,
                                         child: ShortletItem(
+                                          item:
+                                              _cart.isNotEmpty ? _cart[0] : {},
+                                          direction: "horizontal",
+                                          isBordered: false,
+                                        )),
+                                  if (_activeStep == 1 &&
+                                      _cart[0]["listingType"].toString() == "1")
+                                    SizedBox(
+                                        width: double.infinity,
+                                        child: AutomobileItem(
                                           item:
                                               _cart.isNotEmpty ? _cart[0] : {},
                                           direction: "horizontal",
@@ -1065,7 +1061,7 @@ class HotelInformation extends StatelessWidget {
     var checkoutLabel = "Check-out";
     var numRooms = "Total length of stay";
     switch (item["listingType"].toString()) {
-      case "1":
+      case "3":
         checkInLabel = "Event Date";
         checkoutLabel = "End Date";
         numRooms = "Number of Tickets";
@@ -1079,7 +1075,7 @@ class HotelInformation extends StatelessWidget {
         numRooms = "Duration";
         checkoutLabel = "Drop off";
         break;
-      case "4":
+      case "1":
         checkInLabel = "Rental Date";
         checkoutLabel = "End Date";
         numRooms = "Duration";
@@ -1198,7 +1194,7 @@ class HotelInformation extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Widgets.buildText(
-                  "Your ${item["listingType"].toString() == "2" || item["listingType"].toString() == "4" ? "Rental" : "Booking"} Details",
+                  "Your ${item["listingType"].toString() == "2" || item["listingType"].toString() == "1" ? "Rental" : "Booking"} Details",
                   context,
                   color: "text.secondary",
                   isMedium: true),
@@ -1328,7 +1324,7 @@ class HotelInformation extends StatelessWidget {
                         children: [
                           Widgets.buildText(
                               item["listingType"].toString() == "1"
-                                  ? "Selected ticket(s)"
+                                  ? "Pick-up location"
                                   : (item["listingType"].toString() == "4"
                                       ? "No. of Occupants"
                                       : "Selected room"),
@@ -1396,6 +1392,38 @@ class HotelInformation extends StatelessWidget {
                           color: "text.secondary",
                           size: 13.0,
                           weight: 500),
+                    ),
+                  ],
+                ),
+              if (values["selected"].toString().isNotEmpty &&
+                  item["listingType"].toString() == "1")
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Widgets.buildText("Drop-off location", context,
+                              color: "text.disabled", size: 13.0, weight: 500),
+                          const SizedBox(width: 10.0),
+                          Expanded(
+                            child: SizedBox(
+                                width: double.infinity,
+                                child: const DashedDivider(
+                                    color: Color(0x40000000))),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20.0),
+                    ConstrainedBox(
+                      constraints:
+                          BoxConstraints.loose(Size(200.0, double.infinity)),
+                      child: Widgets.buildText(
+                          values["selected"].toString(), context,
+                          color: "text.secondary", size: 13.0, weight: 500),
                     ),
                   ],
                 ),

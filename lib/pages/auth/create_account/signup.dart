@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:cribsfinder/utils/alert.dart';
+import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/jwt.dart';
+import 'package:cribsfinder/utils/modals.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,6 +26,7 @@ class _SignupState extends State<Signup> {
 
   var isChecked = false;
   var isEmail = false;
+  var country = "NG";
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
@@ -34,6 +37,9 @@ class _SignupState extends State<Signup> {
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () {
+      countryController.text = "Nigeria";
+    });
   }
 
   @override
@@ -63,8 +69,10 @@ class _SignupState extends State<Signup> {
               isEmail
                   ? "Checking your email address"
                   : "Checking your phone number...");
-          final result =
-              await JWT.checkEmailPhone(isEmail ? email : phone, "NG", isEmail);
+
+          final result = await JWT.checkEmailPhone(
+              isEmail ? email : phone, country, isEmail);
+          print("result: $result");
           Alert.hideLoading(context);
           if (result == "no_account") {
             if (isEmail) {
@@ -146,6 +154,46 @@ class _SignupState extends State<Signup> {
                           color: "text.secondary"),
                       const SizedBox(
                         height: 30.0,
+                      ),
+                      if (!isEmail)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Widgets.buildText("Country", context,
+                                color: 'text.primary', size: 13.0, weight: 500),
+                            const SizedBox(
+                              height: 5.0,
+                            ),
+                            TextField(
+                              controller: countryController,
+                              readOnly: true,
+                              decoration: Widgets.inputDecoration("",
+                                  color: Color(0x99F4F4F4),
+                                  isFilled: true,
+                                  isOutline: true,
+                                  suffixIcon: UnconstrainedBox(
+                                      child: Helpers.fetchIcons(
+                                          "caret-down", "solid",
+                                          color: "text.disabled", size: 20.0))),
+                              style: GoogleFonts.poppins(
+                                  color: Color(0xFF757575),
+                                  fontSize: 13.0,
+                                  fontWeight: FontWeight.w400),
+                              onTap: () async {
+                                final selected = await Sheets.showOptions(
+                                    "Country", "", Defaults.countries,
+                                    isSearch: true);
+                                countryController.text = selected["name"] ?? "";
+                                setState(() {
+                                  country = selected["code"] ?? "";
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      const SizedBox(
+                        height: 15.0,
                       ),
                       if (!isEmail)
                         Column(

@@ -14,6 +14,7 @@ class ShortletItem extends StatelessWidget {
       this.direction = "vertical",
       this.isBordered = true,
       this.action,
+      this.wishlistAction,
       this.close});
 
   final Function? action;
@@ -21,6 +22,7 @@ class ShortletItem extends StatelessWidget {
   final double offset;
   final bool isBordered;
   final String direction;
+  final Function? wishlistAction;
   final Map<String, dynamic> item;
 
   @override
@@ -134,10 +136,14 @@ class ShortletItem extends StatelessWidget {
               weight: 400, size: 15.0),
         SizedBox(height: direction == "vertical" ? 10.0 : 5.0),
         Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Expanded(
-            child: Widgets.buildText("Hosted by ${item['host']}", context,
-                weight: 500, size: 13.0),
-          ),
+          if (item.containsKey("host"))
+            Expanded(
+              child: Widgets.buildText(
+                  "Hosted by ${item['host'].runtimeType.toString() == "String" ? item["host"] : item["host"]["name"]}",
+                  context,
+                  weight: 500,
+                  size: 13.0),
+            ),
           if (direction == "vertical") const SizedBox(width: 5.0),
           if (direction == "vertical")
             Row(
@@ -195,29 +201,32 @@ class ShortletItem extends StatelessWidget {
   Widget hotelPhoto(BuildContext context) {
     return Stack(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20.0),
-          child: Image.asset(
-              item.containsKey("image")
-                  ? item["image"].toString()
-                  : item["images"][0],
-              width: double.infinity,
-              height: direction == "vertical" ? 200.0 : 145.0,
-              fit: BoxFit.cover),
-        ),
+        Helpers.getPhoto(
+            item.containsKey("image")
+                ? item["image"].toString()
+                : item["photo"] ?? item["images"][0],
+            type: "hotel",
+            text: item["title"].toString(),
+            radius: 20.0,
+            height: direction == "vertical" ? 200.0 : 145.0),
         if (isBordered)
           Positioned(
             top: 10.0,
             right: close != null ? 60.0 : 10.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Helpers.wishlist(item, "2");
+                if (wishlistAction != null) {
+                  wishlistAction!(item);
+                }
+              },
               child: CircleAvatar(
                 backgroundColor:
                     Palette.getColor(context, "background", "paper"),
                 radius: 20.0,
                 child: Helpers.fetchIcons(
                   "heart",
-                  "regular",
+                  item["favourite"].toString() == "0" ? "regular" : "solid",
                   size: 20.0,
                   color: "main.primary",
                 ),

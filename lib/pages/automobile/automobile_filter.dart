@@ -337,8 +337,7 @@ class _AutomobileFilterState extends State<AutomobileFilter> {
         actions: [
           GestureDetector(
             onTap: () async {
-              final res = await HotelModals.filterOther(
-                  filter, neighbourhoods, brands, total);
+              final res = await HotelModals.filterOther(filter, {}, total,false);
               setState(() {
                 filter = res;
               });

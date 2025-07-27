@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';
 import 'package:cribsfinder/utils/modals.dart';
@@ -18,10 +16,11 @@ class RoomItem extends StatelessWidget {
       required this.calendar,
       required this.numRooms,
       required this.numNights,
-      required this.roomSelected,
+      required this.roomsSelected,
       required this.handleCheckout,
       required this.setRoomSelected,
       required this.setNumRooms,
+      this.setRoomUnSelected,
       this.isHotel = true});
 
   final Function? action;
@@ -31,9 +30,10 @@ class RoomItem extends StatelessWidget {
   final List calendar;
   final Map numRooms;
   final int numNights;
-  final int roomSelected;
+  final List<int> roomsSelected;
   final Function handleCheckout;
   final Function setRoomSelected;
+  final Function? setRoomUnSelected;
   final String? checkout;
   final Map<String, dynamic> item;
   final bool isHotel;
@@ -61,7 +61,11 @@ class RoomItem extends StatelessWidget {
                       GestureDetector(
                         onTap: () {
                           Sheets.showImagePreview(
-                              item["images"], item["name"].toString());
+                              (item["images"] ?? [])
+                                  .map((image) => image["image"].toString())
+                                  .toList(),
+                              item["name"].toString(),
+                              type: isHotel ? "hotel" : "shortlet");
                         },
                         child: Widgets.buildText(
                             item["name"].toString(), context,
@@ -242,7 +246,11 @@ class RoomItem extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       Sheets.showImagePreview(
-                          item["images"], item["name"].toString());
+                          (item["images"] ?? [])
+                              .map((image) => image["image"].toString())
+                              .toList(),
+                          item["name"].toString(),
+                          type: isHotel ? "hotel" : "shortlet");
                     },
                     child: Helpers.getPhoto(item["image"],
                         type: "hotel", width: 100.0, height: 100.0),
@@ -264,13 +272,14 @@ class RoomItem extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (roomSelected != index)
+                  if (!roomsSelected.contains(index))
                     Widgets.buildText(
                         "Total Price for ${Helpers.dateDiff(checkin!, checkout!)} ${isHotel ? "night" : "day"}${Helpers.dateDiff(checkin!, checkout!) > 1 ? "s" : ""}",
                         context,
                         color: "text.secondary"),
-                  if (roomSelected != index) const SizedBox(height: 10.0),
-                  if (roomSelected != index)
+                  if (!roomsSelected.contains(index))
+                    const SizedBox(height: 10.0),
+                  if (!roomsSelected.contains(index))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -296,8 +305,9 @@ class RoomItem extends StatelessWidget {
                             weight: 500)
                       ],
                     ),
-                  SizedBox(height: roomSelected != index ? 25.0 : 10.0),
-                  if (roomSelected == index)
+                  SizedBox(
+                      height: !roomsSelected.contains(index) ? 25.0 : 10.0),
+                  if (roomsSelected.contains(index))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -410,12 +420,13 @@ class RoomItem extends StatelessWidget {
                         )
                       ],
                     ),
-                  if (roomSelected == index) const SizedBox(height: 10.0),
+                  if (roomsSelected.contains(index))
+                    const SizedBox(height: 10.0),
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
                         onPressed: () {
-                          if (roomSelected == index) {
+                          if (roomsSelected.contains(index)) {
                             handleCheckout();
                           } else {
                             final price = num.tryParse(item["price"].toString())
@@ -440,22 +451,35 @@ class RoomItem extends StatelessWidget {
                           }
                         },
                         style: Widgets.buildButton(context,
-                            background: roomSelected != index
+                            background: !roomsSelected.contains(index)
                                 ? Palette.get("main.primary").withAlpha(50)
                                 : Palette.get("main.primary"),
                             horizontal: 10.0,
                             radius: 50.0,
                             vertical: 15.0),
                         child: Widgets.buildText(
-                            roomSelected == index
+                            roomsSelected.contains(index)
                                 ? "Next Step"
                                 : "Reserve this ${isHotel ? "room" : "apartment"}",
                             context,
                             isMedium: true,
-                            color: roomSelected == index
+                            color: roomsSelected.contains(index)
                                 ? "text.white"
                                 : "main.primary")),
                   ),
+                  if (roomsSelected.contains(index) &&
+                      setRoomUnSelected != null)
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                          onPressed: () {
+                            setRoomUnSelected!(index);
+                          },
+                          style: Widgets.buildButton(context,
+                              horizontal: 10.0, radius: 50.0, vertical: 15.0),
+                          child: Widgets.buildText("Cancel", context,
+                              color: "error.main", size: 14.0)),
+                    ),
                   const SizedBox(height: 15.0),
                 ],
               )

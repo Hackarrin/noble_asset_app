@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cribsfinder/globals/automobile_item.dart';
 import 'package:cribsfinder/globals/hotel_item.dart';
 import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
@@ -20,15 +21,15 @@ class HotelHome extends StatefulWidget {
 }
 
 class _HotelHomeState extends State<HotelHome> {
-  var selected = 0;
+  var selected = "hotel";
   var selectedLocation = "";
   var selectedDestination = "";
   Map<String, dynamic> profile = {};
   List<Map<String, String>> categories = [
-    {"name": "Hotels", "image": "hotels.png", "id": "hotel"},
-    {"name": "Shortlets", "image": "house.png", "id": "house"},
-    {"name": "Cars", "image": "villa.png", "id": "villa"},
-    {"name": "Deals", "image": "resorts.png", "id": "resorts"},
+    {"name": "Hotels", "image": "hotels.png", "id": "hotel", "type": "0"},
+    {"name": "Shortlets", "image": "house.png", "id": "shortlet", "type": "2"},
+    {"name": "Cars", "image": "villa.png", "id": "car", "type": "1"},
+    {"name": "Deals", "image": "resorts.png", "id": "deal", "type": "0"},
   ];
 
   Map<dynamic, dynamic> data = {
@@ -122,7 +123,7 @@ class _HotelHomeState extends State<HotelHome> {
         "hotelId": "123456"
       }
     ],
-    "nearbyHotels": [
+    "nearbyItems": [
       {
         "title": "Urban hotels",
         "image": "assets/images/hotels.jpeg",
@@ -228,7 +229,7 @@ class _HotelHomeState extends State<HotelHome> {
         error = "";
         loading = true;
       });
-      final res = await JWT.getHome();
+      final res = await JWT.getHome(selected);
       setState(() {
         data = res;
         loading = false;
@@ -252,6 +253,7 @@ class _HotelHomeState extends State<HotelHome> {
 
   void handleWishlistChanged(Map<dynamic, dynamic> listing) {
     final newData = Helpers.updateWishlistValue(data, listing);
+    print("newData $newData");
     setState(() {
       data = newData;
     });
@@ -321,24 +323,24 @@ class _HotelHomeState extends State<HotelHome> {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Widgets.buildText("Categories", context,
-                                isMedium: true, size: 18.0),
-                            GestureDetector(
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                      context, "/hotel-categories",
-                                      arguments: jsonEncode(categories));
-                                },
-                                child: Widgets.buildText("See all", context,
-                                    color: "main.primary"))
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20.0,
-                        ),
+                        // Row(
+                        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //   children: [
+                        //     Widgets.buildText("Categories", context,
+                        //         isMedium: true, size: 18.0),
+                        //     GestureDetector(
+                        //         onTap: () {
+                        //           Navigator.pushNamed(
+                        //               context, "/hotel-categories",
+                        //               arguments: jsonEncode(categories));
+                        //         },
+                        //         child: Widgets.buildText("See all", context,
+                        //             color: "main.primary"))
+                        //   ],
+                        // ),
+                        // const SizedBox(
+                        //   height: 20.0,
+                        // ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -348,38 +350,46 @@ class _HotelHomeState extends State<HotelHome> {
                                   padding: const EdgeInsets.all(5.0),
                                   child: GestureDetector(
                                     onTap: () {
-                                      Navigator.pushNamed(
-                                          context, "/hotel-filter",
-                                          arguments: jsonEncode({
-                                            "categoryName":
-                                                category["name"].toString(),
-                                            "categoryId":
-                                                category["id"].toString()
-                                          }));
+                                      setState(() {
+                                        selected = category["id"] ?? "";
+                                      });
+                                      fetch();
                                     },
                                     child: Column(
                                       children: [
                                         Container(
                                           padding: EdgeInsets.all(15.0),
                                           decoration: BoxDecoration(
-                                            color: Palette.getColor(
-                                                context, "background", "paper"),
+                                            color:
+                                                Palette.get("background.paper"),
                                             border: Border.all(
-                                              color: Color(0x0d000000),
+                                              color: selected ==
+                                                      category["id"].toString()
+                                                  ? Palette.get("main.primary")
+                                                  : Color(0x0d000000),
                                             ),
                                             borderRadius:
                                                 BorderRadius.circular(40.0),
                                           ),
                                           child: FittedBox(
                                             child: Image.asset(
-                                                "assets/images/${category["image"]}"),
+                                              "assets/images/${category["image"]}",
+                                              height: 30.0,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 5.0),
                                         FittedBox(
                                           child: Widgets.buildText(
                                               category["name"].toString(),
-                                              context),
+                                              context,
+                                              color: selected ==
+                                                      category["id"].toString()
+                                                  ? "main.primary"
+                                                  : "text.primary",
+                                              isBold: selected ==
+                                                  category["id"].toString(),
+                                              size: 13.0),
                                         )
                                       ],
                                     ),
@@ -431,7 +441,11 @@ class _HotelHomeState extends State<HotelHome> {
                   final item = (data["featured"] ?? [])[index];
                   return GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, "/hotel",
+                      Navigator.pushNamed(
+                          context,
+                          selected == "car"
+                              ? "/automobile"
+                              : "/${selected == "deal" ? "hotel" : selected}",
                           arguments: jsonEncode(item));
                     },
                     child: Container(
@@ -447,7 +461,8 @@ class _HotelHomeState extends State<HotelHome> {
                           SizedBox(
                             width: double.infinity,
                             child: Helpers.getPhoto(item["photo"].toString(),
-                                type: "hotel", text: item["title"]),
+                                type: selected == "deal" ? "hotel" : selected,
+                                text: item["title"]),
                           ),
                           Container(
                             height: double.infinity,
@@ -558,7 +573,7 @@ class _HotelHomeState extends State<HotelHome> {
                       onTap: () {
                         Navigator.pushNamed(context, "/hotel-filter",
                             arguments: jsonEncode({
-                              "location": item["name"].toString(),
+                              "category": item["name"].toString(),
                               "startDate": item["dateFrom"].toString(),
                               "endDate": item["dateTo"].toString(),
                               "guests": item["guest"].toString()
@@ -610,13 +625,21 @@ class _HotelHomeState extends State<HotelHome> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Widgets.buildText("Our top stays", context,
-                      isMedium: true, size: 18.0),
+                  Widgets.buildText(
+                      selected == "car" ? "Our top rentals" : "Our top stays",
+                      context,
+                      isMedium: true,
+                      size: 18.0),
                   GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, "/hotel-filter",
                             arguments: jsonEncode({
                               "sortBy": "popularity",
+                              "category": selected == "hotel" ||
+                                      selected == "deal"
+                                  ? "hotel"
+                                  : (selected == "shortlet" ? "apartment" : ""),
+                              "type": selected
                             }));
                       },
                       child: Widgets.buildText("See all", context,
@@ -626,43 +649,57 @@ class _HotelHomeState extends State<HotelHome> {
               const SizedBox(
                 height: 20.0,
               ),
-              ConstrainedBox(
-                  constraints: BoxConstraints.loose(Size(screenWidth, 365.0)),
-                  child: Swiper(
-                    outer: true,
-                    layout: SwiperLayout.CUSTOM,
-                    customLayoutOption: Widgets.customLayout(
-                        (data["topStays"] ?? []).length, screenWidth,
-                        offset: 120.0),
-                    itemHeight: 365.0,
-                    itemWidth: screenWidth,
-                    loop: true,
+              SizedBox(
+                  height: 365.0,
+                  width: screenWidth,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
                     itemBuilder: (BuildContext context, int index) {
                       final item = (data["topStays"] ?? [])[index];
-                      return HotelItem(
-                        item: item,
-                        offset: 100.0,
-                        wishlistAction: handleWishlistChanged,
+                      return SizedBox(
+                        width: screenWidth - 70,
+                        child: selected == "car"
+                            ? AutomobileItem(
+                                item: item,
+                                offset: 20,
+                                wishlistAction: handleWishlistChanged)
+                            : HotelItem(
+                                item: item,
+                                offset: 20,
+                                wishlistAction: handleWishlistChanged,
+                              ),
                       );
                     },
                     itemCount: (data["topStays"] ?? []).length,
                   )),
             ],
           ),
-        if (data.containsKey("nearbyHotels") && data["nearbyHotels"].isNotEmpty)
+        if (data.containsKey("nearbyItems") && data["nearbyItems"].isNotEmpty)
           Column(
             children: [
               const SizedBox(height: 20.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Widgets.buildText("Nearby Hotels", context,
-                      isMedium: true, size: 18.0),
+                  Widgets.buildText(
+                      "Nearby ${selected.isNotEmpty ? categories.firstWhere(
+                            (category) => category["id"] == selected,
+                            orElse: () => {},
+                          )["name"] ?? "Hotels" : "Hotels"}",
+                      context,
+                      isMedium: true,
+                      size: 18.0),
                   GestureDetector(
                       onTap: () {
                         Navigator.pushNamed(context, "/hotel-filter",
                             arguments: jsonEncode({
                               "sortBy": "proximity",
+                              "category": selected == "hotel" ||
+                                      selected == "deal"
+                                  ? "hotel"
+                                  : (selected == "shortlet" ? "apartment" : ""),
+                              "type": selected
                             }));
                       },
                       child: Widgets.buildText("See all", context,
@@ -676,17 +713,23 @@ class _HotelHomeState extends State<HotelHome> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (BuildContext context, int index) {
-                  final item = (data["nearbyHotels"] ?? [])[index];
+                  final item = (data["nearbyItems"] ?? [])[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: HotelItem(
-                      item: item,
-                      direction: "horizontal",
-                      wishlistAction: handleWishlistChanged,
-                    ),
+                    child: selected == "car"
+                        ? AutomobileItem(
+                            item: item,
+                            direction: "vertical",
+                            wishlistAction: handleWishlistChanged,
+                          )
+                        : HotelItem(
+                            item: item,
+                            direction: "horizontal",
+                            wishlistAction: handleWishlistChanged,
+                            type: selected),
                   );
                 },
-                itemCount: (data["nearbyHotels"] ?? []).length,
+                itemCount: (data["nearbyItems"] ?? []).length,
               ),
             ],
           ),
@@ -698,13 +741,21 @@ class _HotelHomeState extends State<HotelHome> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Widgets.buildText(
-                      "Discover your home away from home", context,
-                      isMedium: true, size: 18.0),
+                      selected == "car"
+                          ? "Get the luxury you deserve"
+                          : "Discover your home away from home",
+                      context,
+                      isMedium: true,
+                      size: 18.0),
                   GestureDetector(
-                      onTap: () => Navigator.pushNamed(
-                            context,
-                            "/hotel-filter",
-                          ),
+                      onTap: () => Navigator.pushNamed(context, "/hotel-filter",
+                          arguments: jsonEncode({
+                            "category": selected == "hotel" ||
+                                    selected == "deal"
+                                ? "hotel"
+                                : (selected == "shortlet" ? "apartment" : ""),
+                            "type": selected
+                          })),
                       child: Widgets.buildText("See all", context,
                           color: "main.primary"))
                 ],
@@ -769,11 +820,18 @@ class _HotelHomeState extends State<HotelHome> {
                           data["destinations"][selectedDestination][index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
-                        child: HotelItem(
-                          item: listing,
-                          direction: "horizontal",
-                          wishlistAction: handleWishlistChanged,
-                        ),
+                        child: selected == "car"
+                            ? AutomobileItem(
+                                item: listing,
+                                direction: "horizontal",
+                                wishlistAction: handleWishlistChanged,
+                              )
+                            : HotelItem(
+                                item: listing,
+                                direction: "horizontal",
+                                type: selected,
+                                wishlistAction: handleWishlistChanged,
+                              ),
                       );
                     },
                     itemCount: (data["destinations"][selectedDestination] ?? [])
@@ -795,7 +853,11 @@ class _HotelHomeState extends State<HotelHome> {
                   GestureDetector(
                       onTap: () => Navigator.pushNamed(context, "/hotel-filter",
                           arguments: jsonEncode({
-                            "sortBy": "proximity",
+                            "category": selected == "hotel" ||
+                                    selected == "deal"
+                                ? "hotel"
+                                : (selected == "shortlet" ? "apartment" : ""),
+                            "type": selected
                           })),
                       child: Widgets.buildText("See all", context,
                           color: "main.primary"))
@@ -861,10 +923,15 @@ class _HotelHomeState extends State<HotelHome> {
                           data["locations"][selectedLocation][index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
-                        child: HotelItem(
-                          item: listing,
-                          wishlistAction: handleWishlistChanged,
-                        ),
+                        child: selected == "car"
+                            ? AutomobileItem(
+                                item: listing,
+                                wishlistAction: handleWishlistChanged)
+                            : HotelItem(
+                                item: listing,
+                                type: selected,
+                                wishlistAction: handleWishlistChanged,
+                              ),
                       );
                     },
                     itemCount:
@@ -887,11 +954,18 @@ class _HotelHomeState extends State<HotelHome> {
                   final item = (data["items"] ?? [])[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: HotelItem(
-                      item: item,
-                      direction: "horizontal",
-                      wishlistAction: handleWishlistChanged,
-                    ),
+                    child: selected == "car"
+                        ? AutomobileItem(
+                            item: item,
+                            direction: "horizontal",
+                            wishlistAction: handleWishlistChanged,
+                          )
+                        : HotelItem(
+                            item: item,
+                            direction: "horizontal",
+                            type: selected,
+                            wishlistAction: handleWishlistChanged,
+                          ),
                   );
                 },
                 itemCount: (data["items"] ?? []).length,
@@ -903,10 +977,13 @@ class _HotelHomeState extends State<HotelHome> {
         ),
         TextButton(
             onPressed: () {
-              Navigator.pushNamed(
-                context,
-                "/hotel-filter",
-              );
+              Navigator.pushNamed(context, "/hotel-filter",
+                  arguments: jsonEncode({
+                    "category": selected == "hotel" || selected == "deal"
+                        ? "hotel"
+                        : (selected == "shortlet" ? "apartment" : ""),
+                    "type": selected
+                  }));
             },
             child: Widgets.buildText("Load more", context,
                 isMedium: true, color: "main.primary"))

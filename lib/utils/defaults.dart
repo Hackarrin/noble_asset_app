@@ -151,88 +151,6 @@ class Defaults {
     {"label": "Refundable", "value": "refundable"},
     {"label": "Non-refundable", "value": "non-refundable"},
   ];
-  static const Map<String, Map<String, String>> hotelAmenities = {
-    "workspace": {
-      "icon": "briefcase",
-      "name": "Workspace",
-    },
-    "parking": {
-      "icon": "parking",
-      "name": "Parking Area",
-    },
-    "breakfast": {
-      "icon": "plate-utensils",
-      "name": "Breakfast",
-    },
-    "wifi": {
-      "icon": "router-wifi",
-      "name": "Fast wifi",
-    },
-    "swimming_pool": {
-      "icon": "swimmer",
-      "name": "Swimming Pool",
-    },
-    "electricity": {
-      "icon": "bulb",
-      "name": "Electricity",
-    },
-    "large_double_bed": {
-      "icon": "bed-alt",
-      "name": "1 large double bed",
-    },
-    "room_wifi": {
-      "icon": "router-wifi",
-      "name": "Fast wifi",
-    },
-    "pool": {
-      "icon": "swimmer",
-      "name": "Pool",
-    },
-    "entire_room": {
-      "icon": "bed-alt",
-      "name": "Entire room",
-    },
-    "private_kitchenette": {
-      "icon": "grill-hot-alt",
-      "name": "Private kitchenette",
-    },
-    "ensuite_bathroom": {
-      "icon": "hot-tub",
-      "name": "Ensuite bathroom",
-    },
-    "tv": {
-      "icon": "screen",
-      "name": "Flat-screen TV",
-    },
-    "air_conditioning": {
-      "icon": "fan",
-      "name": "Air conditioning",
-    },
-    "housekeeping": {
-      "icon": "broom",
-      "name": "Housekeeping",
-    },
-    "reception": {
-      "icon": "concierge-bell",
-      "name": "24hrs Reception",
-    },
-    "gym": {
-      "icon": "gym",
-      "name": "GYM",
-    },
-    "pet": {
-      "icon": "paw",
-      "name": "Pet Services",
-    },
-    "bar": {
-      "icon": "glass-cheers",
-      "name": "Bar",
-    },
-    "more": {
-      "icon": "eye",
-      "name": "see more",
-    },
-  };
   static const List<Map<String, String>> hotelReviewCategories = [
     {"name": "Cleanliness", "value": "cleanliness"},
     {"name": "Location", "value": "location"},
@@ -829,36 +747,114 @@ class Defaults {
     "Maserati",
     "Mazda",
   ];
+  static const Map<String, Map<String, String>> hotelAmenities = {
+    "workspace": {
+      "icon": "briefcase",
+      "name": "Workspace",
+    },
+    "parking": {
+      "icon": "parking",
+      "name": "Parking Area",
+    },
+    "breakfast": {
+      "icon": "plate-utensils",
+      "name": "Breakfast",
+    },
+    "wifi": {
+      "icon": "router-wifi",
+      "name": "Fast wifi",
+    },
+    "swimming_pool": {
+      "icon": "swimmer",
+      "name": "Swimming Pool",
+    },
+    "electricity": {
+      "icon": "bulb",
+      "name": "Electricity",
+    },
+    "large_double_bed": {
+      "icon": "bed-alt",
+      "name": "1 large double bed",
+    },
+    "room_wifi": {
+      "icon": "router-wifi",
+      "name": "Fast wifi",
+    },
+    "pool": {
+      "icon": "swimmer",
+      "name": "Pool",
+    },
+    "entire_room": {
+      "icon": "bed-alt",
+      "name": "Entire room",
+    },
+    "private_kitchenette": {
+      "icon": "grill-hot-alt",
+      "name": "Private kitchenette",
+    },
+    "ensuite_bathroom": {
+      "icon": "hot-tub",
+      "name": "Ensuite bathroom",
+    },
+    "tv": {
+      "icon": "screen",
+      "name": "Flat-screen TV",
+    },
+    "air_conditioning": {
+      "icon": "fan",
+      "name": "Air conditioning",
+    },
+    "housekeeping": {
+      "icon": "broom",
+      "name": "Housekeeping",
+    },
+    "reception": {
+      "icon": "concierge-bell",
+      "name": "24hrs Reception",
+    },
+    "gym": {
+      "icon": "gym",
+      "name": "GYM",
+    },
+    "pet": {
+      "icon": "paw",
+      "name": "Pet Services",
+    },
+    "bar": {
+      "icon": "glass-cheers",
+      "name": "Bar",
+    },
+    "more": {
+      "icon": "eye",
+      "name": "see more",
+    },
+  };
   static const automobileAmenities = [
     {
       "label": "Air conditioning",
       "value": "air-conditioning",
-      "icon": "mdi:air-conditioner",
+      "icon": "fan",
     },
     {
       "label": "GPS navigation",
       "value": "gps",
-      "icon": "tdesign:gps",
+      "icon": "gps-navigation",
     },
     {
       "label": "BT/Audio System",
       "value": "audio_systm",
-      "icon": "mdi:bluetooth-audio",
+      "icon": "volume",
     },
-    {
-      "label": "Child seat",
-      "value": "child_seat",
-      "icon": "mdi:car-child-seat"
-    },
+    {"label": "Child seat", "value": "child_seat", "icon": "person-seat"},
     {
       "label": "Backup camera",
       "value": "backup_camera",
-      "icon": "ph:webcam-duotone",
+      "icon": "camera",
     },
     {
       "label": "Sunroof",
       "value": "sunroof",
-      "icon": "material-symbols-light:solar-power-outline",
+      "icon": "sun",
     },
   ];
   static const automobileFuelTypes = [

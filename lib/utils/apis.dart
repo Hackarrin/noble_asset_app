@@ -10,7 +10,7 @@ class API {
   static final hotel = path(rootsApi, "hotel");
   static final wallet = path(rootsApi, "wallet");
   static final profile = "https://api.cribsfinder.com/user/profile";
-  static final filterHotels = path(rootsApi, "search-hotels");
+  static final filterHotels = path(rootsApi, "filter");
   static final shortlets = path(rootsApi, "shortlets");
   static final shortlet = path(rootsApi, "shortlet");
   static final filterShortlets = path(rootsApi, "search-shortlets");

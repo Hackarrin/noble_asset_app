@@ -135,9 +135,9 @@ class JWT {
         "An error occured while we were logging you in! We apologize for this. Please try again later.");
   }
 
-  static Future<Map<String, dynamic>> getHome() async {
-    final response =
-        await Fetch(API.home, {"userToken": await Helpers.getToken()}).load();
+  static Future<Map<String, dynamic>> getHome(String category) async {
+    final response = await Fetch(API.home,
+        {"userToken": await Helpers.getToken(), "category": category}).load();
     if (response["status"] == "success") {
       return response["data"];
     }
@@ -192,19 +192,32 @@ class JWT {
         "An error occured while we were resetting your password! We apologize for this. Please try again later.");
   }
 
-  static filterHotels(
-      filters, selectedFilters, page, perPage, sortBy, priceSort) async {
-    final response = await Fetch(API.filterHotels, {
+  static filterHotels(filters, selectedFilters, page, perPage, sortBy,
+      priceSort, isRental) async {
+    print("got here. - ${API.filterHotels} ${{
       ...filters,
       ...selectedFilters,
-      "location":
-          (filters && filters["location"] && filters["location"]["value"])
-              ? filters["location"]["value"]
-              : "",
+      "location": (filters.isNotEmpty && filters.containsKey("location"))
+          ? filters["location"].toString()
+          : "",
       "page": page,
       "perPage": perPage,
       "sortBy": sortBy,
       "priceSort": priceSort,
+      "isRental": isRental,
+      "userToken": await Helpers.getToken(),
+    }}");
+    final response = await Fetch(API.filterHotels, {
+      ...filters,
+      ...selectedFilters,
+      "location": (filters.isNotEmpty && filters.containsKey("location"))
+          ? filters["location"].toString()
+          : "",
+      "page": page,
+      "perPage": perPage,
+      "sortBy": sortBy,
+      "priceSort": priceSort,
+      "isRental": isRental,
       "userToken": await Helpers.getToken(),
     }).load();
     if (response["status"] == "success") {
@@ -437,6 +450,7 @@ class JWT {
       "amount": total,
       "userToken": await Helpers.getToken(),
     }).load();
+    print(response);
     if (response["status"] == "success") {
       return response["data"];
     }
@@ -444,7 +458,7 @@ class JWT {
   }
 
   static Future<String> submitOrder(
-      cart, selectedMethod, processingFee, paymentRef, customer) async {
+      cart, selectedMethod, processingFee, paymentRef, customer, total) async {
     final response = await Fetch(API.checkout, {
       "order": "",
       "cart": cart,
@@ -453,6 +467,7 @@ class JWT {
       "paymentRef": paymentRef,
       "customer": jsonEncode(customer),
       "userToken": await Helpers.getToken(),
+      "total": total
     }).load();
     if (response["status"] == "success") {
       return response["data"].toString();

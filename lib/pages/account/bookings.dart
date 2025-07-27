@@ -1,4 +1,6 @@
+import 'package:cribsfinder/globals/automobile_item.dart';
 import 'package:cribsfinder/globals/hotel_booking.dart';
+import 'package:cribsfinder/globals/shortlet_item.dart';
 import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/defaults.dart';
 import 'package:cribsfinder/utils/helpers.dart';

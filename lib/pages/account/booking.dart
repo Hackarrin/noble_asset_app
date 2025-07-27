@@ -177,9 +177,15 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                     Expanded(
                       child: Widgets.buildText(
                           booking.containsKey("roomType")
-                              ? booking["roomType"]["listingName"].toString()
+                              ? (booking["roomType"] is List
+                                  ? booking["roomType"][0]["listingName"]
+                                      .toString()
+                                  : (booking["roomType"]["listingName"] ??
+                                          booking["roomType"]["title"])
+                                      .toString())
                               : "",
                           context,
+                          lines: 10,
                           isMedium: true),
                     ),
                     const SizedBox(
@@ -187,7 +193,11 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                     ),
                     ...List.generate(
                         num.tryParse(booking.containsKey("roomType")
-                                    ? booking["roomType"]["rating"].toString()
+                                    ? (booking["roomType"] is List
+                                        ? booking["roomType"][0]["rating"]
+                                            .toString()
+                                        : booking["roomType"]["rating"]
+                                            .toString())
                                     : "3")
                                 ?.toInt() ??
                             3, (index) {
@@ -322,10 +332,17 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                       ),
                       Widgets.buildText(
                           booking.containsKey("roomType")
-                              ? "${booking["roomType"]["title"].toString()} x ${booking["quantity"]}"
+                              ? booking["roomType"] is List
+                                  ? booking["roomType"]
+                                      .map((room) =>
+                                          "${room["title"].toString()} x ${room["quantity"]}")
+                                      .toList()
+                                      .join("\n")
+                                  : "${booking["roomType"][0]["title"].toString()} x ${booking["quantity"]}"
                               : "",
                           context,
                           size: 13.0,
+                          lines: 10,
                           weight: 500)
                     ],
                   ),
@@ -342,7 +359,9 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                     ),
                     Widgets.buildText(
                         booking.containsKey("roomType")
-                            ? booking["roomType"]["location"].toString()
+                            ? (booking["roomType"] is List
+                                ? booking["roomType"][0]["location"].toString()
+                                : booking["roomType"]["location"].toString())
                             : "",
                         context,
                         size: 13.0,
@@ -828,12 +847,12 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
               onTap: () {
                 SharePlus.instance.share(ShareParams(
                     title:
-                        "Check out ${booking["roomType"]["listingName"].toString()} on Cribsfinder",
+                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Cribsfinder",
                     subject:
-                        "Check out ${booking["roomType"]["listingName"].toString()} on Cribsfinder",
+                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Cribsfinder",
                     uri: Uri.https(
                       "cribsfinder.com",
-                      "/${booking["type"].toString() == "1" ? "rental" : "place"}/${booking["roomType"]["listingId"]}-${booking["roomType"]["listingName"].toString().toLowerCase().replaceAll(" ", "-")}",
+                      "/${booking["type"].toString() == "1" ? "rental" : "place"}/${booking["roomType"][0]["listingId"]}-${booking["roomType"][0]["listingName"].toString().toLowerCase().replaceAll(" ", "-")}",
                     )));
               },
               child: Row(

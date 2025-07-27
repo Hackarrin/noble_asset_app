@@ -138,7 +138,13 @@ class HotelBooking extends StatelessWidget {
         const SizedBox(height: 10.0),
         Widgets.buildText(
             item.containsKey("roomType")
-                ? item["roomType"]["listingName"].toString()
+                ? item["roomType"] is List
+                    ? (item["roomType"][0]["listingName"] ??
+                            item["roomType"][0]["title"])
+                        .toString()
+                    : (item["roomType"]["listingName"] ??
+                            item["roomType"]["title"])
+                        .toString()
                 : item["title"].toString(),
             context,
             isMedium: true),
@@ -163,7 +169,9 @@ class HotelBooking extends StatelessWidget {
             Expanded(
               child: Widgets.buildText(
                   item.containsKey("roomType")
-                      ? item["roomType"]["location"].toString()
+                      ? item["roomType"] is List
+                          ? item["roomType"][0]["location"].toString()
+                          : item["roomType"]["location"].toString()
                       : item["location"].toString(),
                   context,
                   color: "text.secondary"),
@@ -198,11 +206,17 @@ class HotelBooking extends StatelessWidget {
             item.containsKey("image")
                 ? item["image"].toString()
                 : item.containsKey("roomType")
-                    ? item["roomType"]["featuredPhoto"].toString()
+                    ? (item["roomType"] is List
+                        ? item["roomType"][0]["featuredPhoto"].toString()
+                        : item["roomType"]["featuredPhoto"].toString())
                     : "",
-            type: "hotel",
+            type: item["type"].toString() == "0"
+                ? "hotel"
+                : (item["type"].toString() == "1" ? "car" : "shortlet"),
             text: item.containsKey("roomType")
-                ? item["roomType"]["title"].toString()
+                ? item["roomType"] is List
+                    ? item["roomType"][0]["title"].toString()
+                    : item["roomType"]["title"].toString()
                 : item["title"].toString(),
             height: 145.0,
           ),

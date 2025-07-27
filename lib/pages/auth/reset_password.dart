@@ -1,6 +1,6 @@
-import 'package:cribsfinder/utils/defaults.dart';
+import 'package:cribsfinder/utils/alert.dart';
 import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
+import 'package:cribsfinder/utils/jwt.dart';
 import 'package:cribsfinder/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,6 +29,31 @@ class _ResetForgotPasswordState extends State<ResetForgotPassword> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void process() async {
+    try {
+      if (controller.text.isEmpty) {
+        Alert.show(
+            context, "", "Please enter your password reset code to proceed.",
+            type: "error");
+        return;
+      }
+      if (passwordController.text == cPasswordController.text) {
+        Alert.showLoading(context, "Please wait...");
+        await JWT.resetPassword(
+            {"code": controller.text, "password": passwordController.text});
+        Alert.hideLoading(context);
+        Navigator.pushReplacementNamed(context, "/login");
+        Alert.show(context, "", "Your password has been reset!");
+      } else {
+        Alert.show(context, "", "Please confirm your password to proceed.",
+            type: "error");
+      }
+    } catch (err) {
+      Alert.show(context, "", err.toString(), type: "error");
+    }
+    Alert.hideLoading(context);
   }
 
   @override
@@ -226,7 +251,7 @@ class _ResetForgotPasswordState extends State<ResetForgotPassword> {
                         width: double.infinity,
                         child: TextButton(
                             onPressed: () {
-                              Navigator.pushNamed(context, "/login");
+                              process();
                             },
                             style: Widgets.buildButton(context,
                                 vertical: 20.0,

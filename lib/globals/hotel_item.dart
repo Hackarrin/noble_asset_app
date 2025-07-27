@@ -17,6 +17,7 @@ class HotelItem extends StatelessWidget {
       this.isBordered = true,
       this.action,
       this.wishlistAction,
+      this.type = "hotel",
       this.close});
 
   final Function? action;
@@ -25,6 +26,7 @@ class HotelItem extends StatelessWidget {
   final double offset;
   final bool isBordered;
   final String direction;
+  final String type;
   final Map<dynamic, dynamic> item;
 
   @override
@@ -32,7 +34,9 @@ class HotelItem extends StatelessWidget {
     return Column(children: [
       GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, "/hotel", arguments: jsonEncode(item));
+          Navigator.pushNamed(
+              context, type == "shortlet" ? "/shortlet" : "/hotel",
+              arguments: jsonEncode(item));
         },
         child: Container(
           width: double.infinity,

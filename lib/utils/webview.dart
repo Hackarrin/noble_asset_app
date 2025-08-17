@@ -1,4 +1,4 @@
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 

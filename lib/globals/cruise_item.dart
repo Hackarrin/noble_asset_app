@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -143,7 +143,7 @@ class CruiseItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10.0)),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10.0, vertical: 5.0),
-                  child: Widgets.buildText("New to Cribsfinder", context,
+                  child: Widgets.buildText("New to Noble Assets", context,
                       color: "main.primary"),
                 ),
               if (direction == "horizontal" && !item.containsKey("isNew") ||

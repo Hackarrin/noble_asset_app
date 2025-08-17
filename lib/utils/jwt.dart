@@ -1,28 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cribsfinder/utils/apis.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/fetch.dart';
-import 'package:cribsfinder/utils/helpers.dart';
+import 'package:nobleassets/utils/apis.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/fetch.dart';
+import 'package:nobleassets/utils/helpers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 class JWT {
   static checkEmailPhone(phone, country, bool isEmail) async {
-    final response = await Fetch(API.userLogin, {
+    final response = await Fetch(API.login, {
       (isEmail ? "checkEmail" : "checkPhone"): phone,
       "country": country,
     }).load();
     return response["status"].toString();
   }
 
-  static verifyAccount(code, method, recipient, country) async {
-    final response = await Fetch(API.userLogin, {
+  static verifyAccount(code) async {
+    final response = await Fetch(API.verifyCode, {
       "code": code,
-      "method": method,
-      "recipient": recipient,
-      "country": country,
-      "verify": "",
     }).load();
     final status = response["status"].toString();
     final data = response["data"] ?? {};
@@ -40,21 +36,13 @@ class JWT {
         throw Exception(
             "Something went wrong while verifying your account! Please confirm and try again.");
       }
-    } else if (method == "email") {
-      Helpers.writePref(Defaults.profile, jsonEncode(data));
     } else {
       return data;
     }
   }
 
-  static sendVerifyCode(recipient, country, method) async {
-    final response = await Fetch(API.userLogin, {
-      "send": "",
-      "recipient": recipient,
-      "country": country,
-      "method": method,
-    }).load();
-
+  static sendVerifyCode() async {
+    final response = await Fetch(API.sendCode, {}, method: "get").load();
     if (response["status"].toString() != "success") {
       throw Exception("Something went wrong! Please try again later.");
     }
@@ -83,47 +71,79 @@ class JWT {
       var version = iosInfo.systemVersion;
       os = "$systemName $version";
     }
-    Fetch(API.userLogin, {
-      "name": name,
-      "os": os,
-      "deviceId": deviceId,
-      "status": status,
-      "type": type,
-    }).load();
+    if (status == 1) {
+      Fetch(API.saveDevice, {
+        "name": name,
+        "os": os,
+        "deviceId": deviceId,
+        "status": status,
+        "type": type,
+        "token": ""
+      }).load();
+    } else {
+      Fetch(API.logoutDevice, {
+        "deviceId": deviceId,
+      }).load();
+    }
   }
 
   static signup(values) async {
-    final response = await Fetch(API.userSignup, values).load();
+    final response = await Fetch(API.signup, values).load();
     final status = response["status"] ?? "";
     final data = response["data"] ?? {};
-    final token = response["token"] ?? "";
+    final token = data["token"] ?? "";
+
+    print("respons token $token");
 
     if (status == "success") {
       Helpers.writePref(Defaults.userid, token);
       Helpers.writePref(Defaults.profile, jsonEncode(data));
+      Helpers.writePref(Defaults.showBalance, "1");
       logDevice(1);
+      Helpers.getHome();
       return true;
     }
-    if (status == "email_taken") {
+    if (status == "malformed_data") {
       throw Exception(
-          "The email address you provided is already in use. Please confirm and try again.");
+          "An error occurred while attempting to sign you up! Please try again later.");
+    }
+    if (status == "malformed_name") {
+      throw Exception("Please enter your first and last name to proceed.");
+    }
+    if (status == "name_exists") {
+      throw Exception(
+          "The name you entered is already in use! Please enter another to proceed or login to your account.");
+    }
+    if (status == "email_exists") {
+      throw Exception(
+          "This email address is already in use! Please enter another to proceed or login to your account.");
+    }
+    if (status == "phone_exists") {
+      throw Exception(
+          "This phone number is already in use! Please enter another to proceed or login to your account.");
+    }
+    if (status == "invalid_ref") {
+      throw Exception(
+          "Your referrer ID / email address is invalid! Please confirm and try again or leave the field empty to proceed.");
     }
     throw Exception(
         "An error occured while we were signing you up! We apologize for this. Please try again later.");
   }
 
   static login(values) async {
-    final response = await Fetch(API.userLogin, values).load();
+    final response = await Fetch(API.login, values).load();
     final status = response["status"] ?? "";
     final data = response["data"] ?? {};
-    final token = response["token"] ?? "";
+    final token = data["token"] ?? "";
     if (status == "success") {
       Helpers.writePref(Defaults.userid, token);
       Helpers.writePref(Defaults.profile, jsonEncode(data));
+      Helpers.writePref(Defaults.showBalance, "1");
       logDevice(1);
+      Helpers.getHome();
       return;
     }
-    if (response["status"] == "invalid_login") {
+    if (response["status"] == "not_found") {
       throw Exception(
           "Invalid email address or password! Please confirm and try again");
     }
@@ -136,7 +156,7 @@ class JWT {
   }
 
   static Future<Map<String, dynamic>> getHome(String category) async {
-    final response = await Fetch(API.home,
+    final response = await Fetch(API.switchAccount,
         {"userToken": await Helpers.getToken(), "category": category}).load();
     if (response["status"] == "success") {
       return response["data"];
@@ -146,7 +166,7 @@ class JWT {
   }
 
   static fetchWallet(values) async {
-    final response = await Fetch(API.wallet, values).load();
+    final response = await Fetch(API.login, values).load();
     if (response["status"] == "success") {
       return response["data"];
     }
@@ -172,21 +192,25 @@ class JWT {
   }
 
   static resetPassword(values) async {
-    final response = await Fetch(API.forgot, values).load();
+    final response = await Fetch(API.reset, values).load();
     if (response["status"] == "success") {
       return true;
     }
-    if (response["status"] == "expired_code") {
+    if (response["status"] == "code_expired") {
       throw Exception(
           "The reset code provided has expired! Please request another to proceed.");
     }
-    if (response["status"] == "used_code") {
+    if (response["status"] == "code_used") {
       throw Exception(
           "The reset code provided has already been used! Please request another to proceed.");
     }
-    if (response["status"] == "invalid_code") {
+    if (response["status"] == "code_invalid") {
       throw Exception(
           "The reset code provided is invalid or does not exist! Please request another to proceed.");
+    }
+    if (response["status"] == "same_password") {
+      throw Exception(
+          "This password has already been used by you! Please enter a different password to proceed.");
     }
     throw Exception(
         "An error occured while we were resetting your password! We apologize for this. Please try again later.");
@@ -194,7 +218,7 @@ class JWT {
 
   static filterHotels(filters, selectedFilters, page, perPage, sortBy,
       priceSort, isRental) async {
-    print("got here. - ${API.filterHotels} ${{
+    print("got here. - ${API.login} ${{
       ...filters,
       ...selectedFilters,
       "location": (filters.isNotEmpty && filters.containsKey("location"))
@@ -207,7 +231,7 @@ class JWT {
       "isRental": isRental,
       "userToken": await Helpers.getToken(),
     }}");
-    final response = await Fetch(API.filterHotels, {
+    final response = await Fetch(API.login, {
       ...filters,
       ...selectedFilters,
       "location": (filters.isNotEmpty && filters.containsKey("location"))
@@ -227,7 +251,7 @@ class JWT {
   }
 
   static getHotel(listingId) async {
-    final response = await Fetch(API.listing, {
+    final response = await Fetch(API.login, {
       "userToken": await Helpers.getToken(),
       "propertyId": listingId
     }).load();
@@ -242,7 +266,7 @@ class JWT {
   }
 
   static getShortlets() async {
-    final response = await Fetch(API.shortlets, {
+    final response = await Fetch(API.login, {
       "userToken": await Helpers.getToken(),
     }).load();
     if (response["status"] == "success") {
@@ -253,7 +277,7 @@ class JWT {
 
   static filterShortlets(
       filters, selectedFilters, page, perPage, sortBy, priceSort) async {
-    final response = await Fetch(API.filterShortlets, {
+    final response = await Fetch(API.login, {
       ...filters,
       ...selectedFilters,
       "location":
@@ -273,7 +297,7 @@ class JWT {
   }
 
   static getShortlet(shortletId) async {
-    final response = await Fetch(API.shortlet, {
+    final response = await Fetch(API.login, {
       "shortletId": shortletId,
       "userToken": await Helpers.getToken(),
     }).load();
@@ -288,7 +312,7 @@ class JWT {
   }
 
   static getAutomobiles() async {
-    final response = await Fetch(API.automobiles, {
+    final response = await Fetch(API.login, {
       "userToken": await Helpers.getToken(),
     }).load();
     if (response["status"] == "success") {
@@ -299,7 +323,7 @@ class JWT {
 
   static filterAutomobiles(
       filters, selectedFilters, page, perPage, sortBy, priceSort) async {
-    final response = await Fetch(API.filterAutomobiles, {
+    final response = await Fetch(API.login, {
       ...filters,
       ...selectedFilters,
       "location":
@@ -319,7 +343,7 @@ class JWT {
   }
 
   static getAutomobile(automobileId) async {
-    final response = await Fetch(API.automobile, {
+    final response = await Fetch(API.login, {
       "automobileId": automobileId,
       "userToken": await Helpers.getToken(),
     }).load();
@@ -335,7 +359,7 @@ class JWT {
 
   static Future<Map<dynamic, dynamic>> getWishlist(
       search, status, filters, page, perPage, order, sortBy) async {
-    final response = await Fetch(API.userWishlist, {
+    final response = await Fetch(API.login, {
       ...filters,
       "page": page,
       "perPage": perPage,
@@ -350,9 +374,55 @@ class JWT {
         "We cannot fetch your wishlist at the moment! Please check back later.");
   }
 
+  static Future<Map<dynamic, dynamic>> getTransactions(
+      dateFrom, dateTo, status, search) async {
+    final response = await Fetch(API.login, {
+      "dateFrom": dateFrom,
+      "dateTo": dateTo,
+      "status": status,
+      "search": search
+    }).load();
+    if (response["status"] == "success") {
+      return response;
+    }
+    throw Exception(
+        "We cannot fetch your transactions at the moment! Please check back later.");
+  }
+
+  static Future<Map<dynamic, dynamic>> getMessages(search) async {
+    final response = await Fetch(API.login, {
+      "search": search,
+      "perpage": "100",
+      "order": "desc",
+      "sortBy": "date"
+    }).load();
+    if (response["status"] == "success") {
+      return response;
+    }
+    throw Exception(
+        "We cannot fetch your messages at the moment! Please check back later.");
+  }
+
   static Future<Map<dynamic, dynamic>> getBookings(
       search, status, filters, page, perPage, order, sortBy) async {
-    final response = await Fetch(API.bookings, {
+    final response = await Fetch(API.login, {
+      ...filters,
+      "page": page,
+      "perPage": perPage,
+      "sortBy": sortBy,
+      "search": search,
+      "status": status,
+    }).load();
+    if (response["status"] == "success") {
+      return response;
+    }
+    throw Exception(
+        "We cannot fetch your bookings at the moment! Please check back later.");
+  }
+
+  static Future<Map<dynamic, dynamic>> getReviews(
+      search, status, filters, page, perPage, order, sortBy) async {
+    final response = await Fetch(API.login, {
       ...filters,
       "page": page,
       "perPage": perPage,
@@ -368,7 +438,7 @@ class JWT {
   }
 
   static Future<Map<String, dynamic>> getBooking(bookingId) async {
-    final response = await Fetch(API.bookings, {
+    final response = await Fetch(API.login, {
       "bookingId": bookingId,
     }).load();
     if (response["status"] == "success") {
@@ -381,8 +451,32 @@ class JWT {
     throw Exception("An error has occurred! Please check back later.");
   }
 
+  static cancelBooking(itemId) async {
+    final response = await Fetch(API.login, {
+      "remove": itemId,
+    }).load();
+    if (response["status"] == "success") {
+      return true;
+    }
+    if (response["status"] == "item_not_found") {
+      throw Exception(
+          "The item you are looking for does not exists! Please check back later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static rateBooking(itemId, values) async {
+    final response =
+        await Fetch(API.login, {"add": itemId, "values": values}).load();
+    if (response["status"] == "success") {
+      return true;
+    }
+    throw Exception(
+        "Something went wrong while processing your request! Please try again later.");
+  }
+
   static addWishlist(itemId, itemType) async {
-    final response = await Fetch(API.wishlist, {
+    final response = await Fetch(API.login, {
       "add": itemId,
       "itemType": itemType,
       "userToken": await Helpers.getToken(),
@@ -398,7 +492,7 @@ class JWT {
   }
 
   static removeWishlist(itemId, itemType) async {
-    final response = await Fetch(API.wishlist, {
+    final response = await Fetch(API.login, {
       "remove": itemId,
       "itemType": itemType,
       "userToken": await Helpers.getToken(),
@@ -417,12 +511,12 @@ class JWT {
     // dispatch({
     //   type: "LOGOUT",
     // });
-    Fetch(API.userSignup, {logout: "", "userToken": await Helpers.getToken()})
+    Fetch(API.login, {logout: "", "userToken": await Helpers.getToken()})
         .load();
   }
 
   static contact(values) async {
-    final response = await Fetch(API.contact, {
+    final response = await Fetch(API.login, {
       ...values,
       "contact": "",
       "userToken": await Helpers.getToken(),
@@ -434,7 +528,7 @@ class JWT {
   }
 
   static getCheckoutSettings() async {
-    final response = await Fetch(API.checkout, {
+    final response = await Fetch(API.login, {
       "getSettings": 1,
       "userToken": await Helpers.getToken(),
     }).load();
@@ -445,7 +539,7 @@ class JWT {
   }
 
   static Future<String> getAccessCode(double total) async {
-    final response = await Fetch(API.checkout, {
+    final response = await Fetch(API.login, {
       "getAccessCode": 1,
       "amount": total,
       "userToken": await Helpers.getToken(),
@@ -459,7 +553,7 @@ class JWT {
 
   static Future<String> submitOrder(
       cart, selectedMethod, processingFee, paymentRef, customer, total) async {
-    final response = await Fetch(API.checkout, {
+    final response = await Fetch(API.login, {
       "order": "",
       "cart": cart,
       "selectedMethod": selectedMethod,
@@ -491,8 +585,108 @@ class JWT {
     throw Exception("An error has occurred! Please check back later.");
   }
 
+  static updateNextOfKin(values) async {
+    final response = await Fetch(API.setNOK, values).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "error") {
+      throw Exception(
+          "Something went wrong while updating your next of kin. Please try again later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static updateSelfie(selfie) async {
+    final response = await Fetch(API.setSelfie, {"selfie": selfie}).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "no_bvn_found") {
+      throw Exception("Please enter your BVN then try again later.");
+    }
+    if (response["status"] == "verification_failed") {
+      throw Exception(
+          "Your selfie verification failed! \nPlease make sure you are in a well-lit area then try again.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static updateProof(proof) async {
+    final response =
+        await Fetch(API.setProofOfAddress, {"proofOfAddress": proof}).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "no_bvn_found") {
+      throw Exception("Please enter your BVN then try again later.");
+    }
+    if (response["status"] == "no_address_found") {
+      throw Exception(
+          "Please enter your current address then try again later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static downloadStatement() async {
+    final response = await Fetch(API.getStatement, {}, method: "get").load();
+    if (response["status"] == "success") {
+      return true;
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static downloadPortfolio() async {
+    final response = await Fetch(API.getPortfolio, {}, method: "get").load();
+    if (response["status"] == "success") {
+      return true;
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static updateBVN(bvn) async {
+    final response = await Fetch(API.setBVN, {"bvn": bvn}).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "error") {
+      throw Exception(
+          "Something went wrong while updating your BVN. Please try again later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static updateID(values) async {
+    final response = await Fetch(API.setVerification, values).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "error") {
+      throw Exception(
+          "Something went wrong while updating your identification information. Please try again later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static updatePassword(values) async {
+    final response = await Fetch(API.setPassword, values).load();
+    if (response["status"] == "success") {
+      await Helpers.fetchProfile();
+      return true;
+    }
+    if (response["status"] == "invalid_password") {
+      throw Exception("Invalid password. Please confirm and try again later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
   static updateSettings(values, type) async {
-    final response = await Fetch(API.settings, {
+    final response = await Fetch(API.login, {
       "update_profile": "",
       ...values,
       "type": type,
@@ -531,7 +725,7 @@ class JWT {
   }
 
   static getDevices() async {
-    final response = await Fetch(API.misc, {
+    final response = await Fetch(API.login, {
       "devices": "",
     }).load();
     if (response["status"] == "success") {
@@ -541,7 +735,7 @@ class JWT {
   }
 
   static logoutDevice(values) async {
-    final response = await Fetch(API.userLogin, {
+    final response = await Fetch(API.login, {
       "name": values["name"],
       "os": values["os"],
       "deviceId": values["deviceId"],
@@ -555,7 +749,7 @@ class JWT {
   }
 
   static getPricing(category) async {
-    final response = await Fetch(API.pricing, {
+    final response = await Fetch(API.login, {
       "userToken": await Helpers.getToken(),
       "category": category,
     }).load();
@@ -566,7 +760,7 @@ class JWT {
   }
 
   static addPayoutAccount(values) async {
-    final response = await Fetch(API.settings, {
+    final response = await Fetch(API.login, {
       ...values,
       "bank": values["bank"]["code"].toString(),
       "bankName": values["bank"]["name"].toString(),
@@ -591,7 +785,7 @@ class JWT {
   }
 
   static transferWallet(values, method, pin) async {
-    final response = await Fetch(API.userWallet, {
+    final response = await Fetch(API.login, {
       "transfer": "",
       ...values,
       "method": method,
@@ -612,7 +806,7 @@ class JWT {
   }
 
   static exchangeWallet(values, method, pin) async {
-    final response = await Fetch(API.userWallet, {
+    final response = await Fetch(API.login, {
       "exchange": "",
       ...values,
       "method": method,
@@ -637,7 +831,7 @@ class JWT {
   }
 
   static getBanks() async {
-    final response = await Fetch(API.misc, {"banks": ""}).load();
+    final response = await Fetch(API.login, {"banks": ""}).load();
     if (response["status"] == "success") {
       return response["data"];
     }
@@ -645,7 +839,7 @@ class JWT {
   }
 
   static getWithdrawFee() async {
-    final response = await Fetch(API.misc, {"withdrawFee": ""}).load();
+    final response = await Fetch(API.login, {"withdrawFee": ""}).load();
     if (response["status"] == "success") {
       return response["data"];
     }
@@ -653,7 +847,17 @@ class JWT {
   }
 
   static getExchangeRateFees() async {
-    final response = await Fetch(API.misc, {"exchangeRates": ""}).load();
+    final response = await Fetch(API.login, {"exchangeRates": ""}).load();
+    if (response["status"] == "success") {
+      return response["data"];
+    }
+    return {};
+  }
+
+  static uploadFiles(String fileName, List<String> files) async {
+    final response = await Fetch(API.login, {},
+            isFormData: true, method: "files", fileName: fileName, files: files)
+        .load();
     if (response["status"] == "success") {
       return response["data"];
     }

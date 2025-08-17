@@ -1,15 +1,15 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/room_item.dart';
-import 'package:cribsfinder/globals/shortlet_item.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/bookings/shortlet.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/markers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/room_item.dart';
+import 'package:nobleassets/globals/shortlet_item.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/bookings/shortlet.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/markers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -55,6 +55,7 @@ class _ShortletState extends State<Shortlet>
     "infants": 0
   };
   List<dynamic> _selectedRooms = [];
+  var imageIndex = 0;
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -538,11 +539,11 @@ class _ShortletState extends State<Shortlet>
               if (!loading) {
                 SharePlus.instance.share(ShareParams(
                     title:
-                        "Check out ${_data["title"].toString()} on Cribsfinder",
+                        "Check out ${_data["title"].toString()} on Noble Assets",
                     subject:
-                        "Check out ${_data["title"].toString()} on Cribsfinder",
+                        "Check out ${_data["title"].toString()} on Noble Assets",
                     uri: Uri.https(
-                      "cribsfinder.com",
+                      "nobleassets.com",
                       "/place/${_data["listingId"]}-${_data["title"].toString().toLowerCase().replaceAll(" ", "-")}",
                     )));
               }
@@ -591,6 +592,8 @@ class _ShortletState extends State<Shortlet>
   }
 
   Widget buildContent(double screenWidth) {
+    final images = _data["images"] ?? [];
+    print("dante - image $images");
     return Stack(
       children: [
         SingleChildScrollView(
@@ -600,88 +603,106 @@ class _ShortletState extends State<Shortlet>
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Sheets.showImagePreview(
-                        _data["images"] ?? [], _data["title"].toString(),
-                        type: "shortlet");
-                  },
-                  child: Stack(
-                    children: [
-                      Helpers.getPhoto(
-                          (_data["images"] ?? []).isNotEmpty
-                              ? _data["images"][_selectedImageIndex]
-                              : _data["image"].toString(),
-                          height: 350.0,
-                          radius: 0.0,
-                          type: "shortlet"),
-                      if ((_data["images"] ?? []).length > 1)
+                ConstrainedBox(
+                    constraints: BoxConstraints.loose(Size(screenWidth, 350.0)),
+                    child: Stack(
+                      children: [
+                        Swiper(
+                          outer: true,
+                          layout: SwiperLayout.DEFAULT,
+                          itemHeight: 350.0,
+                          itemWidth: screenWidth,
+                          onIndexChanged: (v) {
+                            setState(() {
+                              imageIndex = v;
+                            });
+                          },
+                          loop: true,
+                          itemBuilder: (BuildContext context, int index) {
+                            final image = images[index];
+                            return GestureDetector(
+                              onTap: () {
+                                Sheets.showImagePreview(_data["images"] ?? [],
+                                    _data["title"].toString(),
+                                    startIndex: index, type: "shortlet");
+                              },
+                              child: Helpers.getPhoto(image,
+                                  height: 350.0, radius: 0.0, type: "hotel"),
+                            );
+                          },
+                          itemCount: images.length,
+                        ),
                         Positioned(
-                          bottom: 30.0,
-                          left: 30.0,
-                          right: 30.0,
-                          child: SizedBox(
-                            child: UnconstrainedBox(
+                          bottom: 10.0,
+                          left: 0,
+                          right: 0,
+                          child: ConstrainedBox(
+                            constraints:
+                                BoxConstraints(minHeight: 40, maxHeight: 80),
+                            child: FittedBox(
                               child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Palette.get("background.paper"),
-                                      borderRadius: BorderRadius.circular(5.0)),
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    spacing: 10.0,
-                                    children: [
-                                      for (var i = 0;
-                                          i <
-                                              ((_data["images"] ?? []).length >
-                                                      6
-                                                  ? 6
-                                                  : (_data["images"] ?? [])
-                                                      .length);
-                                          i += 1)
-                                        Stack(
+                                decoration: BoxDecoration(
+                                    color: Palette.get("background.neutral"),
+                                    borderRadius: BorderRadius.circular(20.0)),
+                                padding: const EdgeInsets.all(8.0),
+                                margin: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  spacing: 10.0,
+                                  children: [
+                                    for (int i = 0;
+                                        i <
+                                            (images.length > 6
+                                                ? 6
+                                                : images.length);
+                                        i += 1)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                            border: imageIndex == i
+                                                ? Border.all(
+                                                    color: Palette.get(
+                                                        "main.primary"),
+                                                    width: 1.5)
+                                                : null,
+                                            borderRadius:
+                                                BorderRadius.circular(12.0)),
+                                        padding: const EdgeInsets.all(1),
+                                        child: Stack(
                                           children: [
-                                            ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                child: Helpers.getPhoto(
-                                                    _data["images"][0],
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    type: "shortlet")),
-                                            if (_data["images"].length > 6 &&
-                                                i == 5)
-                                              Positioned(
-                                                  top: 0,
-                                                  right: 0,
-                                                  child: Container(
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Palette.get(
-                                                            "background.overlay"),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    12.0)),
-                                                    child: Center(
-                                                      child: Widgets.buildText(
-                                                          "+${(_data["images"].length - 6).toString()}",
-                                                          context,
-                                                          color: "text.white",
-                                                          isMedium: true),
-                                                    ),
-                                                  ))
+                                            Helpers.getPhoto(images[i],
+                                                width: 50.0,
+                                                height: 50.0,
+                                                type: "shortlet"),
+                                            if (images.length > 6 && i == 5)
+                                              Container(
+                                                width: 50.0,
+                                                height: 50.0,
+                                                decoration: BoxDecoration(
+                                                    color: Palette.get(
+                                                            "text.black")
+                                                        .withAlpha(150),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0)),
+                                                child: Center(
+                                                  child: Widgets.buildText(
+                                                      "+${images.length - 6}",
+                                                      context,
+                                                      isMedium: true,
+                                                      color: "text.white"),
+                                                ),
+                                              )
                                           ],
-                                        )
-                                    ],
-                                  )),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         )
-                    ],
-                  ),
-                ),
+                      ],
+                    )),
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(

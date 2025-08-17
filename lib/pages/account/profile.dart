@@ -1,7 +1,7 @@
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -15,7 +15,10 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
-  final menus = [
+  Map<String, dynamic> profile = {};
+  Map<String, dynamic> _company = {};
+  Map<String, dynamic> _compliance = {};
+  List menus = [
     {
       "title": "Manage Account",
       "options": [
@@ -25,70 +28,58 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           "page": "/account",
         },
         {
-          "name": "Login & Security",
-          "icon": "insert-alt",
+          "name": "Next of Kin",
+          "icon": "people-roof",
+          "page": "/nok",
+        },
+        {
+          "name": "Compliance",
+          "icon": "compliance-document",
+          "page": "/compliance",
+        },
+        {
+          "name": "Security",
+          "icon": "shield-check",
           "page": "/security",
         },
-      ],
-      "isLogInRequired": true
-    },
-    {
-      "title": "Preferences",
-      "options": [
         {
-          "name": "Two-Factor Authentication",
-          "icon": "shield-keyhole",
-          "page": "/2fa"
+          "name": "Statements & Reports",
+          "icon": "document",
+          "page": "/statements",
         },
-        // {
-        //   "name": "Device Preferences",
-        //   "icon": "tablet-android",
-        //   "page": "/device-preferences"
-        // },
         {
-          "name": "Notification",
-          "icon": "bell-notification-social-media",
-          "page": "/notifications"
+          "name": "Settings",
+          "icon": "settings",
+          "page": "/settings",
         },
       ],
       "isLogInRequired": true
     },
     {
-      "title": "Travel Activity",
+      "title": "Wallets & Referral",
       "options": [
-        {"name": "Wishlist", "icon": "wishlist-heart", "page": "2"},
-        {"name": "My Reviews", "icon": "feedback-review", "page": "/reviews"},
-        {"name": "My Bookings", "icon": "book-alt", "page": "1"},
-      ],
-      "isLogInRequired": true
+        {"name": "Wallet", "icon": "wallet", "page": "/wallet"},
+        {"name": "Refer & Earn", "icon": "refer-arrow", "page": "/referrals"},
+      ]
     },
-    // {
-    //   "title": "Referral & Payment",
-    //   "options": [
-    //     {
-    //       "name": "Refer a Host or Guest",
-    //       "icon": "refer-arrow",
-    //       "page": "/referrals"
-    //     },
-    //     {
-    //       "name": "Payment Method",
-    //       "icon": "money-bill-wave",
-    //       "page": "/payment-method"
-    //     },
-    //     {"name": "Wallet", "icon": "wallet", "page": "/wallet"},
-    //   ]
-    // },
     {
-      "title": "Help & Support",
+      "title": "Get in touch",
       "options": [
-        {"name": "Contact Support", "icon": "user-headset", "page": "/support"},
-        {"name": "Call Center", "icon": "phone-call", "page": "/call"},
+        {
+          "name": "Contact Us",
+          "icon": "user-headset",
+          "page": "https://nobleassets.com/contact?is_mobile=1"
+        },
+        {
+          "name": "Call Center",
+          "icon": "phone-call",
+          "page": "tel:+23470474743662"
+        },
         {
           "name": "Visit the Help Center",
           "icon": "group-call",
-          "page": "/help"
+          "page": "https://nobleassets.com/faq?is_mobile=1"
         },
-        // {"name": "How Cribsfinder Works", "icon": "info", "page": "/work"},
         {
           "name": "Follow Us on Social Media",
           "icon": "following",
@@ -98,41 +89,54 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
       ]
     },
     {
-      "title": "Legal & Privacy",
+      "title": "Learn more",
       "options": [
         {
-          "name": "About Cribsfinder",
+          "name": "About Noble Assets",
           "icon": "user-headset",
-          "page": "https://cribsfinder.com/about"
+          "page": "https://nobleassets.com/about?is_mobile=1"
         },
         {
           "name": "FAQ",
           "icon": "interrogation",
-          "page": "https://cribsfinder.com/faq"
+          "page": "https://nobleassets.com/faq?is_mobile=1"
         },
         {
           "name": "Terms of Services",
           "icon": "info",
-          "page": "https://cribsfinder.com/terms"
+          "page": "https://nobleassets.com/terms?is_mobile=1"
         },
         {
           "name": "Privacy Policy",
           "icon": "user-lock",
-          "page": "https://cribsfinder.com/privacy"
+          "page": "https://nobleassets.com/privacy?is_mobile=1"
         },
       ]
     }
   ];
   bool isLoggedIn = false;
   String _version = "";
-  Map<String, dynamic> profile = {};
 
   void get() async {
     final userId = await Helpers.readPref(Defaults.userid);
-    final details = await Helpers.getProfile();
+    final data = await Helpers.getProfile(key: "profile");
+    final company = await Helpers.getCompany();
     String version = await Helpers.getCurrentVersion();
+    final compliance = await Helpers.checkCompliance();
     setState(() {
-      profile = details["user"] ?? {};
+      profile = data;
+      _company = company;
+      _compliance = compliance;
+      if (_company.isNotEmpty) {
+        menus[0]["options"].insert(
+          1,
+          {
+            "name": "Company details",
+            "icon": "building",
+            "page": "/company",
+          },
+        );
+      }
       _version = version;
       isLoggedIn = userId.isNotEmpty;
     });
@@ -153,6 +157,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    print("response $_compliance");
     return Scaffold(
       backgroundColor: Palette.getColor(context, "background", "default"),
       appBar: AppBar(
@@ -163,18 +168,20 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
           Padding(
               padding: const EdgeInsets.only(right: 15.0),
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.pushNamed(context, "/contact");
+                  },
                   child: Helpers.fetchIcons("user-headset", "regular",
-                      color: "text.black", size: 24.0))),
+                      color: "text.primary", size: 24.0))),
           Padding(
             padding: const EdgeInsets.only(right: 15.0),
             child: GestureDetector(
                 onTap: () async {
-                  await Navigator.pushNamed(context, "/account");
+                  await Navigator.pushNamed(context, "/settings");
                   get();
                 },
                 child: Helpers.fetchIcons("settings", "regular",
-                    color: "text.black", size: 24.0)),
+                    color: "text.primary", size: 24.0)),
           )
         ],
         elevation: 0,
@@ -192,7 +199,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 if (isLoggedIn)
                   Container(
                     decoration: BoxDecoration(
-                        color: Palette.get("text.white"),
+                        color: Palette.get("background.paper"),
                         borderRadius: BorderRadius.circular(10.0)),
                     child: GestureDetector(
                       onTap: () async {
@@ -224,32 +231,31 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: [
                                       Widgets.buildText(
-                                          profile["name"] ?? "", context,
+                                          "${profile["fname"]} ${profile["lname"]}",
+                                          context,
                                           isMedium: true),
+                                      Widgets.buildText(
+                                          _company.isEmpty
+                                              ? (profile["email"]
+                                                      .toString()
+                                                      .isNotEmpty
+                                                  ? profile["email"].toString()
+                                                  : Defaults.accountTypes[
+                                                      num.tryParse(profile[
+                                                                      "type"]
+                                                                  .toString())
+                                                              ?.toInt() ??
+                                                          0])
+                                              : _company["name"].toString(),
+                                          context,
+                                          color: "text.secondary"),
                                       const SizedBox(height: 5.0),
                                       Column(
                                         spacing: 5.0,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Helpers.fetchIcons(
-                                                  "driver-man", "solid",
-                                                  color: "text.primary",
-                                                  size: 16.0),
-                                              const SizedBox(width: 5.0),
-                                              Widgets.buildText(
-                                                  Helpers.formatNumMonths(
-                                                      profile["dateAdded"]
-                                                          .toString()),
-                                                  context,
-                                                  weight: 400,
-                                                  size: 13.0,
-                                                  color: "text.disabled"),
-                                            ],
-                                          ),
-                                          if (profile["isVerified"]
+                                          if (_compliance["percent"]
                                                   .toString() ==
-                                              "1")
+                                              "100")
                                             Row(
                                               children: [
                                                 Helpers.fetchIcons(
@@ -304,7 +310,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                     item["title"].toString(), context,
                                     size: 13.0,
                                     weight: 500,
-                                    color: "text.black"),
+                                    color: "text.primary"),
                                 const SizedBox(
                                   height: 15.0,
                                 ),
@@ -341,8 +347,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                                 arguments:
                                                     item["page"].toString());
                                           } else if (item["page"]
-                                              .toString()
-                                              .startsWith("http")) {
+                                                  .toString()
+                                                  .startsWith("http") ||
+                                              item["page"]
+                                                  .toString()
+                                                  .startsWith("tel:")) {
                                             Helpers.openLink(
                                                 item["page"].toString(),
                                                 item["name"].toString());
@@ -352,11 +361,11 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             SharePlus.instance
                                                 .share(ShareParams(
                                               title:
-                                                  "Find top stays and rentals at Cribsfinder",
+                                                  "Find top stays and rentals at Noble Assets",
                                               subject:
-                                                  "Find top stays and rentals at Cribsfinder",
+                                                  "Find top stays and rentals at Noble Assets",
                                               text:
-                                                  "Check out the best stays and rental at Cribsfinder. \n cribsfinder.com",
+                                                  "Check out the best stays and rental at Noble Assets. \n nobleassets.com",
                                             ));
                                           }
                                         },
@@ -440,7 +449,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                 Widgets.buildText("Version $_version", context, isCenter: true),
                 const SizedBox(height: 10.0),
                 Widgets.buildText(
-                    "© ${DateTime.now().year} Cribsfinder LTD. All rights reserved.",
+                    "© ${DateTime.now().year} Noble Assets Management LTD. All rights reserved.",
                     context,
                     isCenter: true),
                 const SizedBox(height: 50.0),

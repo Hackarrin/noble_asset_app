@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';

@@ -1,82 +1,42 @@
-import 'package:cribsfinder/pages/auth/splash.dart';
-import 'package:cribsfinder/pages/auth/login.dart';
-import 'package:cribsfinder/pages/auth/create_account/get_started.dart';
-import 'package:cribsfinder/pages/auth/create_account/location.dart';
-import 'package:cribsfinder/pages/auth/create_account/notification.dart';
-import 'package:cribsfinder/pages/auth/forgot_password.dart';
-import 'package:cribsfinder/pages/auth/reset_password.dart';
-import 'package:cribsfinder/pages/auth/create_account/signup_verify.dart';
-import 'package:cribsfinder/pages/auth/create_account/complete_profile.dart';
-import 'package:cribsfinder/pages/auth/create_account/account_info.dart';
-import 'package:cribsfinder/pages/auth/create_account/signup.dart';
-import 'package:cribsfinder/pages/hotels/hotel_categories.dart';
-import 'package:cribsfinder/pages/hotels/hotel_filter.dart';
-import 'package:cribsfinder/pages/hotels/hotel_search.dart';
-import 'package:cribsfinder/pages/hotels/hotel_nearby.dart';
-import 'package:cribsfinder/pages/hotels/hotel_recommended.dart';
-import 'package:cribsfinder/pages/hotels/hotel_top_destinations.dart';
-import 'package:cribsfinder/pages/hotels/hotel.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:nobleassets/pages/account/message.dart';
+import 'package:nobleassets/pages/account/messages.dart';
+import 'package:nobleassets/pages/account/next_of_kin.dart';
+import 'package:nobleassets/pages/account/social.dart';
+import 'package:nobleassets/pages/auth/splash.dart';
+import 'package:nobleassets/pages/auth/login.dart';
+import 'package:nobleassets/pages/auth/create_account/get_started.dart';
+import 'package:nobleassets/pages/auth/create_account/location.dart';
+import 'package:nobleassets/pages/auth/create_account/notification.dart';
+import 'package:nobleassets/pages/auth/forgot_password.dart';
+import 'package:nobleassets/pages/auth/reset_password.dart';
+import 'package:nobleassets/pages/auth/create_account/signup_verify.dart';
+import 'package:nobleassets/pages/auth/create_account/complete_profile.dart';
+import 'package:nobleassets/pages/auth/create_account/account_info.dart';
+import 'package:nobleassets/pages/auth/create_account/signup.dart';
 
-import 'package:cribsfinder/pages/shortlets/shortlet_search.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet_filter.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet_categories.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet_recommended.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet_nearby.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet_top_destinations.dart';
-import 'package:cribsfinder/pages/shortlets/shortlet.dart';
-
-import 'package:cribsfinder/pages/events/event_categories.dart';
-import 'package:cribsfinder/pages/events/events_today.dart';
-import 'package:cribsfinder/pages/events/event_search.dart';
-import 'package:cribsfinder/pages/events/event_filter.dart';
-import 'package:cribsfinder/pages/events/event.dart';
-
-import 'package:cribsfinder/pages/attractions/attraction_categories.dart';
-import 'package:cribsfinder/pages/attractions/attractions_explore.dart';
-import 'package:cribsfinder/pages/attractions/attraction_filter.dart';
-import 'package:cribsfinder/pages/attractions/attraction.dart';
-
-import 'package:cribsfinder/pages/automobile/automobile_filter.dart';
-import 'package:cribsfinder/pages/automobile/automobile_search.dart';
-import 'package:cribsfinder/pages/automobile/automobile_categories.dart';
-import 'package:cribsfinder/pages/automobile/automobile_recommended.dart';
-import 'package:cribsfinder/pages/automobile/automobile.dart';
-
-import 'package:cribsfinder/pages/cruise/cruise_filter.dart';
-import 'package:cribsfinder/pages/cruise/cruise_search.dart';
-import 'package:cribsfinder/pages/cruise/cruise_categories.dart';
-import 'package:cribsfinder/pages/cruise/cruise_recommended.dart';
-import 'package:cribsfinder/pages/cruise/cruise.dart';
-
-import 'package:cribsfinder/pages/property/filter.dart';
-import 'package:cribsfinder/pages/property/search.dart';
-import 'package:cribsfinder/pages/property/categories.dart';
-import 'package:cribsfinder/pages/property/recommended.dart';
-import 'package:cribsfinder/pages/property/property.dart';
-import 'package:cribsfinder/pages/property/top_agents.dart';
-import 'package:cribsfinder/pages/property/nearby.dart';
-
-import 'package:cribsfinder/pages/checkout.dart';
-import 'package:cribsfinder/pages/account/booking.dart';
-import 'package:cribsfinder/pages/account/account.dart';
-import 'package:cribsfinder/pages/account/edit_profile.dart';
-import 'package:cribsfinder/pages/account/security.dart';
-import 'package:cribsfinder/pages/account/reset_password.dart';
-import 'package:cribsfinder/pages/account/change_pin.dart';
-import 'package:cribsfinder/pages/account/pin.dart';
-import 'package:cribsfinder/pages/account/2fa.dart';
-import 'package:cribsfinder/pages/account/devices.dart';
-import 'package:cribsfinder/pages/account/device_preferences.dart';
-import 'package:cribsfinder/pages/account/notifications.dart';
-import 'package:cribsfinder/pages/account/reviews.dart';
-import 'package:cribsfinder/pages/account/payment_method.dart';
-import 'package:cribsfinder/pages/account/wallet.dart';
-import 'package:cribsfinder/pages/account/wallet-add-account.dart';
-import 'package:cribsfinder/pages/account/referral.dart';
-import 'package:cribsfinder/pages/account/referral_overview.dart';
-import 'package:cribsfinder/pages/account/transactions.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/palette.dart';
+import 'package:nobleassets/pages/checkout.dart';
+import 'package:nobleassets/pages/account/booking.dart';
+import 'package:nobleassets/pages/account/account.dart';
+import 'package:nobleassets/pages/account/identification.dart';
+import 'package:nobleassets/pages/account/security.dart';
+import 'package:nobleassets/pages/account/reset_password.dart';
+import 'package:nobleassets/pages/account/bvn.dart';
+import 'package:nobleassets/pages/account/compliance.dart';
+import 'package:nobleassets/pages/account/2fa.dart';
+import 'package:nobleassets/pages/account/devices.dart';
+import 'package:nobleassets/pages/account/device_preferences.dart';
+import 'package:nobleassets/pages/account/settings.dart';
+import 'package:nobleassets/pages/account/reviews.dart';
+import 'package:nobleassets/pages/account/statements.dart';
+import 'package:nobleassets/pages/account/wallet.dart';
+import 'package:nobleassets/pages/account/wallet-add-account.dart';
+import 'package:nobleassets/pages/account/referral.dart';
+import 'package:nobleassets/pages/account/referral_overview.dart';
+import 'package:nobleassets/pages/account/transactions.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/palette.dart';
 import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -99,8 +59,36 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+
+  static _MyAppState of(BuildContext context) =>
+      context.findAncestorStateOfType<_MyAppState>()!;
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _isDark = false;
+  void check() async {
+    String pref = await Helpers.readPref("enable_dark");
+    if (pref == "") {
+      //new device set type
+      pref = SchedulerBinding.instance.window.platformBrightness ==
+              Brightness.light
+          ? "0"
+          : "1";
+      Helpers.writePref("enable_dark", pref);
+    }
+    setState(() => _isDark = pref == "1");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    check();
+  }
 
   // This widget is the root of your application.
   @override
@@ -108,63 +96,26 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      themeMode: ThemeMode.light,
-      title: 'Cribsfinder',
+      themeMode: _isDark ? ThemeMode.dark : ThemeMode.light,
+      title: 'Noble Assets',
       routes: {
-        '/hotel-search': (context) => const HotelSearch(),
-        '/hotel-filter': (context) => const HotelFilter(),
-        "/hotel-categories": (context) => const HotelCategories(),
-        "/hotel-nearby": (context) => const HotelNearby(),
-        "/hotel-recommended": (context) => const HotelRecommended(),
-        "/hotel-destinations": (context) => const HotelTopDestinations(),
-        "/hotel": (context) => const Hotel(),
-        '/shortlet-search': (context) => const ShortletSearch(),
-        '/shortlet-filter': (context) => const ShortletFilter(),
-        '/shortlet-categories': (context) => const ShortletCategories(),
-        "/shortlet-recommended": (context) => const ShortletRecommended(),
-        "/shortlet-nearby": (context) => const ShortletNearby(),
-        "/shortlet-destinations": (context) => const ShortletTopDestinations(),
-        '/event-categories': (context) => const EventCategories(),
-        '/events-today': (context) => const EventsToday(),
-        '/events-search': (context) => const EventSearch(),
-        '/event-filter': (context) => const EventFilter(),
-        '/attraction-categories': (context) => const AttractionCategories(),
-        '/attraction-explore': (context) => const AttractionExplore(),
-        '/attraction-filter': (context) => const AttractionFilter(),
-        '/attraction': (context) => const Attraction(),
-        '/automobile-search': (context) => const AutomobileSearch(),
-        '/automobile-filter': (context) => const AutomobileFilter(),
-        '/automobile-brands': (context) => const AutomobileCategories(),
-        '/automobile-recommended': (context) => const AutomobileRecommended(),
-        '/cruise-search': (context) => const CruiseSearch(),
-        '/cruise-filter': (context) => const CruiseFilter(),
-        '/cruise-categories': (context) => const CruiseCategories(),
-        '/cruise-recommended': (context) => const CruiseRecommended(),
-        '/property-search': (context) => const PropertySearch(),
-        '/property-filter': (context) => const PropertyFilter(),
-        '/property-categories': (context) => const PropertyCategories(),
-        '/property-recommended': (context) => const PropertyRecommended(),
-        '/property-top-agents': (context) => const PropertyTopAgents(),
-        '/property-nearby': (context) => const PropertyNearby(),
-        '/property': (context) => const Property(),
-        '/cruise': (context) => const Cruise(),
-        '/automobile': (context) => const Automobile(),
-        '/event': (context) => const Event(),
-        "/shortlet": (context) => const Shortlet(),
         "/checkout": (context) => const Checkout(),
         "/booking": (context) => const Booking(),
         "/account": (context) => const Account(),
-        "/edit-profile": (context) => const EditProfile(),
+        "/identification": (context) => const Identification(),
         "/security": (context) => const Security(),
         "/reset-password": (context) => const ResetPassword(),
-        "/pin": (context) => const TransactionPin(),
-        "/change-pin": (context) => const ChangeTransactionPin(),
+        "/nok": (context) => const NextOfKin(),
+        "/compliance": (context) => const Compliance(),
+        "/bvn": (context) => const BVN(),
         "/2fa": (context) => const TwoFa(),
         "/devices": (context) => const Devices(),
         "/device-preferences": (context) => const DevicePreferences(),
-        "/notifications": (context) => const Notifications(),
+        "/settings": (context) => const Settings(),
+        "/messages": (context) => const Messages(),
+        "/message": (context) => const Message(),
         "/reviews": (context) => const Reviews(),
-        "/payment-method": (context) => const PaymentMethod(),
+        "/statements": (context) => const Statements(),
         "/wallet": (context) => const Wallet(),
         "/referrals": (context) => const Referrals(),
         "/add-wallet-account": (context) => const AddWalletAccount(),
@@ -175,18 +126,25 @@ class MyApp extends StatelessWidget {
         "/login": (context) => const Login(),
         "/signup": (context) => const Signup(),
         "/signup-verify": (context) => const SignupVerify(),
-        "/signup-account-info": (context) => const SignupAccountInfo(),
+        "/signup-welcome": (context) => const Welcome(),
         "/signup-location": (context) => const SignupLocation(),
         "/signup-notification": (context) => const SignupNotification(),
         "/signup-complete-profile": (context) => const SignupCompleteProfile(),
         "/forgot-password": (context) => const ForgotPassword(),
         "/forgot-reset-password": (context) => const ResetForgotPassword(),
         "/get-started": (context) => const GetStarted(),
+        "/social": (context) => const Social(),
       },
       theme: _buildTheme(Brightness.light, context),
       darkTheme: _buildTheme(Brightness.dark, context),
       home: const Splash(),
     );
+  }
+
+  void changeTheme(isDark) {
+    setState(() {
+      _isDark = isDark;
+    });
   }
 }
 
@@ -216,4 +174,12 @@ extension StringExtension on String {
   String capitalize() {
     return "${this[0].toUpperCase()}${this.substring(1).toLowerCase()}";
   }
+}
+
+extension StringValidators on String {
+  bool get containsUppercase => contains(RegExp(r'[A-Z]'));
+
+  bool get containsLowercase => contains(RegExp(r'[a-z]'));
+
+  bool get containsNumbers => contains(RegExp(r'[0-9]'));
 }

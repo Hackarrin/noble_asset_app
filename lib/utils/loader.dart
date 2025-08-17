@@ -1,5 +1,5 @@
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 class LoaderDialog extends StatefulWidget {

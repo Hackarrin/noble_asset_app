@@ -1,11 +1,9 @@
-import 'package:cribsfinder/globals/automobile_item.dart';
-import 'package:cribsfinder/globals/hotel_booking.dart';
-import 'package:cribsfinder/globals/shortlet_item.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/hotel_booking.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
@@ -38,7 +36,7 @@ class _BookingsState extends State<Bookings>
   String sortBy = "desc";
   bool loading = true;
   late TabController tabController;
-  final bookings = [
+  final savings = [
     {
       "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
@@ -179,12 +177,13 @@ class _BookingsState extends State<Bookings>
             .firstWhere((stat) => stat["value"].toString() == status);
         setState(() {
           error =
-              "You don't have any ${stat["label"]?.toLowerCase()} bookings yet, but don't worry! Search and explore top listings on Cribsfinder.";
+              "You don't have any ${stat["label"]?.toLowerCase()} savings yet, but don't worry! Search and explore top listings on Noble Assets.";
         });
       }
     } catch (err) {
       setState(() {
-        error = err.toString();
+        error =
+            "You don't have any savings yet, but don't worry! They'll show up here when you add them.";
         loading = false;
       });
       print(err);
@@ -245,18 +244,8 @@ class _BookingsState extends State<Bookings>
                     )),
               )
             : null,
-        title: Widgets.buildText("My Bookings", context, isMedium: true),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-                onPressed: () {},
-                style: Widgets.buildButton(context,
-                    radius: 50.0, sideColor: Color(0xFFF1F1F1)),
-                icon: Helpers.fetchIcons("comment-alt", "solid",
-                    color: "text.black", size: 16.0)),
-          )
-        ],
+        title: Widgets.buildText("My Savings", context, isMedium: true),
+        actions: [],
         elevation: 0,
         backgroundColor: Palette.getColor(context, "background", "paper"),
         foregroundColor: Palette.getColor(context, "text", "disabled"),
@@ -289,8 +278,8 @@ class _BookingsState extends State<Bookings>
                             filter();
                           },
                           tabs: [
-                            Tab(text: "Upcoming"),
-                            Tab(text: "Completed"),
+                            Tab(text: "Active"),
+                            Tab(text: "Matured"),
                             Tab(text: "Cancelled"),
                           ],
                         ),
@@ -314,7 +303,7 @@ class _BookingsState extends State<Bookings>
                     ],
                   ),
                 )
-              : Alert.showErrorMessage(context, "Login to view your bookings",
+              : Alert.showErrorMessage(context, "Login to view your savings",
                   buttonText: "Login", action: () {
                   Navigator.pushNamed(context, "/login");
                 }),
@@ -329,15 +318,19 @@ class _BookingsState extends State<Bookings>
       child: loading || filteredBookings.isNotEmpty
           ? ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                final item =
-                    loading ? bookings[index] : filteredBookings[index];
+                final item = loading ? savings[index] : filteredBookings[index];
                 return Padding(
                   padding: const EdgeInsets.only(
                       left: 15.0, right: 15.0, bottom: 15.0),
-                  child: HotelBooking(item: item),
+                  child: HotelBooking(
+                    item: item,
+                    action: () {
+                      fetch();
+                    },
+                  ),
                 );
               },
-              itemCount: loading ? bookings.length : filteredBookings.length,
+              itemCount: loading ? savings.length : filteredBookings.length,
             )
           : Alert.showErrorMessage(context, "No Bookings!",
               message: error, buttonText: "Explore"),

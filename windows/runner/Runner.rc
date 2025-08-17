@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.cribsfinder.mobile" "\0"
-            VALUE "FileDescription", "cribsfinder" "\0"
+            VALUE "CompanyName", "com.nobleassets.app" "\0"
+            VALUE "FileDescription", "nobleassets" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "cribsfinder" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 com.cribsfinder.mobile. All rights reserved." "\0"
-            VALUE "OriginalFilename", "cribsfinder.exe" "\0"
-            VALUE "ProductName", "cribsfinder" "\0"
+            VALUE "InternalName", "nobleassets" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 com.nobleassets.app. All rights reserved." "\0"
+            VALUE "OriginalFilename", "nobleassets.exe" "\0"
+            VALUE "ProductName", "nobleassets" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

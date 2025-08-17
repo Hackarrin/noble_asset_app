@@ -1,4 +1,4 @@
-name: cribsfinder
+name: nobleassets
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -16,7 +16,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.0+2
+version: 1.1.1+5
 
 environment:
   sdk: ^3.6.1
@@ -39,6 +39,7 @@ dependencies:
   firebase_analytics: ^11.4.2
   firebase_crashlytics: ^4.3.2
   firebase_performance: ^0.10.1+2
+  firebase_database: ^11.3.4
   avatar_stack: ^3.0.0
   google_fonts: ^6.2.1
   animate_do: ^4.2.0
@@ -74,6 +75,8 @@ dependencies:
   pointycastle: ^3.9.1
   paystack_flutter_sdk: ^0.0.1-alpha.2
   share_plus: ^11.0.0
+  file_picker: ^10.2.1
+  animated_svg: ^2.1.0
 
   # pusher_beams: ^1.1.2
 
@@ -94,7 +97,7 @@ flutter_icons:
   ios: true
   image_path: "assets/images/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-  adaptive_icon_background: "#ff174AB5"
+  adaptive_icon_background: "#ffffffff"
   adaptive_icon_foreground: "assets/images/icon.png"
   remove_alpha_ios: true
   image_path_ios: "assets/images/icon.png"
@@ -143,8 +146,8 @@ flutter:
   # see https://flutter.dev/to/font-from-package
 
 flutter_native_splash:
-  color: "#174AB5"
+  color: "#ffffff"
   image: "assets/images/splash-logo.png"
   android_12:
-    color: "#174AB5"
+    color: "#ffffff"
     image: assets/images/splash-logo.png

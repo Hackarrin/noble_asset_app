@@ -1,13 +1,13 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/automobile_item.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/bookings/cruise.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/markers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/automobile_item.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/bookings/cruise.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/markers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';

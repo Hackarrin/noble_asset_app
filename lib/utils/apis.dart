@@ -1,82 +1,94 @@
 class API {
-  static final rootsApi = "https://api.cribsfinder.com/public/";
-  static final rootsUserApi = "https://api.cribsfinder.com/user/";
-  static final rootsAssets = "https://assets.cribsfinder.com/";
+  static const urlBase = "https://api.nobleassets.com.ng/";
+  static const uRLASSETS = "https://assets.nobleassets.com.ng/";
 
-  static final blog = path(rootsApi, "blog");
-  static final shop = path(rootsApi, "shop");
-  static final home = path(rootsApi, "home");
-  static final hotels = path(rootsApi, "hotels");
-  static final hotel = path(rootsApi, "hotel");
-  static final wallet = path(rootsApi, "wallet");
-  static final profile = "https://api.cribsfinder.com/user/profile";
-  static final filterHotels = path(rootsApi, "filter");
-  static final shortlets = path(rootsApi, "shortlets");
-  static final shortlet = path(rootsApi, "shortlet");
-  static final filterShortlets = path(rootsApi, "search-shortlets");
-  static final events = path(rootsApi, "events");
-  static final event = path(rootsApi, "event");
-  static final filterEvents = path(rootsApi, "search-events");
-  static final attractions = path(rootsApi, "attractions");
-  static final attraction = path(rootsApi, "attraction");
-  static final filterAttractions = path(rootsApi, "search-attractions");
-  static final automobiles = path(rootsApi, "automobiles");
-  static final automobile = path(rootsApi, "automobile");
-  static final filterBoats = path(rootsApi, "search-boats");
-  static final boats = path(rootsApi, "boats");
-  static final boat = path(rootsApi, "boat");
-  static final filterProperties = path(rootsApi, "search-properties");
-  static final properties = path(rootsApi, "properties");
-  static final property = path(rootsApi, "property");
-  static final filterAutomobiles = path(rootsApi, "search-automobiles");
-  static final orders = path(rootsApi, "orders");
-  static final products = path(rootsApi, "products");
-  static final product = path(rootsApi, "product");
-  static final listing = path(rootsApi, "listing");
-  static final checkout = path(rootsApi, "checkout");
-  static final wishlist = path(rootsApi, "wishlist");
-  static final cart = path(rootsApi, "cart");
-  static final account = path(rootsApi, "account");
-  static final contact = path(rootsApi, "support");
-  static final pricing = path(rootsApi, "pricing");
+  // assets
+  static const uRLUSERPHOTO = "${uRLASSETS}users/";
+  static const uRLINVESTMENTS = "${uRLASSETS}investment_types/";
+  static const uRLIDPHOTO = "${uRLASSETS}identifications/";
+  static const uRLSelfiePHOTO = "${uRLASSETS}selfie/";
+  static const uRLAddressPHOTO = "${uRLASSETS}addresses/";
+  static const uRLPromoPHOTO = "${uRLASSETS}promos/";
 
-  static final dashboard = path(rootsUserApi, "dashboard");
-  static final bookings = path(rootsUserApi, "bookings");
-  static final leads = path(rootsUserApi, "leads");
-  static final userLogin = path(rootsUserApi, "login");
-  static final verify = path(rootsUserApi, "verify");
-  static final forgot = path(rootsUserApi, "forgot-password");
-  static final userProfile = path(rootsUserApi, "profile");
-  static final userWallet = path(rootsUserApi, "wallet");
-  static final settings = path(rootsUserApi, "settings");
-  static final userSignup = path(rootsUserApi, "signup");
-  static final misc = path(rootsUserApi, "misc");
-  static final log = path(rootsUserApi, "logs");
-  static final earnings = path(rootsUserApi, "earnings");
-  static final transactions = path(rootsUserApi, "transactions");
-  static final reviews = path(rootsUserApi, "reviews");
-  static final payment = path(rootsUserApi, "payment");
-  static final support = path(rootsUserApi, "support");
-  static final insights = path(rootsUserApi, "insights");
-  static final messages = path(rootsUserApi, "messages");
-  static final referrals = path(rootsUserApi, "referrals");
-  static final staff = path(rootsUserApi, "staff");
-  static final role = path(rootsUserApi, "roles");
-  static final userWishlist = path(rootsUserApi, "wishlist");
-  static final billPayments = path(rootsUserApi, "bill-payments");
+  // auth
+  static const login = "${urlBase}auth/login";
+  static const signup = "${urlBase}auth/signup";
+  static const forgot = "${urlBase}auth/forgot";
+  static const reset = "${urlBase}auth/reset";
+  static const sendCode = "${urlBase}auth/send_verify_code";
+  static const verifyCode = "${urlBase}auth/verify_code";
 
-  static final assetUsers = path(rootsAssets, "customers/");
-  static final assetVendors = path(rootsAssets, "users/");
-  static final assetHotels = path(rootsAssets, "listings/");
-  static final assetEvents = path(rootsAssets, "events/");
-  static final assetAutomobiles = path(rootsAssets, "automobiles/");
-  static final assetShortlets = path(rootsAssets, "listings/");
-  static final assetBoats = path(rootsAssets, "boats/");
-  static final assetProperties = path(rootsAssets, "properties/");
-  static final assetAttractions = path(rootsAssets, "events/");
-  static final assetPost = path(rootsAssets, "posts/");
-  static final assetAuthor = path(rootsAssets, "admins/");
-  static final assetBlogCategory = path(rootsAssets, "categories/");
+  // profile
+  static const profile = "${urlBase}user/profile";
+  static const setNOK = "${urlBase}user/next-of-kin";
+  static const setVerification = "${urlBase}user/verification";
+  static const setSelfie = "${urlBase}user/selfie";
+  static const setProofOfAddress = "${urlBase}user/proof_of_address";
+  static const setBVN = "${urlBase}user/bvn";
+  static const setPassword = "${urlBase}user/password";
+  static const setPhoto = "${urlBase}user/upload_photo";
+  static const setCompany = "${urlBase}user/company";
+  static const accountDelete = "${urlBase}user/delete";
+  static const switchAccount = "${urlBase}user/switch_account";
+
+  // savings
+  static const getSavings = "${urlBase}savings";
+  static const getSavingsLetter = "${urlBase}savings/get_letter";
+  static const saveSavings = "${urlBase}savings/save";
+  static const topupSavings = "${urlBase}savings/topup";
+  static const cancelSavings = "${urlBase}savings/cancel";
+  static const savingDetails = "${urlBase}savings/single";
+
+  // investments
+  static const saveInvestments = "${urlBase}investments/save";
+  static const getInvestmentsTypes = "${urlBase}investments/types";
+  static const getInvestmentsCategories = "${urlBase}investments/categories";
+  static const getInvestments = "${urlBase}investments";
+  static const getInvestmentsLetter = "${urlBase}investments/get_letter";
+  static const investmentDetails = "${urlBase}investments/single";
+  static const cancelInvestments = "${urlBase}investments/cancel";
+
+  //referrer
+  static const getReferrers = "${urlBase}refer";
+  static const investorProfile = "${urlBase}user/investor-profile";
+
+  //wallet
+  static const getWallet = "${urlBase}wallet";
+  static const getBanks = "${urlBase}wallet/banks";
+  static const billPayments = "${urlBase}bills/banks";
+  static const getBillNetworks = "${urlBase}bill/categories";
+  static const getBillBeneficiaries = "${urlBase}bill/beneficiaries";
+  static const payBill = "${urlBase}bill/pay";
+  static const verifyBill = "${urlBase}bill/validate";
+  static const topupWallet = "${urlBase}wallet/topup";
+  static const withdrawWallet = "${urlBase}wallet/withdraw";
+  static const getTransactions = "${urlBase}wallet/transactions";
+  static const getAllTransactions = "${urlBase}wallet/allTransactions";
+  static const saveAccount = "${urlBase}wallet/account_update";
+  static const getInterest = "${urlBase}wallet/get_interest";
+  static const getPortfolio = "${urlBase}wallet/portfolio_download";
+  static const getStatement = "${urlBase}wallet/account_statement_download";
+
+  // misc
+  static const getDefaults = "${urlBase}misc/defaults";
+  static const charge = "${urlBase}misc/charge";
+  static const fetchKey = "${urlBase}misc/key";
+  static const verifyAccount = "${urlBase}misc/verify_account";
+  static const verifyBank = "${urlBase}misc/verify_bank";
+  static const getWithdrawalBanks = "${urlBase}misc/withdrawal_banks";
+  static const getSavingsPlans = "${urlBase}misc/savings_plans";
+  static const saveDevice = "${urlBase}misc/save_device";
+  static const logoutDevice = "${urlBase}misc/logout_device";
+
+  // stocks
+  static const stockMarket = "${urlBase}stock";
+  static const stockDetail = "${urlBase}stock/single";
+  static const stockBuy = "${urlBase}stock/buy";
+  static const stockAccount = "${urlBase}stock/create_account";
+  static const stockSell = "${urlBase}stock/sell";
+  static const stockCancel = "${urlBase}stock/cancel";
+  static const stockPortfolio = "${urlBase}stock/portfolio";
+  static const stockTradeList = "${urlBase}stock/trade_list";
 
   static String path(String root, String sublink) {
     return "$root$sublink";

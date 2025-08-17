@@ -1,12 +1,12 @@
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/wallet/add_recipient.dart';
-import 'package:cribsfinder/utils/wallet/recipients.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/wallet/add_recipient.dart';
+import 'package:nobleassets/utils/wallet/recipients.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -780,7 +780,7 @@ class WalletExchange {
                                   height: 15.0,
                                 ),
                                 Widgets.buildText(
-                                    "By selecting the ${result["currencyTo"]} option, you are unconditionally and irrevocably authorizing our local partner to convert the funds to ${result["currencyTo"]} for your recipient, without any involvement from Cribsfinder Send.",
+                                    "By selecting the ${result["currencyTo"]} option, you are unconditionally and irrevocably authorizing our local partner to convert the funds to ${result["currencyTo"]} for your recipient, without any involvement from Noble Assets Send.",
                                     context,
                                     lines: 10),
                                 const SizedBox(

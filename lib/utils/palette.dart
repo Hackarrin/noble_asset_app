@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nobleassets/main.dart';
 
 class Palette {
   static const Map<String, Map<String, Map<String, int>>> palette = {
@@ -12,8 +13,8 @@ class Palette {
         'other': 0xCC757575,
       },
       'main': {
-        'primary': 0xFF174AB5,
-        'secondary': 0xffFDA911,
+        'primary': 0xFF852E5E,
+        'secondary': 0xffa3802b,
       },
       'background': {
         "button": 0x80FFFFFF,
@@ -24,10 +25,10 @@ class Palette {
         "textfield": 0xFFf5f5f5,
         "overlay": 0x8C000000
       },
-      'error': {'main': 0xFFD61B1E, 'light': 0xFFFCDFD0, 'dark': 0xFF660528},
-      'success': {'main': 0xFF108C44, 'light': 0xFFCDF9CE, 'dark': 0xFF034337},
-      'warning': {'main': 0xFFFFC005, 'light': 0xFFFFF7CD, 'dark': 0xFF7A4F00},
-      'info': {'main': 0xFF146BE5, 'light': 0xFFCFEAFD, 'dark': 0xFF031E6D},
+      'error': {'main': 0xFFBC421A, 'light': 0xFFEAA071, 'dark': 0xFF87190D},
+      'success': {'main': 0xFF56C124, 'light': 0xFACEC79, 'dark': 0xFF0B5C06},
+      'warning': {'main': 0xFFD6A000, 'light': 0xFFF2D561, 'dark': 0xFF9A6B00},
+      'info': {'main': 0xFF0097E2, 'light': 0xFF62D8F6, 'dark': 0xFF0057A2},
     },
     'dark': {
       'text': {
@@ -39,8 +40,8 @@ class Palette {
         "black": 0xFF000000
       },
       'main': {
-        'primary': 0xFF174AB5,
-        'secondary': 0xffFDA911,
+        'primary': 0xFF852E5E,
+        'secondary': 0xffa3802b,
       },
       'background': {
         'default': 0xFF191C25,
@@ -49,18 +50,18 @@ class Palette {
         'skeleton': 0xBB212b36,
         "overlay": 0xEE000000
       },
-      'error': {'main': 0xFFD61B1E, 'light': 0xFFFCDFD0, 'dark': 0xFF660528},
-      'success': {'main': 0xFF108C44, 'light': 0xFFCDF9CE, 'dark': 0xFF034337},
-      'warning': {'main': 0xFFFFC005, 'light': 0xFFFFF7CD, 'dark': 0xFF7A4F00},
-      'info': {'main': 0xFF146BE5, 'light': 0xFFCFEAFD, 'dark': 0xFF031E6D},
+      'error': {'main': 0xFFBC421A, 'light': 0xFFEAA071, 'dark': 0xFF87190D},
+      'success': {'main': 0xFF56C124, 'light': 0xFACEC79, 'dark': 0xFF0B5C06},
+      'warning': {'main': 0xFFD6A000, 'light': 0xFFF2D561, 'dark': 0xFF9A6B00},
+      'info': {'main': 0xFF0097E2, 'light': 0xFF62D8F6, 'dark': 0xFF0057A2},
     },
   };
 
   static Color getColor(BuildContext context, String type, String variant,
       {Brightness? mode}) {
     var color = Colors.black;
-    var isLight =
-        true; // (mode ?? MediaQuery.of(context).platformBrightness) == Brightness.light;
+    var isLight = (mode ?? Theme.of(navigatorKey.currentContext!).brightness) ==
+        Brightness.light;
     var scheme = (isLight ? palette['light'] : palette['dark'])!;
     if (scheme.containsKey(type)) {
       if (scheme[type]!.containsKey(variant)) {
@@ -72,8 +73,9 @@ class Palette {
 
   static Color get(String colorText, {Brightness? mode}) {
     var color = Colors.black;
-    var isLight =
-        true; // (mode ?? MediaQuery.of(context).platformBrightness) == Brightness.light;
+    var isLight = (mode ?? Theme.of(navigatorKey.currentContext!).brightness) ==
+        Brightness.light;
+    print("response $isLight");
     var scheme = (isLight ? palette['light'] : palette['dark'])!;
     final colorSplit = colorText.toString().split(".");
     final type = colorSplit[0];

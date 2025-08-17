@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/attraction_item.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/home_header.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/attraction_item.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/home_header.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:avatar_stack/avatar_stack.dart';
 import 'package:avatar_stack/positions.dart';
 import 'package:card_swiper/card_swiper.dart';

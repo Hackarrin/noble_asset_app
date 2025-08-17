@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/property_item.dart';
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/home_header.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/property_item.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/home_header.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +25,7 @@ class _PropertyHomeState extends State<PropertyHome> {
       {"name": "Ola Alli", "image": "assets/images/avatar.png", "id": "hotel"},
       {"name": "John Doe", "image": "assets/images/avatar.png", "id": "house"},
       {
-        "name": "Cribsfinder",
+        "name": "Noble Assets",
         "image": "assets/images/avatar.png",
         "id": "villa"
       },

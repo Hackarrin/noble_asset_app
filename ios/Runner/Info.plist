@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Cribsfinder</string>
+		<string>Noble Assets</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>cribsfinder</string>
+		<string>nobleassets</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -51,5 +51,15 @@
 		<string>To suggest nearby services, this app need to know your location.</string>
 		<key>NSFaceIDUsageDescription</key>
 		<string>This application wants to access your TouchID or FaceID.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This application wants to access your photos.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>This application wants to access your camera.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>This application wants to access your location.</string>
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>tel</string>
+		</array>
 	</dict>
 </plist>

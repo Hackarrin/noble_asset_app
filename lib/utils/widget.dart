@@ -61,7 +61,7 @@ class Widgets {
 
   static InputDecoration inputDecoration(text,
       {color = Colors.white,
-      borderColor = Colors.white,
+      Color? borderColor,
       hintColor = Colors.white,
       icon,
       prefixIcon,
@@ -77,25 +77,25 @@ class Widgets {
         suffixIcon: suffixIcon,
         enabledBorder: isOutline
             ? OutlineInputBorder(
-                borderSide: BorderSide(width: 1.0, color: borderColor),
+                borderSide: BorderSide(width: 1.0, color: borderColor ?? color),
                 borderRadius: BorderRadius.circular(radius))
             : UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 1.0),
+                borderSide: BorderSide(color: borderColor ?? color, width: 1.0),
               ),
         focusedBorder: isOutline
             ? OutlineInputBorder(
-                borderSide: BorderSide(width: 1.0, color: borderColor),
+                borderSide: BorderSide(width: 1.0, color: borderColor ?? color),
                 borderRadius: BorderRadius.circular(radius))
             : UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 1.0),
+                borderSide: BorderSide(color: borderColor ?? color, width: 1.0),
               ),
         border: isOutline
             ? OutlineInputBorder(
-                borderSide: BorderSide(width: 1.0, color: borderColor),
+                borderSide: BorderSide(width: 1.0, color: borderColor ?? color),
                 borderRadius: BorderRadius.circular(radius),
               )
             : UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor, width: 1.0),
+                borderSide: BorderSide(color: borderColor ?? color, width: 1.0),
               ),
         labelStyle: TextStyle(
           color: borderColor,

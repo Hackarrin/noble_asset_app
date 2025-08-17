@@ -1,9 +1,11 @@
-import 'package:cribsfinder/pages/account/bookings.dart';
-import 'package:cribsfinder/pages/account/profile.dart';
-import 'package:cribsfinder/pages/account/wishlist.dart';
-import 'package:cribsfinder/pages/hotels/home.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/pages/account/bookings.dart';
+import 'package:nobleassets/pages/account/profile.dart';
+import 'package:nobleassets/pages/account/wallet.dart';
+import 'package:nobleassets/pages/account/wishlist.dart';
+import 'package:nobleassets/pages/dashboard.dart';
+import 'package:nobleassets/pages/hotels/home.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
@@ -24,11 +26,11 @@ class _HomeState extends State<Home> {
   final menus = [
     {"name": "Home", "icon": "home"},
     {
-      "name": "Bookings",
+      "name": "Save",
       "icon": "calendar-day",
     },
     {
-      "name": "Wishlist",
+      "name": "Invest",
       "icon": "wishlist-star",
     },
     {
@@ -53,15 +55,15 @@ class _HomeState extends State<Home> {
       // } else if (selectedInterface == "property") {
       //   return PropertyHome();
       // }
-      return HotelHome();
+      return Dashboard();
     } else if (selected == 1) {
       return Bookings();
     } else if (selected == 2) {
-      return Wishlist();
+      return Investments();
     } else if (selected == 3) {
       return Profile();
     }
-    return HotelHome();
+    return Dashboard();
   }
 
   @override
@@ -102,6 +104,7 @@ class _HomeState extends State<Home> {
         backgroundColor: Palette.getColor(context, "background", "default"),
         body: _getPage(),
         bottomNavigationBar: StylishBottomBar(
+          backgroundColor: Palette.get("background.neutral"),
           option:
               AnimatedBarOptions(iconSize: 24.0, padding: EdgeInsets.all(10)),
           notchStyle: NotchStyle.circle,

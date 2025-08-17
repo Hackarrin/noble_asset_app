@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/cruise_item.dart';
-import 'package:cribsfinder/utils/bookings/general.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/home_header.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/cruise_item.dart';
+import 'package:nobleassets/utils/bookings/general.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/home_header.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 

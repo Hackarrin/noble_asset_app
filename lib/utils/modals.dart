@@ -1,29 +1,32 @@
-import 'package:cribsfinder/globals/automobile_item.dart';
-import 'package:cribsfinder/globals/cruise_item.dart';
-import 'package:cribsfinder/globals/event_item.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
-import 'package:cribsfinder/globals/shortlet_item.dart';
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/platform_date_picker.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:nobleassets/globals/automobile_item.dart';
+import 'package:nobleassets/globals/cruise_item.dart';
+import 'package:nobleassets/globals/event_item.dart';
+import 'package:nobleassets/globals/hotel_item.dart';
+import 'package:nobleassets/globals/shortlet_item.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_xlider/flutter_xlider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:shimmer/shimmer.dart';
 
 class Sheets {
-  static Future<dynamic> chooseImage(String title) async {
+  static Future<dynamic> chooseImage(String title,
+      {bool isBase64 = false}) async {
     if (navigatorKey.currentContext == null) {
       return "";
     }
@@ -32,8 +35,13 @@ class Sheets {
     void camera() async {
       final XFile? image = await picker.pickImage(source: ImageSource.camera);
       if (image != null) {
-        List<int> imageBytes = await image.readAsBytes();
-        photo = image.path;
+        if (isBase64) {
+          List<int> imageBytes = await image.readAsBytes();
+          photo = base64Encode(imageBytes);
+        } else {
+          photo = image.path;
+        }
+
         Navigator.pop(navigatorKey.currentContext!, true);
       } else {
         Alert.show(navigatorKey.currentContext!, '',
@@ -44,8 +52,12 @@ class Sheets {
     void gallery() async {
       final XFile? image = await picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        List<int> imageBytes = await image.readAsBytes();
-        photo = image.path;
+        if (isBase64) {
+          List<int> imageBytes = await image.readAsBytes();
+          photo = base64Encode(imageBytes);
+        } else {
+          photo = image.path;
+        }
         Navigator.pop(navigatorKey.currentContext!, true);
       } else {
         Alert.show(navigatorKey.currentContext!, '',
@@ -1439,7 +1451,28 @@ class Sheets {
     return res;
   }
 
-  static void forgotPin() async {
+  static Future<void> showSelfie(value) async {
+    String selfie = value;
+    void update() async {
+      try {
+        if (selfie.isEmpty) {
+          Alert.show(navigatorKey.currentContext!, "",
+              "Please fill all required fields to proceed");
+          return;
+        }
+        Alert.showLoading(navigatorKey.currentContext!, "Updating...");
+        await JWT.updateSelfie(selfie);
+        Alert.hideLoading(navigatorKey.currentContext!);
+        Alert.show(navigatorKey.currentContext!, "",
+            "Your selfie has been verified successfully!",
+            type: "success");
+      } catch (err) {
+        Alert.show(navigatorKey.currentContext!, "", err.toString(),
+            type: "error");
+      }
+      Alert.hideLoading(navigatorKey.currentContext!);
+    }
+
     await showModalBottomSheet(
         elevation: 10,
         backgroundColor: Colors.transparent,
@@ -1459,7 +1492,223 @@ class Sheets {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Widgets.buildText("Forgot transaction PIN", context,
+                      Widgets.buildText("Facial Verification", context,
+                          isMedium: true),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Divider(color: Color(0x14000000)),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      Center(
+                        child: Helpers.fetchIcons("mode-portrait", "solid",
+                            size: 100.0, color: "main.secondary"),
+                      ),
+                      const SizedBox(
+                        height: 40.0,
+                      ),
+                      Widgets.buildText(
+                          "For additional verification, please take a selfie of yourself.\n Upload your BVN before proceeding.",
+                          context,
+                          lines: 10,
+                          isCenter: true,
+                          color: "text.secondary"),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () async {
+                              try {
+                                final ImagePicker picker = ImagePicker();
+                                final XFile? image = await picker.pickImage(
+                                    source: ImageSource.camera,
+                                    imageQuality: 60,
+                                    preferredCameraDevice: CameraDevice.front);
+                                if (image != null) {
+                                  List<int> imageBytes =
+                                      await image.readAsBytes();
+                                  setState(
+                                      () => selfie = base64Encode(imageBytes));
+                                  update();
+                                }
+                              } catch (e) {
+                                Alert.show(context, "",
+                                    "An error occurred! Please try again later.");
+                              }
+                            },
+                            style: Widgets.buildButton(context,
+                                background: Palette.getColor(
+                                    context, "main", "primary"),
+                                vertical: 15.0,
+                                horizontal: 40.0,
+                                radius: 45.0),
+                            child: Widgets.buildText("Take Selfie", context,
+                                isMedium: true, color: "text.white")),
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: Widgets.buildButton(context,
+                                  vertical: 15.0,
+                                  horizontal: 40.0,
+                                  radius: 45.0),
+                              child: Widgets.buildText("Close", context,
+                                  isMedium: true, color: "text.primary"))),
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  static Future<void> showProofAddress() async {
+    String address = "";
+    void update() async {
+      try {
+        if (address.isEmpty) {
+          Alert.show(navigatorKey.currentContext!, "",
+              "Please fill all required fields to proceed");
+          return;
+        }
+        Alert.showLoading(navigatorKey.currentContext!, "Updating...");
+        await JWT.updateProof(address);
+        Alert.hideLoading(navigatorKey.currentContext!);
+        Alert.show(navigatorKey.currentContext!, "",
+            "Your proof of address document has been uploaded successfully!",
+            type: "success");
+      } catch (err) {
+        Alert.show(navigatorKey.currentContext!, "", err.toString(),
+            type: "error");
+      }
+      Alert.hideLoading(navigatorKey.currentContext!);
+    }
+
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Widgets.buildText("Proof of Address", context,
+                          isMedium: true),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Divider(color: Color(0x14000000)),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      Center(
+                        child: Helpers.fetchIcons("file-upload", "solid",
+                            size: 100.0, color: "main.secondary"),
+                      ),
+                      const SizedBox(
+                        height: 40.0,
+                      ),
+                      Widgets.buildText(
+                          "Valid proof of address documents include:\n Utility bills eg Water, electrical, internet, cable etc, bank statement etc.\n Your proof of address must clearly show your current address and the name and logo of the issuer.",
+                          context,
+                          lines: 10,
+                          isCenter: true,
+                          color: "text.secondary"),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () async {
+                              try {
+                                String image = await chooseImage(
+                                    "Upload Profile picture",
+                                    isBase64: true);
+                                if (image.isNotEmpty) {
+                                  setState(() => address = image);
+                                  update();
+                                }
+                              } catch (e) {
+                                Alert.show(context, "Error",
+                                    "An error occurred! Please try again later.");
+                              }
+                            },
+                            style: Widgets.buildButton(context,
+                                background: Palette.getColor(
+                                    context, "main", "primary"),
+                                vertical: 15.0,
+                                horizontal: 40.0,
+                                radius: 45.0),
+                            child: Widgets.buildText("Upload", context,
+                                isMedium: true, color: "text.white")),
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: Widgets.buildButton(context,
+                                  vertical: 15.0,
+                                  horizontal: 40.0,
+                                  radius: 45.0),
+                              child: Widgets.buildText("Close", context,
+                                  isMedium: true, color: "text.primary"))),
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  static void forgotBVN() async {
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Widgets.buildText("Find your BVN", context,
                           isMedium: true),
                       const SizedBox(
                         height: 10.0,
@@ -1470,16 +1719,17 @@ class Sheets {
                       ),
                       Center(
                         child: Image.asset("assets/images/exclamation.png",
-                            height: 100.0, fit: BoxFit.contain),
+                            height: 50.0, fit: BoxFit.contain),
                       ),
                       const SizedBox(
-                        height: 60.0,
+                        height: 20.0,
                       ),
                       Widgets.buildText(
-                          "Did you forget your PIN? We will send a one-time password (OTP) to your email to verify your identity before making this change.",
+                          "To retrieve your Bank Verification Number (BVN), you can dial the USSD code *565*0# from the phone number linked to your BVN. Alternatively, you can check via your bank's mobile app, the NIBSS website, or by contacting your bank's customer support.",
                           context,
                           lines: 10,
                           isCenter: true,
+                          size: 14.0,
                           color: "text.secondary"),
                       const SizedBox(
                         height: 30.0,
@@ -1496,8 +1746,7 @@ class Sheets {
                                 vertical: 15.0,
                                 horizontal: 40.0,
                                 radius: 45.0),
-                            child: Widgets.buildText(
-                                "Yes, send me an OTP", context,
+                            child: Widgets.buildText("Close", context,
                                 isMedium: true, color: "text.white")),
                       )
                     ],
@@ -1509,8 +1758,190 @@ class Sheets {
         });
   }
 
+  static void showAccountStatement() async {
+    void update() async {
+      try {
+        Alert.showLoading(
+            navigatorKey.currentContext!, "Generating your statement...");
+        await JWT.downloadStatement();
+        Alert.hideLoading(navigatorKey.currentContext!);
+        Alert.show(navigatorKey.currentContext!, "",
+            "Your account statement  has been sent to your email address!",
+            type: "success");
+      } catch (err) {
+        Alert.show(navigatorKey.currentContext!, "", err.toString(),
+            type: "error");
+      }
+      Alert.hideLoading(navigatorKey.currentContext!);
+    }
+
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Widgets.buildText("Get Your Account Statement", context,
+                          isMedium: true),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Divider(color: Color(0x14000000)),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Widgets.buildText(
+                          "Once you click the button below, an email will be sent to you with a PDF attached containing a summary of your wallet's credit and debit statement.",
+                          context,
+                          lines: 10,
+                          isCenter: true,
+                          size: 14.0,
+                          color: "text.secondary"),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              update();
+                            },
+                            style: Widgets.buildButton(context,
+                                background: Palette.getColor(
+                                    context, "main", "primary"),
+                                vertical: 15.0,
+                                horizontal: 40.0,
+                                radius: 45.0),
+                            child: Widgets.buildText(
+                                "Generate Statement", context,
+                                isMedium: true, color: "text.white")),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: Widgets.buildButton(context,
+                                vertical: 15.0, horizontal: 40.0, radius: 45.0),
+                            child: Widgets.buildText("Close", context,
+                                isMedium: true, color: "text.primary")),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  static void showPortfolioStatement() async {
+    void update() async {
+      try {
+        Alert.showLoading(
+            navigatorKey.currentContext!, "Generating your statement...");
+        await JWT.downloadPortfolio();
+        Alert.hideLoading(navigatorKey.currentContext!);
+        Alert.show(navigatorKey.currentContext!, "",
+            "Your portfolio statement has been sent to your email address!",
+            type: "success");
+      } catch (err) {
+        Alert.show(navigatorKey.currentContext!, "", err.toString(),
+            type: "error");
+      }
+      Alert.hideLoading(navigatorKey.currentContext!);
+    }
+
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Widgets.buildText("Get Your Portfolio Statement", context,
+                          isMedium: true),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Divider(color: Color(0x14000000)),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Widgets.buildText(
+                          "Once you click the button below, an email will be sent to you with a PDF attached containing a summary of your assets with us.",
+                          context,
+                          lines: 10,
+                          isCenter: true,
+                          size: 14.0,
+                          color: "text.secondary"),
+                      const SizedBox(
+                        height: 30.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              update();
+                            },
+                            style: Widgets.buildButton(context,
+                                background: Palette.getColor(
+                                    context, "main", "primary"),
+                                vertical: 15.0,
+                                horizontal: 40.0,
+                                radius: 45.0),
+                            child: Widgets.buildText(
+                                "Generate Statement", context,
+                                isMedium: true, color: "text.white")),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            style: Widgets.buildButton(context,
+                                vertical: 15.0, horizontal: 40.0, radius: 45.0),
+                            child: Widgets.buildText("Close", context,
+                                isMedium: true, color: "text.primary")),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+  }
+
   static void showImagePreview(List images, String title,
-      {String type = "hotel"}) async {
+      {String type = "hotel", int startIndex = 0}) async {
     await showModalBottomSheet(
         elevation: 10,
         backgroundColor: Colors.transparent,
@@ -1570,22 +2001,26 @@ class Sheets {
                             height: 10.0,
                           ),
                           Expanded(
-                            child: Container(
+                            child: SizedBox(
                                 child: PhotoViewGallery.builder(
                               scrollPhysics: const BouncingScrollPhysics(),
+                              enableRotation: true,
                               builder: (BuildContext context, int index) {
                                 return PhotoViewGalleryPageOptions(
-                                  imageProvider: NetworkImage(
+                                  imageProvider: CachedNetworkImageProvider(
                                       "${Defaults.sectionsImagesUrl[type]}${images[index]}"),
                                   initialScale:
-                                      PhotoViewComputedScale.contained * 0.8,
+                                      PhotoViewComputedScale.contained,
                                   heroAttributes: PhotoViewHeroAttributes(
-                                      tag: images[index].toString()),
+                                    tag: images[index].toString(),
+                                  ),
                                 );
                               },
                               itemCount: images.length,
+                              pageController:
+                                  PageController(initialPage: startIndex),
                               loadingBuilder: (context, event) => Center(
-                                child: Container(
+                                child: SizedBox(
                                   width: 20.0,
                                   height: 20.0,
                                   child: CircularProgressIndicator(
@@ -2580,6 +3015,530 @@ class Sheets {
                   ),
                 )
               ],
+            );
+          });
+        });
+    return res;
+  }
+
+  static Future<bool> showNoInterest(interest) async {
+    var res = false;
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 15.0,
+                    children: [
+                      Widgets.buildText(
+                          "Earn Interest on Your Wallet!", context,
+                          isMedium: true, size: 20.0, lines: 3),
+                      Widgets.buildText(
+                          "You can now earn some money by funding your wallet. You'll get $interest% per annum on the amount in your wallet. Your interest will be automatically paid to you at the end of every month!",
+                          context,
+                          lines: 10),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              res = true;
+                              Navigator.pop(context);
+                            },
+                            style: Widgets.buildButton(
+                              context,
+                              horizontal: 15.0,
+                              vertical: 15.0,
+                              radius: 60.0,
+                            ),
+                            child: Widgets.buildText(
+                              "Close",
+                              context,
+                              color: "text.primary",
+                            )),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+    return res;
+  }
+
+  static showTransactionDetails(Map<String, dynamic> transaction) async {
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "default"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding: EdgeInsets.all(15.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Widgets.buildText(
+                            Helpers.formatCurrency(transaction["amount"],
+                                currency: "NGN"),
+                            context,
+                            isMedium: true,
+                            isCenter: true),
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Widgets.buildText("Booking Id", context,
+                              color: "text.disabled"),
+                          const SizedBox(
+                            width: 10.0,
+                          ),
+                          Row(
+                            spacing: 10,
+                            children: [
+                              Widgets.buildText(
+                                  "#${transaction["bookingId"].toString()}",
+                                  context),
+                              Widgets.buildText("•", context,
+                                  isMedium: true, size: 12.0),
+                              GestureDetector(
+                                  onTap: () => Navigator.pushNamed(
+                                      context, "/booking",
+                                      arguments: jsonEncode({
+                                        "bookingId":
+                                            transaction["bookingId"].toString()
+                                      })),
+                                  child: Widgets.buildText(
+                                    "View",
+                                    context,
+                                    color: "info.main",
+                                    isUnderlined: true,
+                                  ))
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        spacing: 10.0,
+                        children: [
+                          Widgets.buildText("Payment Method", context,
+                              color: "text.disabled"),
+                          Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Widgets.buildText(
+                                      transaction["paymentMethod"].toString(),
+                                      context,
+                                      weight: 500,
+                                      color: "text.primary"),
+                                  Widgets.buildText("Paystack", context,
+                                      weight: 500,
+                                      size: 12.0,
+                                      color: "text.disabled"),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Widgets.buildText("Transaction Amount", context,
+                              color: "text.disabled"),
+                          const SizedBox(
+                            width: 10.0,
+                          ),
+                          Widgets.buildText(
+                              Helpers.formatCurrency(
+                                  transaction["amount"].toString()),
+                              context),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Widgets.buildText("Transaction Fee", context,
+                              color: "text.disabled"),
+                          const SizedBox(
+                            width: 10.0,
+                          ),
+                          Widgets.buildText(
+                              Helpers.formatCurrency(
+                                  transaction["fee"].toString()),
+                              context),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Widgets.buildText("Amount Paid", context,
+                              color: "text.disabled"),
+                          const SizedBox(
+                            width: 10.0,
+                          ),
+                          Widgets.buildText(
+                              Helpers.formatCurrency(
+                                  transaction["amountPaid"].toString(),
+                                  currency: "NGN"),
+                              context,
+                              isMedium: true),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0, vertical: 10.0),
+                        child: Row(
+                          spacing: 10.0,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  style: Widgets.buildButton(context,
+                                      background: Palette.getColor(
+                                          context, "main", "secondary"),
+                                      vertical: 10.0,
+                                      horizontal: 40.0,
+                                      radius: 45.0),
+                                  child: Widgets.buildText("Share", context,
+                                      isMedium: true, color: "text.white")),
+                            ),
+                            Expanded(
+                              child: TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  style: Widgets.buildButton(context,
+                                      background: Palette.getColor(
+                                          context, "main", "primary"),
+                                      vertical: 10.0,
+                                      horizontal: 40.0,
+                                      radius: 45.0),
+                                  child: Widgets.buildText("Download", context,
+                                      isMedium: true, color: "text.white")),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  static Future<bool> cancelBooking(Map booking) async {
+    var res = false;
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 15.0,
+                    children: [
+                      Widgets.buildText(
+                          "Confirm you want to cancel this booking?", context,
+                          isMedium: true, size: 20.0, lines: 3),
+                      Widgets.buildText(
+                          "Please note that cancelling this booking may result in automatic refund of amount paid.",
+                          context,
+                          lines: 10),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () async {
+                              try {
+                                Alert.showLoading(context, "Processing...");
+                                await JWT.cancelBooking(
+                                    booking["bookingId"].toString());
+                                Alert.hideLoading(context);
+                                res = true;
+                                Alert.show(context, "",
+                                    "Your booking has been cancelled!",
+                                    cancelAction: () {
+                                  Navigator.pop(context);
+                                });
+                              } catch (err) {
+                                Alert.show(context, "", err.toString(),
+                                    cancelAction: () {
+                                  res = false;
+                                  Navigator.pop(context);
+                                });
+                              }
+                            },
+                            style: Widgets.buildButton(context,
+                                horizontal: 15.0,
+                                vertical: 15.0,
+                                radius: 60.0,
+                                background: Palette.get("error.main")),
+                            child: Widgets.buildText("Proceed", context,
+                                color: "text.white")),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+    return res;
+  }
+
+  static Future<bool> reviewBooking(Map booking) async {
+    var res = false;
+    Map<String, dynamic> result = {};
+    TextEditingController controller = TextEditingController();
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        isScrollControlled: true,
+        builder: (context) {
+          final screenHeight = MediaQuery.sizeOf(context).height;
+          final maxHeight = screenHeight * 0.9;
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                width: double.infinity,
+                constraints:
+                    BoxConstraints(maxHeight: maxHeight, minHeight: 100.0),
+                decoration: BoxDecoration(
+                    color: Palette.getColor(context, "background", "paper"),
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0))),
+                padding: EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2.0,
+                    children: [
+                      Widgets.buildText(
+                          (booking["roomType"] is List
+                                  ? booking["roomType"][0]["listingName"]
+                                  : booking["roomType"]["title"])
+                              .toString(),
+                          context,
+                          isMedium: true,
+                          size: 20.0,
+                          lines: 3),
+                      Widgets.buildText(
+                          (booking["roomType"] is List
+                                  ? booking["roomType"][0]
+                                  : booking["roomType"])["location"]
+                              .toString(),
+                          context,
+                          lines: 10),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      GridView.count(
+                        crossAxisCount: 2,
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        mainAxisSpacing: 10.0,
+                        crossAxisSpacing: 10.0,
+                        childAspectRatio: 2.0,
+                        children: [
+                          for (var item in Defaults.hotelReviewCategories)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 5.0,
+                              children: [
+                                Widgets.buildText(
+                                    item["name"].toString(), context,
+                                    isMedium: true, size: 14.0),
+                                FittedBox(
+                                  child: Row(
+                                    spacing: 5.0,
+                                    children: [
+                                      for (int i = 0; i < 5; i += 1)
+                                        GestureDetector(
+                                            onTap: () {
+                                              setState(() => result[
+                                                  item["value"]
+                                                      .toString()] = i + 1);
+                                            },
+                                            child: Helpers.fetchIcons(
+                                                "star", "solid",
+                                                size: 24.0,
+                                                color: i <
+                                                        (result[item["value"]
+                                                                .toString()] ??
+                                                            0)
+                                                    ? "main.primary"
+                                                    : "background.neutral"))
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Widgets.buildText("Add a comment", context,
+                              color: 'text.primary', size: 13.0),
+                          const SizedBox(
+                            height: 5.0,
+                          ),
+                          TextField(
+                            controller: controller,
+                            decoration: Widgets.inputDecoration("",
+                                color: Palette.get("background.neutral"),
+                                isFilled: true,
+                                isOutline: true),
+                            minLines: 6,
+                            maxLines: 10,
+                            style: GoogleFonts.nunito(
+                                color: Palette.get("text.secondary"),
+                                fontSize: 13.0,
+                                fontWeight: FontWeight.w400),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () async {
+                              try {
+                                if (booking.containsKey("bookingId") &&
+                                    booking["bookingId"]
+                                        .toString()
+                                        .isNotEmpty) {
+                                  if (result.keys.isNotEmpty) {
+                                    Alert.showLoading(context, "Submitting...");
+                                    await JWT.rateBooking(
+                                        booking["bookingId"].toString(), {
+                                      ...result,
+                                      "message": controller.text
+                                    });
+                                    Alert.hideLoading(context);
+                                    res = true;
+                                    Alert.show(context, "",
+                                        "Your review has been processed!",
+                                        cancelAction: () {
+                                      Navigator.pop(context);
+                                    });
+                                  } else {
+                                    throw Exception(
+                                        "Please add atleast one rating to proceed.");
+                                  }
+                                } else {
+                                  throw Exception(
+                                      "Please select a valid review and retry.");
+                                }
+                              } catch (err) {
+                                Alert.show(context, "", err.toString());
+                              }
+                            },
+                            style: Widgets.buildButton(context,
+                                horizontal: 15.0,
+                                vertical: 15.0,
+                                radius: 60.0,
+                                background: Palette.get("success.main")),
+                            child: Widgets.buildText("Submit", context,
+                                color: "text.white")),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () async {
+                              res = false;
+                              Navigator.pop(context);
+                            },
+                            child: Widgets.buildText("Cancel", context,
+                                color: "text.disabled", isUnderlined: true)),
+                      )
+                    ],
+                  ),
+                ),
+              ),
             );
           });
         });

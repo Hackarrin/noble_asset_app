@@ -1,7 +1,8 @@
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -20,6 +21,13 @@ class _ResetPasswordState extends State<ResetPassword>
   final passwordController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+
+  List<Map<String, String>> rules = [
+    {"title": "Password must contain uppercase letters.", "value": "0"},
+    {"title": "Password must contain lowercase letters.", "value": "0"},
+    {"title": "Password must contain numbers.", "value": "0"},
+    {"title": "Password must be at least 8 characters long.", "value": "0"},
+  ];
 
   @override
   void initState() {
@@ -42,14 +50,20 @@ class _ResetPasswordState extends State<ResetPassword>
         Alert.show(context, "", "Please confirm your new password to proceed");
         return;
       }
-      Alert.showLoading(context, "Updating...");
-      await JWT.updateSettings({
-        "cpassword": passwordController.text,
-        "password": newPasswordController.text
-      }, "password");
-      Alert.hideLoading(context);
-      Alert.show(context, "", "Password updated successfully!",
-          type: "success");
+      final unruly = rules.every((element) => element["value"] == "1");
+      if (unruly) {
+        Alert.showLoading(context, "Updating...");
+        await JWT.updatePassword({
+          "oldPassword": passwordController.text,
+          "password": newPasswordController.text
+        });
+        Alert.hideLoading(context);
+        Alert.show(context, "", "Your password has been updated successfully!",
+            type: "success");
+      } else {
+        Alert.show(context, "", "Some password rules have not been met!",
+            type: "error");
+      }
     } catch (err) {
       Alert.show(context, "", err.toString(), type: "error");
     }
@@ -140,7 +154,7 @@ class _ResetPasswordState extends State<ResetPassword>
                           enableSuggestions: false,
                           autocorrect: false,
                           decoration: Widgets.inputDecoration("",
-                              color: Color(0xFFF4F4F4),
+                              color: Palette.get("background.neutral"),
                               isFilled: true,
                               isOutline: true,
                               suffixIcon: IconButton(
@@ -153,8 +167,22 @@ class _ResetPasswordState extends State<ResetPassword>
                                       isVisible ? "eye-crossed" : "eye",
                                       "regular",
                                       size: 18.0))),
+                          onChanged: index == 1
+                              ? (value) {
+                                  setState(() {
+                                    rules[0]["value"] =
+                                        value.containsUppercase ? "1" : "0";
+                                    rules[1]["value"] =
+                                        value.containsLowercase ? "1" : "0";
+                                    rules[2]["value"] =
+                                        value.containsNumbers ? "1" : "0";
+                                    rules[3]["value"] =
+                                        value.length >= 8 ? "1" : "0";
+                                  });
+                                }
+                              : null,
                           style: GoogleFonts.nunito(
-                              color: Color(0xCC757575),
+                              color: Palette.get("text.secondary"),
                               fontSize: 13.0,
                               fontWeight: FontWeight.w400),
                         ),
@@ -173,7 +201,40 @@ class _ResetPasswordState extends State<ResetPassword>
                                     isRight: true, color: "main.primary"),
                               ),
                             ),
-                          )
+                          ),
+                        if (index == 1)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: SizedBox(
+                              height: 70,
+                              child: Column(
+                                children: <Widget>[
+                                  for (var rule in rules)
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Widgets.buildText(
+                                            rule["title"] ?? "", context,
+                                            size: 12.0,
+                                            color: rule["value"] == "1"
+                                                ? 'success.main'
+                                                : 'text.disabled',
+                                            isBold: true),
+                                        (rule["value"] == "1"
+                                            ? Icon(
+                                                Icons.done_all_rounded,
+                                                color: Palette.getColor(
+                                                    context, "success", "main"),
+                                                size: 16.0,
+                                              )
+                                            : const SizedBox(width: 1.0)),
+                                      ],
+                                    )
+                                ],
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   );

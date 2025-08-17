@@ -1,10 +1,11 @@
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
-import 'package:card_swiper/card_swiper.dart';
-import 'package:dotted_border/dotted_border.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../utils/palette.dart';
 
@@ -16,35 +17,13 @@ class Transactions extends StatefulWidget {
 }
 
 class _TransactionsState extends State<Transactions> {
-  final profile = {
-    "fname": "Tayo",
-    "lname": "Oladele",
-    "email": "info@cribsfinder.com",
-    "phone": "091833383",
-    "dateAdded": "2025-01-01",
-    "isVerified": "1",
-    "status": "1",
-    "photo": "",
-    "gender": "M",
-    "dob": "1995-01-02",
-    "address": "ibeju Lekki Lagos Nigeria"
-  };
-  String _walletBalance = '100000';
-  String _currency = "NGN";
-  String _date = "";
-  String _category = "";
+  String _dateFrom = "";
+  String _dateTo = "";
   String _status = "";
-  Map<String, dynamic> _wallet = {"NGN": 100.0, "USD": 100.0, "GBP": 100.0};
-  Map<String, dynamic> _overview = {
-    "totalPaid": 100.0,
-    "totalPending": 900.0,
-    "total": 1000.0,
-    "customers": 0.0,
-    "vendors": 10.0,
-    "activeCustomers": 0,
-    "activeVendors": 5
-  };
-  final List _transactions = [
+  final TextEditingController _search = TextEditingController();
+
+  Map<String, dynamic> _overview = {};
+  List _transactions = [
     {
       "type": 0,
       "amount": 940343,
@@ -74,84 +53,44 @@ class _TransactionsState extends State<Transactions> {
       "currency": "GBP",
     },
     {
-      "type": 4,
+      "type": 0,
       "amount": 940343,
       "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "NGN",
     },
     {
-      "type": 5,
+      "type": 1,
       "amount": 940343,
       "title": "Tayo Oladele",
       "date": "2025-02-04",
       "currency": "USD",
     },
     {
-      "type": 6,
+      "type": 2,
       "amount": 940343,
       "title": "Tayo Oladele",
       "date": "2025-02-04",
-      "currency": "NGN",
+      "currency": "GBP",
     },
     {
-      "type": 7,
+      "type": 3,
       "amount": 940343,
       "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "USD",
-    },
-    {
-      "type": 8,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "NGN",
-    },
-    {
-      "type": 9,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "USD",
-    },
-    {
-      "type": 10,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "NGN",
-    },
-    {
-      "type": 11,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "NGN",
-    },
-    {
-      "type": 12,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "USD",
-    },
-    {
-      "type": 13,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-03",
-      "currency": "NGN",
+      "date": "2025-02-04",
+      "currency": "GBP",
     },
   ];
   Map<String, List> groupedTransactions = {};
   String _sort = "";
+  var loading = false;
+  var error = "";
 
   void groupTransactions() {
     try {
       Map<String, List> transactions = {};
       for (var i = 0; i < _transactions.length; i += 1) {
-        final date = _transactions[i]["date"].toString().split(" ")[0];
+        final date = _transactions[i]["dateAdded"].toString().split(" ")[0];
         if (transactions.containsKey(date)) {
           transactions[date]!.add(_transactions[i]);
         } else {
@@ -166,11 +105,41 @@ class _TransactionsState extends State<Transactions> {
     }
   }
 
+  void fetch() async {
+    try {
+      setState(() {
+        error = "";
+        loading = true;
+      });
+      final res =
+          await JWT.getTransactions(_dateFrom, _dateTo, _status, _search.text);
+      print("dante ${res["images"]}");
+      setState(() {
+        _transactions = res["data"];
+        _overview = res["overview"];
+        loading = false;
+        error = "";
+      });
+      groupTransactions();
+      if (groupedTransactions.isEmpty) {
+        error =
+            "You do have any transaction ${_search.text.isEmpty && _dateFrom.isEmpty && _dateTo.isEmpty && _status.isEmpty ? "at the moment! Don't worry. They'll show up here when you add some." : "matching your search parameters."}";
+      }
+    } catch (err) {
+      setState(() {
+        error = err.toString();
+        loading = false;
+      });
+      print(err);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
+    Future.delayed(Duration.zero, () async {
       groupTransactions();
+      fetch();
     });
   }
 
@@ -213,292 +182,289 @@ class _TransactionsState extends State<Transactions> {
             children: [
               Widgets.buildText("Transactions", context, isMedium: true),
               Widgets.buildText(
-                "${Helpers.formatCurrency(_walletBalance, currency: _currency)} available",
+                "${Helpers.formatCurrency(_overview.containsKey("totalTransaction") ? _overview["totalTransaction"].toString() : "0")} spent",
                 context,
               ),
             ],
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: IconButton(
-                  onPressed: () async {
-                    final res = await Sheets.showSortBy(_sort, items: [
-                      {"name": "All", "value": ""},
-                      {"name": "Active", "value": "1"},
-                      {"name": "Inactive", "value": "0"},
-                    ]);
-                    setState(() {
-                      _sort = res;
-                    });
-                  },
-                  style: Widgets.buildButton(context,
-                      sideColor: Color(0xFFF1F1F1), radius: 50.0),
-                  icon: Helpers.fetchIcons("cloud-download-alt", "regular",
-                      size: 17.0)),
-            )
-          ],
         ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(
                 top: 15.0, left: 15.0, right: 15.0, bottom: 10.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    decoration: Widgets.inputDecoration("",
-                        color: Palette.get("background.paper"),
-                        radius: 60.0,
-                        hint: "Search by transaction name",
-                        isFilled: true,
-                        isOutline: true,
-                        hintColor: Palette.get("text.secondary"),
-                        prefixIcon: UnconstrainedBox(
-                            child: Helpers.fetchIcons("search", "regular",
-                                color: "main.primary", size: 18.0))),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  SizedBox(
-                    height: 40.0,
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          var title = "";
-                          if (index == 0) {
-                            title = "Date";
-                          } else if (index == 1) {
-                            title = "All Categories";
-                          } else if (index == 2) {
-                            title = "Status";
-                          } else if (index == 3) {
-                            title = "Currency";
-                          }
-                          return GestureDetector(
-                            onTap: () async {
-                              print("index $index");
-                              if (index == 0) {
-                                final res = await Sheets.showSortBy(_date,
-                                    items: [
-                                      {"name": "All Date", "value": ""},
-                                      {
-                                        "name": "Last Week",
-                                        "value": "last_week"
-                                      },
-                                      {
-                                        "name": "Last 30 days",
-                                        "value": "last_30_days"
-                                      },
-                                      {
-                                        "name": "Custom Range",
-                                        "value": "custom"
-                                      },
-                                    ],
-                                    title: "Date filters",
-                                    isShowClear: false);
-                                if (res == "custom") {
-                                  final date = await Sheets.selectDate("",
-                                      isRange: true,
-                                      title: "Select custom range");
-                                  setState(() {
-                                    _date = date;
-                                  });
-                                } else {
-                                  setState(() {
-                                    _date = res;
-                                  });
-                                }
-                              } else if (index == 1) {
-                                final res = await Sheets.showSortBy(_category,
-                                    items: Defaults.walletTransactionType,
-                                    title: "Select Categories",
-                                    isShowClear: false,
-                                    isShowIcon: true);
-                                setState(() {
-                                  _category = res;
-                                });
-                              } else if (index == 2) {
-                                final res = await Sheets.showSortBy(_status,
-                                    items: [
-                                      {"name": "All Status", "value": ""},
-                                      {"name": "Successful", "value": "1"},
-                                      {"name": "In Progress", "value": "2"},
-                                      {"name": "Failed", "value": "0"},
-                                    ],
-                                    title: "Transaction Status",
-                                    isShowClear: false);
-                                setState(() {
-                                  _status = res;
-                                });
-                              } else if (index == 3) {
-                                final res = await Sheets.showSortBy(_status,
-                                    items: _wallet.keys
-                                        .map((item) => {
-                                              ...Defaults.walletTypes
-                                                  .firstWhere((w) =>
-                                                      w["value"].toString() ==
-                                                      item),
-                                              "balance":
-                                                  _wallet[item].toString()
-                                            })
-                                        .toList(),
-                                    title: "Currency",
-                                    isShowClear: false,
-                                    isCurrency: true);
-                                setState(() {
-                                  _status = res;
-                                });
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Palette.get("background.paper"),
-                                  borderRadius: BorderRadius.circular(30.0)),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5.0, horizontal: 10.0),
-                              margin: const EdgeInsets.only(right: 15.0),
-                              child: Row(
-                                children: [
-                                  Widgets.buildText(title, context,
-                                      color: "text.secondary"),
-                                  const SizedBox(
-                                    width: 20.0,
-                                  ),
-                                  Helpers.fetchIcons("caret-down", "solid")
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        itemCount: 4),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        final date = groupedTransactions.keys.toList()[index];
-                        final transactions = groupedTransactions[date] ?? [];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Widgets.buildText(
-                                  Helpers.formatDate(date,
-                                      formatString: "MMM d, yyyy"),
-                                  context,
-                                  color: "text.secondary",
-                                  weight: 500),
-                              const SizedBox(
-                                height: 20.0,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: Palette.get("background.paper"),
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    border:
-                                        Border.all(color: Color(0x0D000000))),
-                                padding: const EdgeInsets.all(10.0),
-                                child: ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemBuilder: (context, index) {
-                                      final item = transactions[index];
-                                      return Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 20.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  decoration: BoxDecoration(
-                                                      color: Color(0x1A23813F),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              50.0)),
-                                                  child: Helpers.fetchIcons(
-                                                      Defaults
-                                                          .walletTransactionType[
-                                                              num.tryParse(item[
-                                                                              "type"]
-                                                                          .toString())
-                                                                      ?.toInt() ??
-                                                                  0]["icon"]
-                                                          .toString(),
-                                                      "regular",
-                                                      color: "main.primary",
-                                                      size: 20.0),
-                                                ),
-                                                const SizedBox(
-                                                  width: 10.0,
-                                                ),
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Widgets.buildText(
-                                                        item["title"], context),
-                                                    Widgets.buildText(
-                                                        Helpers.formatDate(
-                                                            item["date"]
-                                                                .toString(),
-                                                            formatString:
-                                                                "MMM d, yyyy"),
-                                                        context,
-                                                        size: 12.0,
-                                                        color:
-                                                            "text.secondary"),
-                                                  ],
-                                                )
-                                              ],
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.end,
-                                              children: [
-                                                Widgets.buildText(
-                                                    "${item["type"].toString() == "8" ? "+" : "-"}${Helpers.formatCurrency(item["amount"].toString(), currency: item["currency"])}",
-                                                    context,
-                                                    weight: 500,
-                                                    color: item["type"]
-                                                                .toString() ==
-                                                            "8"
-                                                        ? "success.main"
-                                                        : "text.primary"),
-                                                Widgets.buildText(
-                                                    "Successful", context,
-                                                    size: 12.0,
-                                                    color: "success.main"),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                    itemCount: transactions.length),
-                              )
-                            ],
-                          ),
-                        );
-                      },
-                      itemCount: groupedTransactions.length),
-                ],
-              ),
-            ),
+            child: loading
+                ? Shimmer.fromColors(
+                    baseColor: Palette.get("background.neutral"),
+                    highlightColor: Palette.get("background.default"),
+                    loop: 1,
+                    child: AbsorbPointer(child: buildContent(screenWidth)))
+                : (error.isNotEmpty
+                    ? Alert.showErrorMessage(context, "",
+                        message: error, buttonText: "Retry", action: () {
+                        setState(() {
+                          _dateFrom = "";
+                          _dateTo = "";
+                          _status = "";
+                        });
+                        _search.text = "";
+                        fetch();
+                      })
+                    : buildContent(screenWidth)),
           ),
         ));
+  }
+
+  Widget buildContent(double screenWidth) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 150.0,
+            width: double.infinity,
+            child: ListView(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemExtent: 320.0,
+              primary: false,
+              children: [
+                SizedBox(
+                  height: 150.0,
+                  width: double.infinity,
+                  child: TransactionsCard(
+                      value: Helpers.formatCurrency(
+                          _overview.containsKey("bookingTransactions")
+                              ? _overview["bookingTransactions"].toString()
+                              : "0"),
+                      title: "Bookings",
+                      subtitle:
+                          "No. of Payments: ${Helpers.formatNumber(_overview.containsKey("bookingCount") ? _overview["bookingCount"].toString() : "0")}"),
+                ),
+                SizedBox(
+                  height: 150.0,
+                  width: double.infinity,
+                  child: TransactionsCard(
+                      value: Helpers.formatCurrency(
+                          _overview.containsKey("otherTransactions")
+                              ? _overview["otherTransactions"].toString()
+                              : "0"),
+                      title: "Other Transactions (Refunds etc)",
+                      subtitle:
+                          "No. of Payments: ${Helpers.formatNumber(_overview.containsKey("bankCount") ? _overview["bankCount"].toString() : "0")}"),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 20.0,
+          ),
+          TextField(
+            controller: _search,
+            onSubmitted: (v) {
+              fetch();
+            },
+            decoration: Widgets.inputDecoration("",
+                color: Palette.get("background.paper"),
+                radius: 60.0,
+                hint: "Search transaction",
+                isFilled: true,
+                isOutline: true,
+                borderColor: Palette.get("text.disabled"),
+                hintColor: Palette.get("text.secondary"),
+                prefixIcon: UnconstrainedBox(
+                    child: Helpers.fetchIcons("search", "regular",
+                        color: "main.primary", size: 18.0))),
+          ),
+          const SizedBox(
+            height: 20.0,
+          ),
+          SizedBox(
+            height: 40.0,
+            child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  var title = "";
+                  if (index == 0) {
+                    title =
+                        "Date${_dateFrom.isNotEmpty ? " (${Helpers.formatDate(_dateFrom, formatString: "MMM dd,yyyy")} - ${Helpers.formatDate(_dateTo, formatString: "MMM dd,yyyy")})" : ""}";
+                  } else if (index == 1) {
+                    title =
+                        "Status ${_status.isNotEmpty ? (_status == "1" ? "(Successful)" : "(Failed)") : ""}";
+                  }
+                  return GestureDetector(
+                    onTap: () async {
+                      if (index == 0) {
+                        final date = await Sheets.selectDate("",
+                            isRange: true, title: "Select start and end date");
+                        final dateSplit = date.split("_");
+                        setState(() {
+                          _dateFrom = dateSplit.first;
+                          _dateTo = dateSplit.last;
+                        });
+                        fetch();
+                      } else if (index == 1) {
+                        final res = await Sheets.showSortBy(_status,
+                            items: [
+                              {"name": "All Status", "value": ""},
+                              {"name": "Successful", "value": "1"},
+                              {"name": "Failed", "value": "0"},
+                            ],
+                            title: "Transaction Status",
+                            isShowClear: false);
+                        setState(() {
+                          _status = res;
+                        });
+                        fetch();
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Palette.get("background.paper"),
+                          borderRadius: BorderRadius.circular(30.0)),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 5.0, horizontal: 10.0),
+                      margin: const EdgeInsets.only(right: 15.0),
+                      child: Row(
+                        children: [
+                          Widgets.buildText(title, context,
+                              color: "text.secondary"),
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          Helpers.fetchIcons("caret-down", "solid")
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                itemCount: 2),
+          ),
+          const SizedBox(
+            height: 20.0,
+          ),
+          ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                final date = groupedTransactions.keys.toList()[index];
+                final transactions = groupedTransactions[date] ?? [];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Widgets.buildText(
+                          Helpers.formatDate(date, formatString: "MMM d, yyyy"),
+                          context,
+                          color: "text.secondary",
+                          weight: 500),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: Palette.get("background.paper"),
+                            borderRadius: BorderRadius.circular(10.0),
+                            border: Border.all(color: Color(0x0D000000))),
+                        padding: const EdgeInsets.all(10.0),
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              final item = transactions[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Sheets.showTransactionDetails(item);
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: index + 1 == transactions.length
+                                          ? 0
+                                          : 20.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(10.0),
+                                            decoration: BoxDecoration(
+                                                color:
+                                                    Palette.get("main.primary")
+                                                        .withAlpha(50),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        50.0)),
+                                            child: Helpers.fetchIcons(
+                                                Defaults.walletTransactionType[
+                                                        num.tryParse(item[
+                                                                        "type"]
+                                                                    .toString())
+                                                                ?.toInt() ??
+                                                            0]["icon"]
+                                                    .toString(),
+                                                "regular",
+                                                color: "main.primary",
+                                                size: 20.0),
+                                          ),
+                                          const SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Widgets.buildText(
+                                                  "#${item["bookingId"].toString()}",
+                                                  context),
+                                              Widgets.buildText(
+                                                  Helpers.formatDate(
+                                                      item["dateAdded"]
+                                                          .toString(),
+                                                      formatString:
+                                                          "MMM d, yyyy hh:mm aaa"),
+                                                  context,
+                                                  size: 12.0,
+                                                  color: "text.secondary"),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Widgets.buildText(
+                                              "${item["type"].toString() == "4" ? "+" : "-"}${Helpers.formatCurrency(item["amount"].toString())}",
+                                              context,
+                                              weight: 500,
+                                              color:
+                                                  item["type"].toString() == "4"
+                                                      ? "success.main"
+                                                      : "text.primary"),
+                                          Widgets.buildText(
+                                              "Successful", context,
+                                              size: 12.0,
+                                              color: "success.main"),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            itemCount: transactions.length),
+                      )
+                    ],
+                  ),
+                );
+              },
+              itemCount: groupedTransactions.length),
+        ],
+      ),
+    );
   }
 }
 
@@ -506,27 +472,15 @@ class TransactionsCard extends StatelessWidget {
   const TransactionsCard(
       {super.key,
       required this.value,
-      required this.type,
-      required this.secondaryValue});
+      required this.title,
+      required this.subtitle});
 
   final String value;
-  final String type;
-  final String secondaryValue;
+  final String title;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
-    final typeText = {
-      "totalPaid": "Total Paid",
-      "total": "Total Amount Made",
-      "customers": "Referred Customers",
-      "vendors": "Referred Vendors"
-    };
-    final secondaryText = {
-      "totalPaid": "Pending Payments",
-      "total": "",
-      "customers": "Active Customers",
-      "vendors": "Active Vendors"
-    };
     return Padding(
       padding: const EdgeInsets.only(right: 40.0),
       child: Container(
@@ -542,7 +496,7 @@ class TransactionsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Widgets.buildText(
-                typeText[type].toString(),
+                title,
                 context,
                 size: 13.0,
               ),
@@ -551,11 +505,8 @@ class TransactionsCard extends StatelessWidget {
                   Helpers.formatCurrency(value.toString()), context,
                   size: 24.0, isMedium: true),
               SizedBox(height: 20.0),
-              if ((secondaryText[type] ?? "").isNotEmpty)
-                Widgets.buildText(
-                    "${secondaryText[type]}: ${Helpers.formatCurrency(secondaryValue.toString())}",
-                    context,
-                    color: "text.secondary"),
+              if (subtitle.isNotEmpty)
+                Widgets.buildText(subtitle, context, color: "text.secondary"),
             ],
           ),
         ),

@@ -1,13 +1,18 @@
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/apis.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/wallet/exchange.dart';
-import 'package:cribsfinder/utils/wallet/fund.dart';
-import 'package:cribsfinder/utils/wallet/transfer.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'dart:async';
+
+import 'package:flutter/services.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/apis.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/fetch.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/wallet/exchange.dart';
+import 'package:nobleassets/utils/wallet/fund.dart';
+import 'package:nobleassets/utils/wallet/transfer.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -22,134 +27,22 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
-  final profile = {
-    "fname": "Tayo",
-    "lname": "Oladele",
-    "email": "info@cribsfinder.com",
-    "phone": "091833383",
-    "dateAdded": "2025-01-01",
-    "isVerified": "1",
-    "status": "1",
-    "photo": "",
-    "gender": "M",
-    "dob": "1995-01-02",
-    "address": "ibeju Lekki Lagos Nigeria"
+  var account = {};
+  var balance = {};
+  var accountNumber = "";
+  var interestRate = "";
+  var _isVisible = false;
+  List quickAccess = [];
+  Map<String, dynamic> otherPayoutAccount = {
+    "bank": {"code": "", "name": ""},
+    "accountNumber": "",
+    "accountName": "",
+    "currency": "",
+    "sortCode": "",
+    "routingNumber": "",
   };
-  Map<String, dynamic> _wallet = {"NGN": 100.0, "USD": 100.0, "GBP": 100.0};
-  Map<String, dynamic> _withdrawalFee = {};
-  List _banks = [
-    {"name": "Access Bank", "code": "38293", "icon": ""},
-    {"name": "Zenith Bank", "code": "38293", "icon": ""},
-    {"name": "Kuda Bank", "code": "38293", "icon": ""},
-    {"name": "Wema Bank", "code": "38293", "icon": ""},
-    {"name": "Titan Bank", "code": "38293", "icon": ""},
-    {"name": "Opay", "code": "38293", "icon": ""},
-    {"name": "Moniepoint", "code": "38293", "icon": ""}
-  ];
-  final List<Map<String, dynamic>> _recipients = [
-    {
-      "accountName": "Precious Alangbe",
-      "photo": "dante.png",
-      "country": "NGN",
-      "currency": "NGN",
-      "bankCode": "132",
-      "bankName": "Access Bank",
-      "sortCode": "",
-      "routingNumber": "",
-      "accountNumber": "123456789",
-      "code": "1"
-    },
-    {
-      "accountName": "Dante Aligheri",
-      "photo": "",
-      "country": "GBP",
-      "currency": "GBP",
-      "bankCode": "",
-      "bankName": "",
-      "sortCode": "32783",
-      "routingNumber": "Shsgsgsg",
-      "accountNumber": "123456789",
-      "code": "2"
-    },
-    {
-      "accountName": "Smith",
-      "photo": "",
-      "country": "USD",
-      "currency": "USD",
-      "bankCode": "",
-      "bankName": "",
-      "sortCode": "32783",
-      "routingNumber": "Shsgsgsg",
-      "accountNumber": "123456789",
-      "code": "3"
-    },
-    {
-      "accountName": "Ola",
-      "photo": "",
-      "country": "NGN",
-      "currency": "NGN",
-      "sortCode": "32783",
-      "routingNumber": "Shsgsgsg",
-      "bankCode": "132",
-      "bankName": "Kuda Bank",
-      "accountNumber": "123456789",
-      "code": "4"
-    },
-  ];
-  final String _coins = "100.0";
-  final String _referrals = "40";
-  final List _transactions = [
-    {
-      "type": 0,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "NGN",
-    },
-    {
-      "type": 1,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "USD",
-    },
-    {
-      "type": 2,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "GBP",
-    },
-    {
-      "type": 3,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "GBP",
-    },
-    {
-      "type": 4,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "NGN",
-    },
-    {
-      "type": 5,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "USD",
-    },
-    {
-      "type": 6,
-      "amount": 940343,
-      "title": "Tayo Oladele",
-      "date": "2025-02-04",
-      "currency": "NGN",
-    }
-  ];
-  bool _isVisible = true;
+  Map<String, dynamic> _withdrawalAccount = {};
+  late SwiperController _controller;
   Map<String, dynamic> transferValues = {
     "amount": "",
     "currency": "",
@@ -160,133 +53,24 @@ class _WalletState extends State<Wallet> {
     "isConfirmed": 0,
     "note": "",
   };
-  Map<String, dynamic> exchangeValues = {
-    "amount": "",
-    "recipientAmount": "",
-    "reference": "",
-    "currencyFrom": "NGN",
-    "currencyTo": "",
-    "account": "",
-    "exchangeRate": 0,
-    "isFocused": "from",
-    "fees": 0,
-    "total": 0,
-    "isNewRecipient": 0,
-    "isConfirmed": 0,
-    "note": "",
-  };
-  Map<String, dynamic> otherPayoutAccount = {
-    "bank": {"code": "", "name": ""},
-    "accountNumber": "",
-    "accountName": "",
-    "currency": "",
-    "sortCode": "",
-    "routingNumber": "",
-  };
-  Map<String, dynamic> dedicatedAccount = {
-    "NGN": {
-      "bank": "Paystack Titan",
-      "accountNumber": "1234567890",
-      "accountName": "Cribsfinder / John Doe"
-    },
-  };
-  List paymentMethods = [
-    {"last4": "4345", "currency": "NGN", "bank": "ACCESS BANK"},
-    {"last4": "4345", "currency": "USD", "bank": "STRIPE BANK"},
-    {"last4": "4345", "currency": "GBP", "bank": "BRITISH BANK"},
-  ];
-  Map<String, dynamic> exchangeDefaults = {
-    "GBP_NGN_rate": 1200,
-    "USD_NGN_rate": 1200,
-  };
-  Map<String, dynamic> limits = {
-    "NGN": {
-      "single": {"total": 5000000, "spent": 1000000},
-      "daily": {"total": 6000000, "spent": 2000000},
-      "weekly": {"total": 7000000, "spent": 3000000},
-      "monthly": {"total": 8000000, "spent": 4000000},
-      "deposit": {"total": "Unlimited", "spent": 5000000},
-    },
-    "USD": {
-      "single": {"total": 500000, "spent": 100000},
-      "daily": {"total": 600000, "spent": 200000},
-      "weekly": {"total": 700000, "spent": 300000},
-      "monthly": {"total": 800000, "spent": 400000},
-      "deposit": {"total": "Unlimited", "spent": 500000},
-    },
-    "GBP": {
-      "single": {"total": 500000, "spent": 100000},
-      "daily": {"total": 600000, "spent": 200000},
-      "weekly": {"total": 700000, "spent": 300000},
-      "monthly": {"total": 800000, "spent": 400000},
-      "deposit": {"total": "Unlimited", "spent": 500000},
-    },
-  };
-  Map<String, dynamic> withdrawFee = {};
-  List quickAccess = [];
+  List _transactions = [];
+  List _recipients = [];
+  List _banks = [];
+  List paymentMethods = [];
+  Map dedicatedAccount = {};
+  Map withdrawFee = {};
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  void handleCloseTransfer() {
-    // setOpenTransfer(false);
-    setState(() {
-      otherPayoutAccount = {
-        "bank": {"code": "", "name": ""},
-        "accountNumber": "",
-        "accountName": "",
-        "currency": "",
-        "sortCode": "",
-        "routingNumber": "",
-      };
-      transferValues = {
-        "amount": "",
-        "currency": "",
-        "account": "",
-        "fees": 0,
-        "total": 0,
-        "isNewRecipient": 0,
-        "isConfirmed": 0,
-        "note": "",
-      };
-    });
-  }
-
-  void handleCloseExchange() {
-    setState(() {
-      otherPayoutAccount = {
-        "bank": {"code": "", "name": ""},
-        "accountNumber": "",
-        "accountName": "",
-        "currency": "",
-        "sortCode": "",
-        "routingNumber": "",
-      };
-      exchangeValues = {
-        "amount": "",
-        "recipientAmount": "",
-        "reference": "",
-        "currencyFrom": "NGN",
-        "currencyTo": "",
-        "account": "",
-        "exchangeRate": 0,
-        "isFocused": "from",
-        "fees": 0,
-        "total": 0,
-        "isNewRecipient": 0,
-        "isConfirmed": 0,
-        "note": "",
-      };
-    });
-  }
-
-  void filter() async {
+  void get() async {
     try {
-      // final res = await JWT.getWallets();
-    } catch (err) {
-      print(err);
+      Map data = await Fetch(API.getTransactions, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        setState(() {
+          _transactions = res["data"];
+        });
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 
@@ -326,7 +110,7 @@ class _WalletState extends State<Wallet> {
                 .toList();
             final selectedRecipient = await WalletTransfer.show(
                 recipients,
-                _wallet[transferValues["currency"].toString()].toString(),
+                balance[transferValues["currency"].toString()].toString(),
                 transferValues["currency"].toString(),
                 isAddRecipient: true,
                 banks: _banks);
@@ -392,7 +176,7 @@ class _WalletState extends State<Wallet> {
         } else if (transferValues["account"].toString().isNotEmpty &&
             transferValues["isConfirmed"].toString() == "0") {
           final res = await WalletTransfer.show([],
-              _wallet[transferValues["currency"].toString()].toString(),
+              balance[transferValues["currency"].toString()].toString(),
               transferValues["currency"].toString(),
               isAddRecipient:
                   transferValues["isNewRecipient"].toString() == "1",
@@ -428,7 +212,7 @@ class _WalletState extends State<Wallet> {
         } else if (transferValues["isConfirmed"].toString() == "1" &&
             method.isEmpty) {
           WalletTransfer.show([],
-              _wallet[transferValues["currency"].toString()].toString(),
+              balance[transferValues["currency"].toString()].toString(),
               transferValues["currency"].toString(),
               isAddRecipient:
                   transferValues["isNewRecipient"].toString() == "1",
@@ -455,7 +239,7 @@ class _WalletState extends State<Wallet> {
               .toList();
           final selectedRecipient = await WalletTransfer.show(
               recipients,
-              _wallet[transferValues["currency"].toString()].toString(),
+              balance[transferValues["currency"].toString()].toString(),
               transferValues["currency"].toString());
           if (selectedRecipient.isNotEmpty) {
             setState(() {
@@ -511,14 +295,14 @@ class _WalletState extends State<Wallet> {
         Alert.show(context, "Success!", "Your wallet debit is successful!",
             type: "success");
         handleCloseTransfer();
-        filter();
+        fetch();
       } else {
         final selectedCurrency = await Sheets.showWallets(
-            _wallet.keys
+            balance.keys
                 .map((item) => {
                       ...Defaults.walletTypes
                           .firstWhere((w) => w["value"].toString() == item),
-                      "balance": _wallet[item].toString()
+                      "balance": balance[item].toString()
                     })
                 .toList(),
             isShowAdd: true);
@@ -544,207 +328,41 @@ class _WalletState extends State<Wallet> {
 
   void handlePay() async {
     try {
-      final items = [
-        {
-          "name": "Add money",
-          "subtitle": "Add money to your account",
-          "icon": "plus-small",
-          "value": "topup"
-        },
-        {
-          "name": "Create an invoice",
-          "subtitle": "Draft and send invoice",
-          "icon": "receipt",
-          "value": "invoice"
-        },
-        {
-          "name": "Send payment link",
-          "subtitle": "Get paid faster by sharing a link",
-          "icon": "link",
-          "value": "link"
-        }
-      ];
-      final selected = await Sheets.showOptions(
-          "Get Paid",
-          "Choose Your Preferred Payment Method to Receive Funds in Your Cribsfinder Wallet.",
-          items,
-          isCustomBackground: true);
-      if (selected.isNotEmpty && selected["value"].toString().isNotEmpty) {
-        if (selected["value"].toString() == "topup") {
-          final selectedCurrency = await Sheets.showWallets(
-              _wallet.keys
-                  .map((item) => {
-                        ...Defaults.walletTypes
-                            .firstWhere((w) => w["value"].toString() == item),
-                        "balance": _wallet[item].toString()
-                      })
-                  .toList(),
-              title: "Add Money",
-              subtitle:
-                  "Choose Your Preferred Payment Method to Receive Funds in Your Cribsfinder Wallet.");
-          final res = await WalletTopup.fundAccount(
-              paymentMethods
-                  .where(
-                      (item) => item["currency"].toString() == selectedCurrency)
-                  .toList(),
-              dedicatedAccount[selectedCurrency] ?? {},
-              limits[selectedCurrency],
-              selectedCurrency);
-        }
-      }
+      final res = await WalletTopup.fundAccount([], account, {}, "NGN");
     } catch (err) {
       print("error $err");
     }
   }
 
-  void handleExchange(String method, String pin) async {
-    try {
-      String errorMessage = "";
-      bool isShowExchangeModal = false;
-
-      if (exchangeValues["amount"].toString() != "" &&
-          (num.tryParse(exchangeValues["amount"].toString())?.toDouble() ?? 0) >
-              0 &&
-          (num.tryParse(exchangeValues["recipientAmount"].toString())
-                      ?.toDouble() ??
-                  0) >
-              0) {
-        if ((num.tryParse(exchangeValues["total"].toString())?.toDouble() ??
-                0) <=
-            0) {
-          if (exchangeValues["currencyFrom"].toString() ==
-              exchangeValues["currencyTo"]) {
-            setState(() {
-              transferValues = {
-                ...transferValues,
-                "currency": exchangeValues["currencyFrom"].toString(),
-                "amount": exchangeValues["amount"].toString()
-              };
-            });
-            handleCloseExchange();
-            handleTransfer("", "");
-          } else {
-            setState(() {
-              exchangeValues = {
-                ...exchangeValues,
-                "total": (num.tryParse(exchangeValues["amount"].toString())
-                            ?.toDouble() ??
-                        0) +
-                    (num.tryParse(exchangeValues["fees"].toString())
-                            ?.toDouble() ??
-                        0)
-              };
-            });
-            isShowExchangeModal = true;
-          }
-        } else if (exchangeValues["isNewRecipient"].toString() == "1" &&
-            exchangeValues["account"].toString().isEmpty) {
-          if (otherPayoutAccount["accountNumber"].toString().isNotEmpty) {
-            if (otherPayoutAccount["currency"].toString() == "NGN" &&
-                (otherPayoutAccount["bank"]["code"] ?? "").toString().isEmpty) {
-              errorMessage = "Please set a valid bank account to proceed.";
-            }
-            if (otherPayoutAccount["currency"].toString() == "USD" &&
-                otherPayoutAccount["routingNumber"].toString().isEmpty) {
-              errorMessage = "Please set a valid routing number to proceed.";
-            }
-            if (otherPayoutAccount["currency"].toString() != "NGN" &&
-                otherPayoutAccount["accountName"].toString().isEmpty) {
-              errorMessage = "Please set a valid account name to proceed.";
-            }
-          } else {
-            errorMessage = "Please set a valid account number to proceed.";
-          }
-          if (errorMessage.isEmpty) {
-            await Future.delayed(Duration(milliseconds: 500));
-            Alert.showLoading(context, "Saving recipient...");
-            final recipient = await JWT.addPayoutAccount(otherPayoutAccount);
-            setState(() {
-              exchangeValues = {
-                ...exchangeValues,
-                "account": recipient["code"] ?? "",
-              };
-              otherPayoutAccount = {
-                ...otherPayoutAccount,
-                "bank": {
-                  "code": otherPayoutAccount["bank"]["code"].toString(),
-                  "name": recipient["bankName"] ??
-                      otherPayoutAccount["bank"]["name"].toString()
-                },
-                "accountName": recipient["accountName"] ?? ""
-              };
-            });
-            Alert.hideLoading(context);
-          }
-          isShowExchangeModal = true;
-        } else if (exchangeValues["account"].toString().isNotEmpty &&
-            exchangeValues["isConfirmed"].toString() == "0") {
-          setState(() {
-            exchangeValues = {...exchangeValues, "isConfirmed": 1};
-          });
-          isShowExchangeModal = true;
-        } else if (exchangeValues["isConfirmed"].toString() == "1" &&
-            method.isEmpty) {
-          WalletExchange.show(exchangeValues, _wallet, exchangeDefaults,
-              otherPayoutAccount: otherPayoutAccount);
-          final res = await Sheets.showPINVerify();
-          Navigator.pop(context);
-          if (res.isNotEmpty) {
-            handleExchange("pin", res);
-          } else {
-            isShowExchangeModal = true;
-          }
-        }
-        if (!isShowExchangeModal && method.isNotEmpty) {
-          await Future.delayed(Duration(milliseconds: 500));
-          Alert.showLoading(context, "Processing...");
-          await JWT.exchangeWallet(exchangeValues, method, pin);
-          Alert.show(context, "", "Your wallet exchange is successful!",
-              type: "success");
-          handleCloseExchange();
-          filter();
-        }
-      } else {
+  Future<void> fetch() async {
+    if (await Helpers.readPref(Defaults.userid) != "") {
+      Map<String, dynamic> data = await Helpers.getProfile();
+      if (data["is_verified"] == 1) {
+        Map<String, dynamic> accountDetails = await Helpers.getAccount();
+        Map<String, dynamic> balanceDetails =
+            await Helpers.getBalances(isOverride: true);
+        Map<String, dynamic> withdrawalAccount =
+            await Helpers.getWithdrawalAccount();
+        final rate = await Helpers.getDefault("interest_rate");
         setState(() {
-          exchangeValues = {
-            ...exchangeValues,
-            "currencyTo": _wallet.keys.length > 1
-                ? _wallet.keys.toList()[1]
-                : exchangeValues["currencyFrom"]
-          };
-          isShowExchangeModal = true;
+          interestRate = rate;
+          account = accountDetails;
+          accountNumber = account["number"] ?? "";
+          balance["naira"] = balanceDetails["naira"];
+          balance["dollar"] = balanceDetails["dollar"];
+          balance["interestNaira"] = balanceDetails["interestNaira"];
+          balance["interestDollar"] = balanceDetails["interestDollar"];
+          balance["lastInterestDate"] = balanceDetails["lastInterestDate"];
+          balance["interestDays"] = balanceDetails["interestDays"];
+          _withdrawalAccount = withdrawalAccount;
         });
-      }
-      if (isShowExchangeModal) {
-        final recipients = _recipients
-            .where((item) =>
-                item["currency"].toString() ==
-                exchangeValues["currencyTo"].toString())
-            .toList();
-        final res = await WalletExchange.show(
-            exchangeValues, _wallet, exchangeDefaults,
-            otherPayoutAccount: otherPayoutAccount,
-            recipients: recipients, setOtherPayoutAccount: (otherAccount) {
-          setState(() {
-            otherPayoutAccount = {...otherPayoutAccount, ...otherAccount};
-          });
-        }, errorMessage: errorMessage);
-        if (res["isCancelled"]) {
-          handleCloseExchange();
-        } else {
-          setState(() {
-            isShowExchangeModal = false;
-            exchangeValues = {...res};
-          });
-          print(exchangeValues);
-          handleExchange("", "");
+      } else {
+        if (navigatorKey.currentContext != null) {
+          Navigator.pushReplacementNamed(
+              navigatorKey.currentContext!, '/verify');
         }
       }
-    } catch (err) {
-      Alert.show(context, "", err.toString().split(":").last.trim(),
-          type: "error");
     }
-    Alert.hideLoading(context);
   }
 
   void menuSelected(String item) {
@@ -754,19 +372,6 @@ class _WalletState extends State<Wallet> {
       // nothing
     } else {
       switch (item) {
-        case "airtime":
-          // nothing
-          break;
-        case "data": // nothing
-          break;
-        case "power": // nothing
-          break;
-        case "cable": // nothing
-          break;
-        case "exchange":
-          handleCloseExchange();
-          handleExchange("", "");
-          break;
         case "transfer":
           handleCloseTransfer();
           handleTransfer("", "");
@@ -774,9 +379,8 @@ class _WalletState extends State<Wallet> {
         case "deposit":
           handlePay();
           break;
-        case "limits":
-          WalletTopup.fundAccount([], {}, limits["NGN"], "NGN",
-              showLimits: true);
+        case "settings":
+          WalletTopup.fundAccount([], {}, {}, "NGN", showLimits: true);
           break;
       }
     }
@@ -784,10 +388,9 @@ class _WalletState extends State<Wallet> {
 
   void checkAccess() async {
     try {
-      String selectedPref = await Helpers.readPref(Defaults.quickAccess);
-      List selected =
-          (selectedPref.isEmpty ? Defaults.defaultQuickAccess : selectedPref)
-              .split(",");
+      String selectedPref = await Helpers.readPref(Defaults.defaultQuickAccess);
+      List selected = Defaults.defaultQuickAccess.split(",");
+      print("response acess $selectedPref");
       final mergedList = [];
       for (var list
           in Defaults.walletMenu.map((item) => item["items"]).toList()) {
@@ -804,20 +407,33 @@ class _WalletState extends State<Wallet> {
     }
   }
 
-  void setDefaults() async {
-    try {
-      final banks = await JWT.getBanks();
-      final withdrawFee = await JWT.getWithdrawFee();
-      final eDefaults = await JWT.getExchangeRateFees();
-      print("defaults = $eDefaults");
-      setState(() {
-        _banks = banks;
-        _withdrawalFee = withdrawFee;
-        exchangeDefaults = eDefaults;
-      });
-    } catch (err) {
-      print(err);
-    }
+  void handleCloseTransfer() {
+    // setOpenTransfer(false);
+    setState(() {
+      otherPayoutAccount = {
+        "bank": {"code": "", "name": ""},
+        "accountNumber": "",
+        "accountName": "",
+        "currency": "",
+        "sortCode": "",
+        "routingNumber": "",
+      };
+      transferValues = {
+        "amount": "",
+        "currency": "",
+        "account": "",
+        "fees": 0,
+        "total": 0,
+        "isNewRecipient": 0,
+        "isConfirmed": 0,
+        "note": "",
+      };
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -825,7 +441,8 @@ class _WalletState extends State<Wallet> {
     super.initState();
     Future.delayed(Duration.zero, () async {
       checkAccess();
-      setDefaults();
+      fetch();
+      get();
     });
   }
 
@@ -837,47 +454,28 @@ class _WalletState extends State<Wallet> {
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
+          leading: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Color(0xfff1f1f1), width: 1),
+              color: Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            margin: const EdgeInsets.only(left: 15.0),
+            child: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Helpers.fetchIcons(
+                  "arrow-small-left",
+                  "solid",
+                  size: 24,
+                  color: "text.other",
+                )),
+          ),
+          title: Widgets.buildText("My Wallets", context, isMedium: true),
           elevation: 0,
           backgroundColor: Palette.getColor(context, "background", "paper"),
           foregroundColor: Palette.getColor(context, "text", "disabled"),
-          toolbarHeight: 80.0,
-          title: Row(children: [
-            Helpers.getProfilePhoto(context, height: 40.0),
-            const SizedBox(
-              width: 10.0,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Widgets.buildText(
-                    "${profile["fname"]} ${profile["lname"]}", context,
-                    isMedium: true),
-                Widgets.buildText("Good morning", context),
-              ],
-            )
-          ]),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                  color: Color(0x1A41B11A),
-                  borderRadius: BorderRadius.circular(20.0)),
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 12.0),
-              margin: const EdgeInsets.only(right: 15.0),
-              child: Row(
-                children: [
-                  Helpers.fetchIcons("coins", "solid",
-                      size: 16.0, color: "warning.main"),
-                  const SizedBox(
-                    width: 10.0,
-                  ),
-                  Widgets.buildText(
-                      "Earned ${Helpers.formatCurrency(_coins)}", context,
-                      size: 11.0, isMedium: true)
-                ],
-              ),
-            )
-          ],
         ),
         body: SafeArea(
           child: Padding(
@@ -892,41 +490,32 @@ class _WalletState extends State<Wallet> {
                       child: Swiper(
                         outer: true,
                         layout: SwiperLayout.CUSTOM,
-                        customLayoutOption: Widgets.customLayout(
-                            _wallet.keys.length + 2, screenWidth,
-                            offset: 60.0),
+                        customLayoutOption:
+                            Widgets.customLayout(2, screenWidth, offset: 60.0),
                         itemHeight: 180.0,
                         itemWidth: screenWidth,
                         loop: true,
                         itemBuilder: (BuildContext context, int index) {
-                          var currency = "";
-                          if (_wallet.keys.length > index) {
-                            currency = _wallet.keys.toList()[index];
-                          } else if (index == _wallet.keys.length) {
-                            currency = "ADD";
-                          } else if (index == _wallet.keys.length + 1) {
-                            currency = "REFERRAL";
+                          Map<String, dynamic> balance = {};
+                          switch (index) {
+                            case 0:
+                              balance = {"NGN": balance["naira"]};
+                              break;
+                            case 1:
+                              balance = {"USD": balance["dollar"]};
+                              break;
                           }
                           return WalletBalance(
-                              overview: {..._wallet, "REFERRAL": _referrals},
-                              type: currency,
-                              coins: _coins,
+                              overview: balance,
+                              type: balance.keys.first,
                               isVisible: _isVisible,
                               setVisible: () {
                                 setState(() {
                                   _isVisible = !_isVisible;
                                 });
-                              },
-                              handleAddAccount: () {
-                                if (currency == "ADD") {
-                                  Navigator.pushNamed(
-                                      context, "/add-wallet-account");
-                                } else if (currency != "REFERRAL") {
-                                  // handleOpenDeposit();
-                                }
                               });
                         },
-                        itemCount: _wallet.keys.length + 2,
+                        itemCount: 2,
                         pagination: SwiperPagination(builder:
                             SwiperCustomPagination(builder:
                                 (BuildContext context,
@@ -953,6 +542,57 @@ class _WalletState extends State<Wallet> {
                           );
                         })),
                       )),
+                  const SizedBox(height: 20.0),
+                  GestureDetector(
+                    onTap: () async {
+                      Sheets.showNoInterest(interestRate);
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10.0, horizontal: 15.0),
+                        decoration: BoxDecoration(
+                            color: Palette.getColor(
+                                context, "background", "neutral"),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(10.0))),
+                        child: balance["interestNaira"].toString().isEmpty ||
+                                balance["interestNaira"].toString() == "0"
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Widgets.buildText(
+                                      "Loyalty Bonus Earned Per Annum", context,
+                                      size: 14.0, color: "main.secondary"),
+                                  const SizedBox(height: 5.0),
+                                  Widgets.buildText("$interestRate%", context),
+                                ],
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Widgets.buildText(
+                                      "Loyalty Bonus Earned in ${balance["interestDays"] ?? "0"} ${(num.tryParse(balance["interestDays"].toString())?.toInt() ?? 0) > 1 ? "days" : "day"}",
+                                      context,
+                                      size: 14.0,
+                                      color: "main.secondary"),
+                                  const SizedBox(height: 5.0),
+                                  Widgets.buildText(
+                                      Helpers.formatCurrency(
+                                          balance["interestNaira"].toString()),
+                                      context,
+                                      size: 26.0),
+                                  const SizedBox(height: 5.0),
+                                  Widgets.buildText(
+                                      "at a rate of $interestRate% per annum.",
+                                      context,
+                                      color: "text.secondary",
+                                      size: 14.0),
+                                ],
+                              )),
+                  ),
                   const SizedBox(
                     height: 20.0,
                   ),
@@ -1007,449 +647,105 @@ class _WalletState extends State<Wallet> {
                               ),
                             ),
                           ),
-                        GestureDetector(
-                          onTap: () async {
-                            final selected = await Sheets.showWalletMenu();
-                            checkAccess();
-                            menuSelected(selected);
-                          },
-                          child: Column(
+                      ],
+                    ),
+                  ),
+                  if (account.containsKey("number") && account["number"] != "")
+                    const SizedBox(
+                      height: 20.0,
+                    ),
+                  if (account.containsKey("number") && account["number"] != "")
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          color: Palette.getColor(
+                              context, "background", "neutral")),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Widgets.buildText("Fund Your Wallet", context,
+                              color: "text.primary",
+                              size: 16.0,
+                              isBold: true,
+                              isCenter: true),
+                          const SizedBox(height: 10.0),
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(50.0),
-                                    border:
-                                        Border.all(color: Color(0x0D000000))),
-                                padding: const EdgeInsets.all(15.0),
-                                child: Helpers.fetchIcons(
-                                    "menu-dots-vertical", "solid",
-                                    size: 20.0, color: "text.black"),
-                              ),
-                              const SizedBox(
-                                height: 5.0,
-                              ),
-                              Widgets.buildText("More", context)
+                              Widgets.buildText("Bank: ", context,
+                                  size: 16.0,
+                                  isBold: true,
+                                  isCenter: true,
+                                  color: "text.secondary"),
+                              Widgets.buildText(account["bank"] ?? "", context,
+                                  size: 16.0,
+                                  isBold: true,
+                                  isCenter: true,
+                                  color: "text.secondary"),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  ConstrainedBox(
-                      constraints:
-                          BoxConstraints.loose(Size(screenWidth, 180.0)),
-                      child: Swiper(
-                        outer: true,
-                        layout: SwiperLayout.DEFAULT,
-                        itemHeight: 180.0,
-                        itemWidth: screenWidth,
-                        loop: true,
-                        autoplay: true,
-                        autoplayDelay: 7000,
-                        duration: 1000,
-                        itemBuilder: (BuildContext context, int index) {
-                          Widget content = Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Widgets.buildText(
-                                        "Invite your friends or vendors and earn between ₦2,000 and ₦10,000!",
-                                        context,
-                                        lines: 4,
-                                        weight: 500),
-                                  ),
-                                  const SizedBox(
-                                    width: 20.0,
-                                  ),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Palette.get("main.primary"),
-                                            width: 2.0),
-                                        borderRadius:
-                                            BorderRadius.circular(50.0)),
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Helpers.fetchIcons("user", "regular",
-                                        color: "main.primary", size: 20.0),
-                                  )
-                                ],
-                              ),
-                              const SizedBox(
-                                height: 30.0,
-                              ),
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.pushNamed(context, "/referrals");
-                                  },
-                                  style: Widgets.buildButton(context,
-                                      background: Color(0x1A41B11A),
-                                      horizontal: 15.0,
-                                      vertical: 15.0,
-                                      radius: 50.0),
-                                  child: Widgets.buildText(
-                                      "Invite friends", context,
-                                      color: "main.primary", weight: 500))
-                            ],
-                          );
-                          if (index == 1 || index == 2) {
-                            content = Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Widgets.buildText(
-                                            "1 ${index == 1 ? "GBP" : "USD"} = ${Helpers.formatCurrency(exchangeDefaults["${index == 1 ? "GBP" : "USD"}_NGN_rate"].toString())}",
-                                            context,
-                                            isMedium: true,
-                                            size: 20.0),
-                                        const SizedBox(
-                                          width: 10.0,
-                                        ),
-                                        SizedBox(
-                                          width: 100.0,
-                                          child: Stack(
-                                            children: [
-                                              ClipOval(
-                                                child: Image.asset(
-                                                    "assets/images/GBP.png",
-                                                    height: 30.0,
-                                                    width: 30.0,
-                                                    fit: BoxFit.cover),
-                                              ),
-                                              Positioned(
-                                                left: 20,
-                                                child: ClipOval(
-                                                  child: Image.asset(
-                                                      "assets/images/NGN.png",
-                                                      height: 30.0,
-                                                      width: 30.0,
-                                                      fit: BoxFit.cover),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    Widgets.buildText("Exchange rate", context,
-                                        weight: 500.0, color: "text.secondary"),
-                                  ],
-                                ),
-                                TextButton(
-                                    onPressed: () async {
-                                      final selected =
-                                          await Sheets.showExchangeRates(
-                                              exchangeDefaults);
-                                      if (selected.isNotEmpty) {
-                                        setState(() {
-                                          exchangeValues = {
-                                            ...exchangeValues,
-                                            "currencyFrom": selected["from"],
-                                            "currencyTo": selected["to"]
-                                          };
-                                        });
-                                        handleExchange("", "");
-                                      }
-                                    },
-                                    style: Widgets.buildButton(context,
-                                        background: Color(0x1A41B11A),
-                                        horizontal: 15.0,
-                                        vertical: 15.0,
-                                        radius: 50.0),
-                                    child: Widgets.buildText(
-                                        "View rates", context,
-                                        weight: 500.0, color: "main.primary"))
-                              ],
-                            );
-                          } else if (index == 3) {
-                            content = Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Widgets.buildText(
-                                        "${Helpers.formatCurrency(limits["NGN"]["daily"]["spent"].toString())}/  ${Helpers.formatCurrency(limits["NGN"]["daily"]["total"].toString())}",
-                                        context,
-                                        isMedium: true,
-                                        size: 20.0),
-                                    Widgets.buildText("Daily Limit", context,
-                                        weight: 500.0, color: "text.secondary"),
-                                  ],
-                                ),
-                                TextButton(
-                                    onPressed: () {
-                                      WalletTopup.fundAccount(
-                                          [], {}, limits["NGN"], "NGN",
-                                          showLimits: true);
-                                    },
-                                    style: Widgets.buildButton(context,
-                                        background: Color(0x1A41B11A),
-                                        horizontal: 15.0,
-                                        vertical: 15.0,
-                                        radius: 50.0),
-                                    child: Widgets.buildText(
-                                        "View limits", context,
-                                        weight: 500.0, color: "main.primary"))
-                              ],
-                            );
-                          } else if (index == 4) {
-                            final networks = [
-                              {
-                                "name": "MTN",
-                                "logo": "MTN.png",
-                                "discount": "5%"
+                          const SizedBox(height: 10.0),
+                          SizedBox(
+                            width: 200.0,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Clipboard.setData(ClipboardData(
+                                    text: account["number"] ?? ""));
+                                setState(() => accountNumber = "Copied");
+                                Timer(const Duration(seconds: 4), () async {
+                                  setState(() =>
+                                      accountNumber = account["number"] ?? "");
+                                });
                               },
-                              {
-                                "name": "GLO",
-                                "logo": "GLO.png",
-                                "discount": "4%"
-                              },
-                              {
-                                "name": "Airtel",
-                                "logo": "Airtel.jpeg",
-                                "discount": "6%"
-                              },
-                              {
-                                "name": "9Mobile",
-                                "logo": "9Mobile.jpeg",
-                                "discount": "2%"
-                              },
-                            ];
-                            content = Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Widgets.buildText(
-                                    "Get discounted data now", context,
-                                    weight: 500.0, color: "text.secondary"),
-                                const SizedBox(
-                                  height: 10.0,
-                                ),
-                                Wrap(
-                                  spacing: 5.0,
-                                  runSpacing: 5.0,
-                                  children: [
-                                    for (var network in networks)
-                                      Container(
-                                        width: (screenWidth - 100.0) / 2.0,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: Color(0x0D000000)),
-                                            borderRadius:
-                                                BorderRadius.circular(10)),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 5.0, horizontal: 10.0),
-                                        child: Row(
-                                          children: [
-                                            ClipOval(
-                                              child: Image.asset(
-                                                "assets/images/${network["logo"]}",
-                                                width: 30.0,
-                                                height: 30.0,
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              width: 10.0,
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Widgets.buildText(
-                                                    network["name"].toString(),
-                                                    context,
-                                                    isMedium: true),
-                                                Widgets.buildText(
-                                                    "Up to ${network["discount"].toString()}",
-                                                    context),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                  ],
-                                ),
-                              ],
-                            );
-                          }
-                          return Container(
-                            decoration: BoxDecoration(
-                                color: Palette.get("background.paper"),
-                                borderRadius: BorderRadius.circular(20.0),
-                                border: Border.all(color: Color(0x0D000000))),
-                            padding: const EdgeInsets.all(15.0),
-                            child: content,
-                          );
-                        },
-                        itemCount: 5,
-                      )),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Palette.get("background.paper"),
-                        borderRadius: BorderRadius.circular(20.0),
-                        border: Border.all(color: Color(0x0D000000))),
-                    padding: const EdgeInsets.all(15.0),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Widgets.buildText("Send Again", context,
-                                isMedium: true),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                handleTransfer("", "");
-                              },
-                              child: Column(
+                              style: Widgets.buildButton(context,
+                                  radius: 20.0,
+                                  background: Palette.getColor(
+                                      context, "text", "disabled"),
+                                  vertical: 5.0),
+                              child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  DottedBorder(
-                                    radius: Radius.circular(50.0),
-                                    borderType: BorderType.RRect,
-                                    color: Palette.get("main.primary"),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(50.0)),
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Helpers.fetchIcons(
-                                          "plus-small", "solid",
-                                          size: 30.0, color: "main.primary"),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  Widgets.buildText("Add New", context,
-                                      color: "main.primary")
+                                  const Icon(Icons.content_copy),
+                                  const SizedBox(width: 10.0),
+                                  AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      transitionBuilder: (Widget child,
+                                          Animation<double> animation) {
+                                        return SlideTransition(
+                                          position: Tween<Offset>(
+                                                  begin:
+                                                      const Offset(0.0, -0.5),
+                                                  end: const Offset(0.0, 0.0))
+                                              .animate(animation),
+                                          child: child,
+                                        );
+                                      },
+                                      child: Widgets.buildText(
+                                          accountNumber, context,
+                                          size: 20.0,
+                                          isBold: true,
+                                          isCenter: true,
+                                          color: "text.white")),
                                 ],
                               ),
                             ),
-                            for (final recipient in _recipients)
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        transferValues = {
-                                          "amount": "",
-                                          "currency": recipient["currency"],
-                                          "account": recipient["code"],
-                                          "fees": 0,
-                                          "total": 0,
-                                          "isNewRecipient": 0,
-                                          "isConfirmed": 0,
-                                          "note": ""
-                                        };
-                                        otherPayoutAccount = {
-                                          "bank": {
-                                            "code": recipient["bankCode"],
-                                            "name": recipient["bankName"]
-                                          },
-                                          "accountNumber":
-                                              recipient["accountNumber"],
-                                          "accountName":
-                                              recipient["accountName"],
-                                          "currency": recipient["currency"],
-                                          "sortCode": recipient["sortCode"],
-                                          "routingNumber":
-                                              recipient["routingNumber"],
-                                        };
-                                      });
-                                      handleTransfer("", "");
-                                    },
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                  color: Color(0xFFF8F8FA),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          50.0),
-                                                  border: Border.all(
-                                                      color:
-                                                          Color(0x0D000000))),
-                                              child: Helpers.getPhoto(
-                                                  recipient["photo"].toString(),
-                                                  text:
-                                                      recipient["accountName"],
-                                                  height: 50.0),
-                                            ),
-                                            Positioned(
-                                                right: 0.0,
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                      color: Palette.get(
-                                                          "background.paper"),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0)),
-                                                  padding:
-                                                      const EdgeInsets.all(0.5),
-                                                  child: ClipOval(
-                                                    child: Image.asset(
-                                                      "assets/images/${recipient["country"]}.png",
-                                                      width: 15.0,
-                                                      height: 15.0,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                ))
-                                          ],
-                                        ),
-                                        const SizedBox(
-                                          height: 5.0,
-                                        ),
-                                        Widgets.buildText(
-                                            recipient["accountName"], context)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
+                          ),
+                          const SizedBox(height: 10.0),
+                          Widgets.buildText(
+                              "This works like regular bank account number. Transfer from any source to ${account["number"] ?? ""}. Select ${account["bank"]} as the destination bank. Funds will be credited to your Wallet instantly.",
+                              context,
+                              size: 12.0,
+                              isBold: true,
+                              isCenter: true,
+                              color: "text.secondary"),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -1646,25 +942,19 @@ class WalletBalance extends StatelessWidget {
       {super.key,
       required this.overview,
       required this.type,
-      required this.coins,
       required this.setVisible,
-      required this.isVisible,
-      required this.handleAddAccount});
+      required this.isVisible});
 
   final Map<String, dynamic> overview;
-  final Function handleAddAccount;
   final Function setVisible;
   final String type;
   final bool isVisible;
-  final String coins;
 
   @override
   Widget build(BuildContext context) {
-    final _walletBackground = {
-      "NGN": "ngn-bg.png",
-      "USD": "usd-bg.png",
-      "GBP": "gbp-bg.png",
-      "REFERRAL": "referral-bg.png"
+    final _walletTitle = {
+      "NGN": "Naira Wallet",
+      "USD": "Dollar Wallet",
     };
     return Padding(
       padding: const EdgeInsets.only(right: 40.0),
@@ -1672,133 +962,46 @@ class WalletBalance extends StatelessWidget {
         width: double.infinity,
         height: 130.0,
         decoration: BoxDecoration(
-            color: Color(0x3341B11A),
-            image: type == "ADD"
-                ? null
-                : DecorationImage(
-                    image:
-                        AssetImage("assets/images/${_walletBackground[type]}"),
-                    fit: BoxFit.cover),
+            gradient: LinearGradient(colors: [
+              Palette.get("main.primary"),
+              Palette.get("main.secondary")
+            ]),
             borderRadius: BorderRadius.circular(20.0)),
-        child: DottedBorder(
-          dashPattern: [6, 6],
-          strokeWidth: type == "ADD" ? 1.0 : 0.0,
-          color: Palette.get("main.primary"),
-          radius: Radius.circular(20.0),
-          borderType: BorderType.RRect,
-          padding: EdgeInsets.all(type == "ADD" ? 3 : 0),
-          child: Stack(
-            children: [
-              GestureDetector(
-                onTap: () => handleAddAccount(),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, top: 0.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0, top: 0.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
                     children: [
-                      if (type != "ADD")
-                        Row(
-                          children: [
-                            Widgets.buildText(
-                                type == "REFERRAL"
-                                    ? "Your referral Overview: ${Helpers.formatNumber(overview[type].toString())}"
-                                    : "Available Balance",
-                                context,
-                                size: 13.0,
-                                color: "text.white"),
-                            if (type != "REFERRAL")
-                              IconButton(
-                                  onPressed: () {
-                                    setVisible();
-                                  },
-                                  icon: Helpers.fetchIcons(
-                                      isVisible ? "eye-crossed" : "eye",
-                                      "regular",
-                                      color: "text.white",
-                                      size: 14.0))
-                          ],
-                        ),
-                      if (type == "ADD")
-                        Center(
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Palette.get("background.paper"),
-                                borderRadius: BorderRadius.circular(5.0)),
-                            padding: const EdgeInsets.all(5.0),
-                            child: Helpers.fetchIcons("plus-small", "solid",
-                                size: 30.0, color: "main.primary"),
-                          ),
-                        ),
-                      SizedBox(height: type == "ADD" ? 20.0 : 0.0),
-                      if (type == "REFERRAL")
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Widgets.buildText("Total Earned", context,
-                              size: 13.0, color: "text.white"),
-                        ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Widgets.buildText(
-                            type == "ADD"
-                                ? "Tap to add account"
-                                : Helpers.formatCurrency(
-                                    (type == "REFERRAL"
-                                        ? coins.toString()
-                                        : overview[type].toString()),
-                                    currency: type == "REFERRAL" ? "NGN" : type,
-                                    isShow: isVisible),
-                            context,
-                            color: "text.white",
-                            size: type == "ADD" ? 16.0 : 24.0,
-                            isBold: type != "ADD",
-                            isMedium: type == "ADD",
-                            isCenter: type == "ADD"),
-                      )
+                      Widgets.buildText(_walletTitle[type].toString(), context,
+                          size: 13.0, color: "text.white"),
+                      IconButton(
+                          onPressed: () {
+                            setVisible();
+                          },
+                          icon: Helpers.fetchIcons(
+                              isVisible ? "eye-crossed" : "eye", "regular",
+                              color: "text.white", size: 14.0))
                     ],
                   ),
-                ),
-              ),
-              if (type != "ADD" && type != "REFERRAL")
-                Align(
-                  alignment: Alignment.topRight,
-                  child: GestureDetector(
-                    onTap: () {
-                      handleAddAccount();
-                    },
-                    child: Container(
-                      width: 30.0,
-                      height: 30.0,
-                      decoration: BoxDecoration(
-                          color: Palette.get("background.paper"),
-                          borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(5.0),
-                              topRight: Radius.circular(20.0))),
-                      child: Center(
-                          child: Helpers.fetchIcons("plus-small", "solid",
-                              size: 25.0)),
+                  FittedBox(
+                    child: Widgets.buildText(
+                      Helpers.formatCurrency(overview[type].toString(),
+                          currency: type, isShow: isVisible),
+                      context,
+                      color: "text.white",
+                      size: 30.0,
+                      isBold: true,
                     ),
-                  ),
-                ),
-              if (type != "ADD")
-                Align(
-                  alignment: type == "REFERRAL"
-                      ? Alignment.topRight
-                      : Alignment.bottomRight,
-                  child: type == "REFERRAL"
-                      ? Padding(
-                          padding:
-                              const EdgeInsets.only(right: 40.0, top: 30.0),
-                          child: Helpers.fetchIcons("coins", "solid",
-                              size: 30.0, color: "text.white"),
-                        )
-                      : Image.asset(
-                          "assets/images/wallet-logo.png",
-                          height: 80.0,
-                        ),
-                ),
-            ],
-          ),
+                  )
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

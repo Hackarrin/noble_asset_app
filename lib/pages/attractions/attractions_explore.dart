@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/attraction_item.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/attraction_item.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';

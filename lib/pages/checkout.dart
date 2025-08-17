@@ -1,14 +1,14 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/globals/automobile_item.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
-import 'package:cribsfinder/globals/shortlet_item.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/automobile_item.dart';
+import 'package:nobleassets/globals/hotel_item.dart';
+import 'package:nobleassets/globals/shortlet_item.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -94,11 +94,10 @@ class _CheckoutState extends State<Checkout>
       final init = await _paystack.initialize(Defaults.paystackKey, true);
       if (init) {
         final accessCode = await JWT.getAccessCode(_total);
-        print("accessCode $accessCode");
         if (accessCode.isNotEmpty) {
           final response = await _paystack.launch(accessCode);
+          Alert.hideLoading(context);
           if (response.status == "success") {
-            Alert.hideLoading(context);
             confirmOrder(response.reference);
           }
           return;
@@ -837,9 +836,11 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: fnameController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
+                  color: Palette.get("background.neutral"),
+                  isFilled: true,
+                  isOutline: true),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               onChanged: (text) {
@@ -861,9 +862,11 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: lnameController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
+                  color: Palette.get("background.neutral"),
+                  isFilled: true,
+                  isOutline: true),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               onChanged: (text) {
@@ -885,9 +888,11 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: emailController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
+                  color: Palette.get("background.neutral"),
+                  isFilled: true,
+                  isOutline: true),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               onChanged: (text) {
@@ -909,9 +914,11 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: phoneController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
+                  color: Palette.get("background.neutral"),
+                  isFilled: true,
+                  isOutline: true),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               onChanged: (text) {
@@ -933,7 +940,7 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: addressController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4),
+                  color: Palette.get("background.neutral"),
                   isFilled: true,
                   isOutline: true,
                   suffixIcon: UnconstrainedBox(
@@ -941,7 +948,7 @@ class CustomerInformation extends StatelessWidget {
                         size: 25.0, color: "text.disabled"),
                   )),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               onChanged: (text) {
@@ -1011,9 +1018,11 @@ class CustomerInformation extends StatelessWidget {
             TextField(
               controller: arrivalController,
               decoration: Widgets.inputDecoration("",
-                  color: Color(0xFFF4F4F4), isFilled: true, isOutline: true),
+                  color: Palette.get("background.neutral"),
+                  isFilled: true,
+                  isOutline: true),
               style: GoogleFonts.nunito(
-                  color: Color(0xCC757575),
+                  color: Palette.get("text.secondary"),
                   fontSize: 13.0,
                   fontWeight: FontWeight.w400),
               readOnly: true,

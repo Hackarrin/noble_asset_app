@@ -24,7 +24,7 @@
   ],
   "kind": "codemodel",
   "paths": {
-    "build": "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/Debug/4c3o331d/x86",
+    "build": "/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/Debug/4c3o331d/x86",
     "source": "/Users/hackarrin/flutter_sdk/packages/flutter_tools/gradle/src/main/groovy"
   },
   "version": {

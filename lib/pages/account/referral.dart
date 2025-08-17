@@ -1,7 +1,7 @@
-import 'package:cribsfinder/utils/apis.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/apis.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class _ReferralsState extends State<Referrals> {
   final profile = {
     "fname": "Tayo",
     "lname": "Oladele",
-    "email": "info@cribsfinder.com",
+    "email": "info@nobleassets.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -74,7 +74,7 @@ class _ReferralsState extends State<Referrals> {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
     return Scaffold(
-        backgroundColor: Color(0xFF7777D4),
+        backgroundColor: Palette.get("main.primary"),
         body: Padding(
           padding: const EdgeInsets.only(
               top: kToolbarHeight, left: 0.0, right: 0.0, bottom: 0.0),
@@ -137,7 +137,7 @@ class _ReferralsState extends State<Referrals> {
                                         weight: 400, size: 30.0),
                                     Row(
                                       children: [
-                                        Widgets.buildText("50%", context,
+                                        Widgets.buildText("1K", context,
                                             weight: 600,
                                             size: 50.0,
                                             color: "main.purple"),
@@ -149,7 +149,7 @@ class _ReferralsState extends State<Referrals> {
                                       ],
                                     ),
                                     Widgets.buildText(
-                                        "Earn Up to 50% by Inviting Vendors & Friends to Cribsfinder!",
+                                        "Earn Up to NGN1,000 by Inviting Friends to Noble Assets!",
                                         context,
                                         isMedium: true,
                                         lines: 5)
@@ -165,7 +165,7 @@ class _ReferralsState extends State<Referrals> {
                                     borderRadius: BorderRadius.circular(20)),
                                 padding: const EdgeInsets.all(15.0),
                                 child: Widgets.buildText(
-                                    "Turn Your Connections into Cash Invite vendors and friends to join Cribsfinder and unlock an incredible earning opportunity.",
+                                    "Turn Your Connections into Cash. Invite family and friends to join Noble Assets and unlock an incredible earning opportunity.",
                                     lines: 10,
                                     context),
                               ),
@@ -173,7 +173,7 @@ class _ReferralsState extends State<Referrals> {
                                 height: 10.0,
                               ),
                               Widgets.buildText(
-                                  "By inviting friends & vendors, you agree to our terms and conditions.",
+                                  "By inviting friends & family, you agree to our terms and conditions.",
                                   context,
                                   size: 11.0,
                                   lines: 4,
@@ -194,7 +194,8 @@ class _ReferralsState extends State<Referrals> {
                                   child: TextButton(
                                       onPressed: () {},
                                       style: Widgets.buildButton(context,
-                                          background: Color(0xFF7575EC),
+                                          background:
+                                              Palette.get("main.secondary"),
                                           radius: 50.0,
                                           vertical: 15.0),
                                       child: Widgets.buildText(
@@ -231,24 +232,6 @@ class _ReferralsState extends State<Referrals> {
                       child: Widgets.buildText("Close", context,
                           isCenter: true, color: "text.white")),
                 ),
-                Positioned(
-                    bottom: 400.0,
-                    child: SizedBox(
-                      width: screenWidth,
-                      child: Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                              color: Color(0xFF263238),
-                              borderRadius: BorderRadius.circular(20.0)),
-                          margin: const EdgeInsets.only(left: 50.0),
-                          padding: const EdgeInsets.all(10.0),
-                          child: Image.asset(
-                            "assets/images/logo-white.png",
-                            height: 64.0,
-                          ),
-                        ),
-                      ),
-                    )),
               ],
             ),
           ),

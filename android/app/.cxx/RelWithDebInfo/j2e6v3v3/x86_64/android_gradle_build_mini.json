@@ -6,14 +6,14 @@
     [
       "/Users/hackarrin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
       "-C",
-      "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/j2e6v3v3/x86_64",
+      "/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/RelWithDebInfo/j2e6v3v3/x86_64",
       "clean"
     ]
   ],
   "buildTargetsCommandComponents": [
     "/Users/hackarrin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
     "-C",
-    "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/j2e6v3v3/x86_64",
+    "/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/RelWithDebInfo/j2e6v3v3/x86_64",
     "{LIST_OF_TARGETS_TO_BUILD}"
   ],
   "libraries": {}

@@ -24,7 +24,7 @@
   ],
   "kind": "codemodel",
   "paths": {
-    "build": "/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/j2e6v3v3/armeabi-v7a",
+    "build": "/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/RelWithDebInfo/j2e6v3v3/armeabi-v7a",
     "source": "/Users/hackarrin/flutter_sdk/packages/flutter_tools/gradle/src/main/groovy"
   },
   "version": {

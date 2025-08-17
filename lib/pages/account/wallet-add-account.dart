@@ -1,7 +1,7 @@
-import 'package:cribsfinder/utils/apis.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/apis.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class _AddWalletAccountState extends State<AddWalletAccount> {
   final profile = {
     "fname": "Tayo",
     "lname": "Oladele",
-    "email": "info@cribsfinder.com",
+    "email": "info@nobleassets.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",
@@ -108,7 +108,7 @@ class _AddWalletAccountState extends State<AddWalletAccount> {
               child: Column(
                 children: [
                   Widgets.buildText(
-                      "Open a multi-currency wallet with Cribsfinder! Hold, send, and receive funds seamlessly in your preferred currency.",
+                      "Open a multi-currency wallet with Noble Assets! Hold, send, and receive funds seamlessly in your preferred currency.",
                       lines: 10,
                       isCenter: true,
                       weight: 500,

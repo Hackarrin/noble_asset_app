@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
@@ -99,7 +99,10 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, "/messages",
+                      arguments: jsonEncode(booking));
+                },
                 style: Widgets.buildButton(context,
                     radius: 50.0, sideColor: Color(0xFFF1F1F1)),
                 icon: Helpers.fetchIcons("comment-alt", "solid",
@@ -617,7 +620,8 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, "/chat");
+                        Navigator.pushNamed(context, "/messages",
+                            arguments: jsonEncode(booking));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -767,39 +771,47 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                                   spreadRadius: 2)
                             ]),
                         child: UnconstrainedBox(
-                            child: Helpers.fetchIcons("car-alt", "solid",
-                                color: "main.primary", size: 20.0))),
+                            child: Helpers.fetchIcons(
+                                booking["type"].toString() == "1"
+                                    ? "bed"
+                                    : "car-alt",
+                                "solid",
+                                color: "main.primary",
+                                size: 20.0))),
                     const SizedBox(
                       width: 20.0,
                     ),
-                    if (booking["type"].toString() != "1")
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacementNamed(context, "/home",
-                              arguments: "");
-                        },
-                        child: Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Widgets.buildText("Car rental", context,
-                                  size: 13.0,
-                                  weight: 500,
-                                  color: "text.secondary"),
-                              const SizedBox(
-                                height: 5.0,
-                              ),
-                              Widgets.buildText(
-                                  "Need a Ride? Book a Car Rental for Your Stay!",
-                                  context,
-                                  size: 12.0,
-                                  weight: 400,
-                                  lines: 3,
-                                  color: "text.secondary"),
-                            ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, "/home",
+                            arguments: "");
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Widgets.buildText(
+                            booking["type"].toString() == "1"
+                                ? "Book a stay"
+                                : "Car rental",
+                            context,
+                            size: 13.0,
+                            isMedium: true,
                           ),
-                        ),
+                          const SizedBox(
+                            height: 5.0,
+                          ),
+                          Widgets.buildText(
+                              booking["type"].toString() == "1"
+                                  ? "Need a place to stay? Book an hotel / short-let."
+                                  : "Need a Ride? Book a Car Rental for Your Stay!",
+                              context,
+                              size: 12.0,
+                              weight: 400,
+                              lines: 3,
+                              color: "text.secondary"),
+                        ],
                       ),
+                    ),
                   ],
                 ),
               ],
@@ -818,13 +830,13 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
               onTap: () {
                 SharePlus.instance.share(ShareParams(
                     title: booking["type"].toString() == "1"
-                        ? "I rented an automobile from Cribsfinder"
-                        : "I booked a ${booking["type"].toString() == "0" ? "room" : "short-let"} from Cribsfinder",
+                        ? "I rented a car from Noble Assets"
+                        : "I booked a ${booking["type"].toString() == "0" ? "room" : "short-let"} from Noble Assets",
                     subject: booking["type"].toString() == "1"
-                        ? "I rented an automobile from Cribsfinder"
-                        : "I booked a ${booking["type"].toString() == "0" ? "room" : "short-let"} from Cribsfinder",
+                        ? "I rented a car from Noble Assets"
+                        : "I booked a ${booking["type"].toString() == "0" ? "room" : "short-let"} from Noble Assets",
                     uri: Uri.https(
-                      "cribsfinder.com",
+                      "nobleassets.com",
                       "/bookings/${booking["bookingId"]}",
                     )));
               },
@@ -847,11 +859,11 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
               onTap: () {
                 SharePlus.instance.share(ShareParams(
                     title:
-                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Cribsfinder",
+                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Noble Assets",
                     subject:
-                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Cribsfinder",
+                        "Check out ${booking["roomType"][0]["listingName"].toString()} on Noble Assets",
                     uri: Uri.https(
-                      "cribsfinder.com",
+                      "nobleassets.com",
                       "/${booking["type"].toString() == "1" ? "rental" : "place"}/${booking["roomType"][0]["listingId"]}-${booking["roomType"][0]["listingName"].toString().toLowerCase().replaceAll(" ", "-")}",
                     )));
               },
@@ -873,10 +885,10 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
             GestureDetector(
               onTap: () {
                 SharePlus.instance.share(ShareParams(
-                  title: "Find top stays and rentals at Cribsfinder",
-                  subject: "Find top stays and rentals at Cribsfinder",
+                  title: "Find top stays and rentals at Noble Assets",
+                  subject: "Find top stays and rentals at Noble Assets",
                   text:
-                      "Check out the best stays and rental at Cribsfinder. \n cribsfinder.com",
+                      "Check out the best stays and rental at Noble Assets. \n nobleassets.com",
                 ));
               },
               child: Row(
@@ -886,6 +898,26 @@ class _BookingState extends State<Booking> with SingleTickerProviderStateMixin {
                     width: 10.0,
                   ),
                   Widgets.buildText("Share this app", context,
+                      size: 13.0, weight: 500, color: "main.primary")
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 10.0,
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacementNamed(context, "/home",
+                    arguments: "1");
+              },
+              child: Row(
+                children: [
+                  Helpers.fetchIcons("calendar-day", "regular",
+                      color: "main.primary"),
+                  const SizedBox(
+                    width: 10.0,
+                  ),
+                  Widgets.buildText("Back to bookings", context,
                       size: 13.0, weight: 500, color: "main.primary")
                 ],
               ),

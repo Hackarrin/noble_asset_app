@@ -1,34 +1,77 @@
-import 'dart:convert';
-
-import 'package:cribsfinder/globals/hotel_booking.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/palette.dart';
 
-class TransactionPin extends StatefulWidget {
-  const TransactionPin({Key? key}) : super(key: key);
+class Compliance extends StatefulWidget {
+  const Compliance({Key? key}) : super(key: key);
 
   @override
-  _TransactionPinState createState() => _TransactionPinState();
+  _ComplianceState createState() => _ComplianceState();
 }
 
-class _TransactionPinState extends State<TransactionPin>
+class _ComplianceState extends State<Compliance>
     with SingleTickerProviderStateMixin {
   final menus = [
-    {"name": "Change Transaction PIN", "page": "/change-pin"},
-    {"name": "Forgot Transaction PIN", "page": "forgot-pin"},
-    {"name": "Enable / Disable Transaction PIN", "page": "pin-enable"},
+    {"name": "BVN", "page": "/bvn"},
+    {"name": "Identification", "page": "/identification"},
+    {"name": "Facial Verification", "page": "pin-enable"},
+    {"name": "Proof of Address", "page": "proof-of-address"},
   ];
   var enablePin = true;
+
+  Map<String, dynamic> bvnStatus = {"text": "Pending", "label": "warning"};
+  Map<String, dynamic> idStatus = {"text": "Pending", "label": "warning"};
+  Map<String, dynamic> selfieStatus = {"text": "Pending", "label": "warning"};
+  String selfie = "";
+  int intBvnStatus = 0;
+  int intIdStatus = 0;
+  int intSelfieStatus = 0;
+  int accountType = 0;
+
+  Future<void> fetch() async {
+    Map<String, dynamic> data = await Helpers.getProfile();
+    Map<String, dynamic> dataVerification = await Helpers.getVerifications();
+    print("response $dataVerification");
+    setState(() {
+      accountType = num.tryParse(data["type"].toString())?.toInt() ?? 0;
+      if (dataVerification.containsKey("bvn_status")) {
+        bvnStatus = dataVerification["bvn_status"];
+        intBvnStatus = num.tryParse(dataVerification["intBvnStatus"].toString())
+                ?.toInt() ??
+            0;
+      }
+      if (dataVerification.containsKey("selfie_status")) {
+        selfieStatus = dataVerification["selfie_status"];
+        intSelfieStatus =
+            num.tryParse(dataVerification["intSelfieStatus"].toString())
+                    ?.toInt() ??
+                0;
+      }
+      if (dataVerification.containsKey("status")) {
+        idStatus = dataVerification["status"];
+        setState(() {
+          selfie = dataVerification["selfie"];
+        });
+        intIdStatus =
+            num.tryParse(dataVerification["intStatus"].toString())?.toInt() ??
+                0;
+        if (intIdStatus == 1 && dataVerification["lga"].toString().isEmpty) {
+          intIdStatus = 0;
+        }
+      }
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+    Future.delayed(Duration.zero, () async {
+      await fetch();
+    });
   }
 
   @override
@@ -61,7 +104,7 @@ class _TransactionPinState extends State<TransactionPin>
                 color: "text.other",
               )),
         ),
-        title: Widgets.buildText("Manage PIN", context, isMedium: true),
+        title: Widgets.buildText("Compliance", context, isMedium: true),
         elevation: 0,
         backgroundColor: Palette.getColor(context, "background", "paper"),
         foregroundColor: Palette.getColor(context, "text", "disabled"),
@@ -89,13 +132,27 @@ class _TransactionPinState extends State<TransactionPin>
                         physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (BuildContext context, int index) {
                           final item = menus[index];
+                          Map status = {};
+                          if (index == 0) {
+                            status = bvnStatus;
+                          } else if (index == 1) {
+                            status = idStatus;
+                          } else if (index == 2) {
+                            status = selfieStatus;
+                          }
                           return GestureDetector(
-                            onTap: () {
-                              if (item["page"].toString().startsWith("/")) {
-                                Navigator.pushNamed(
-                                    context, item["page"].toString());
+                            onTap: () async {
+                              if (index == 2) {
+                                await Sheets.showSelfie(selfie);
+                                fetch();
+                              } else if (index == 3) {
+                                Sheets.showProofAddress();
                               } else {
-                                Sheets.forgotPin();
+                                Navigator.pushNamed(
+                                        context, item["page"].toString())
+                                    .then((value) {
+                                  fetch();
+                                });
                               }
                             },
                             child: Container(
@@ -125,26 +182,28 @@ class _TransactionPinState extends State<TransactionPin>
                                           height: 15.0,
                                         ),
                                       ]),
-                                  index == 2
-                                      ? SizedBox(
-                                          height: 30.0,
-                                          child: FittedBox(
-                                            child: Switch(
-                                                inactiveTrackColor:
-                                                    Color(0x80000000),
-                                                inactiveThumbColor:
-                                                    Palette.get("text.white"),
-                                                value: enablePin,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    enablePin = value;
-                                                  });
-                                                }),
-                                          ),
-                                        )
-                                      : Helpers.fetchIcons(
+                                  Row(
+                                    children: [
+                                      if (status.isNotEmpty)
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Palette.get(
+                                                  "${status["label"]}.main"),
+                                              borderRadius:
+                                                  BorderRadius.circular(5.0)),
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: Widgets.buildText(
+                                              status["text"].toString(),
+                                              context,
+                                              size: 12.0,
+                                              weight: 500,
+                                              color: "text.white"),
+                                        ),
+                                      Helpers.fetchIcons(
                                           "caret-right", "regular",
                                           size: 16.0),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),

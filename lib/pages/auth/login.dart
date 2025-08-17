@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -49,15 +49,14 @@ class _LoginState extends State<Login> {
           isAlreadyLoggedIn ? profileEmail : emailController.text.trim();
       final phone = phoneController.text.replaceAll(" ", "").trim();
       final password = passwordController.text;
+      print("response $email");
 
-      if (((method == "email" && email.isNotEmpty) || phone.isNotEmpty) &&
-          password.isNotEmpty) {
+      if (email.isNotEmpty && (method == "biometric" || password.isNotEmpty)) {
         if (Helpers.isEmail(email) || phone.isNotEmpty) {
           Alert.showLoading(context, "Logging you in...");
-          await JWT.login(
-              {"password": password, "username": email, "method": method});
+          await JWT
+              .login({"password": password, "email": email, "method": method});
           Alert.hideLoading(context);
-
           Helpers.toHome(context);
         } else {
           Alert.show(
@@ -110,14 +109,13 @@ class _LoginState extends State<Login> {
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
-      final profile = await Helpers.getProfile();
+      final profile = await Helpers.getProfile(key: "profile");
       if (profile.isNotEmpty) {
         setState(() {
-          name = profile["user"]["name"].toString();
-          profileEmail = profile["user"]["email"].toString();
+          name = profile["fname"].toString();
+          profileEmail = profile["email"].toString();
           isAlreadyLoggedIn = true;
         });
-
         final bool canAuthenticateWithBiometrics =
             await auth.canCheckBiometrics;
         bool isBiometricEnabled =
@@ -180,6 +178,7 @@ class _LoginState extends State<Login> {
                         height: 80.0,
                         fit: BoxFit.contain,
                       ),
+                      const SizedBox(height: 40.0),
                       Widgets.buildText(
                         isAlreadyLoggedIn
                             ? "Welcome Back, $name"
@@ -366,97 +365,6 @@ class _LoginState extends State<Login> {
                         ],
                       ),
                       const SizedBox(
-                        height: 20.0,
-                      ),
-                      if (!isAlreadyLoggedIn)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(child: Divider(color: Color(0x1A535353))),
-                            Widgets.buildText(" Or sign in with ", context,
-                                color: "text.disabled"),
-                            Expanded(child: Divider(color: Color(0x1A535353))),
-                          ],
-                        ),
-                      if (!isAlreadyLoggedIn)
-                        const SizedBox(
-                          height: 20.0,
-                        ),
-                      if (!isAlreadyLoggedIn)
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                googleSignin();
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    border:
-                                        Border.all(color: Color(0x1A000000))),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 10.0),
-                                child: Row(
-                                  children: [
-                                    Image.asset(
-                                        "assets/images/login-google.jpeg",
-                                        height: 30.0,
-                                        fit: BoxFit.contain),
-                                    const SizedBox(
-                                      width: 10.0,
-                                    ),
-                                    Widgets.buildText("Google", context)
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              width: 10.0,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  method =
-                                      method == "phone" ? "email" : "phone";
-                                });
-                                if (method == "email") {
-                                  phoneController.text = "";
-                                } else {
-                                  emailController.text = "";
-                                }
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20.0),
-                                    border:
-                                        Border.all(color: Color(0x1A000000))),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 5.0, horizontal: 10.0),
-                                child: Row(
-                                  children: [
-                                    if (method == "phone")
-                                      Image.asset(
-                                          "assets/images/login-email.jpeg",
-                                          height: 30.0,
-                                          fit: BoxFit.contain),
-                                    if (method == "email")
-                                      Helpers.fetchIcons(
-                                          "circle-phone", "solid",
-                                          color: "main.primary", size: 24.0),
-                                    const SizedBox(
-                                      width: 10.0,
-                                    ),
-                                    Widgets.buildText(
-                                        method == "email" ? "Phone" : "Email",
-                                        context)
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      const SizedBox(
                         height: 40.0,
                       ),
                       GestureDetector(
@@ -475,23 +383,15 @@ class _LoginState extends State<Login> {
                           children: [
                             Widgets.buildText(
                                 isAlreadyLoggedIn
-                                    ? "No, I am not Ola    "
+                                    ? "No, I am not $name.    "
                                     : "Don't have an account?   ",
                                 context,
                                 color: "text.secondary"),
-                            GestureDetector(
-                              onTap: () {
-                                Helpers.logout(person: true);
-                                setState(() {
-                                  isAlreadyLoggedIn = false;
-                                });
-                              },
-                              child: Widgets.buildText(
-                                  isAlreadyLoggedIn ? "Logout" : "Sign Up",
-                                  context,
-                                  isUnderlined: true,
-                                  color: "main.primary"),
-                            ),
+                            Widgets.buildText(
+                                isAlreadyLoggedIn ? "Logout" : "Sign Up",
+                                context,
+                                isUnderlined: true,
+                                color: "main.primary"),
                           ],
                         ),
                       )

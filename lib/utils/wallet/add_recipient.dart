@@ -1,7 +1,7 @@
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

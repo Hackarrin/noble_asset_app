@@ -1,16 +1,16 @@
 {
   "project_info": {
     "project_number": "149378416912",
-    "firebase_url": "https://cribsfinder-dda93-default-rtdb.firebaseio.com",
-    "project_id": "cribsfinder-dda93",
-    "storage_bucket": "cribsfinder-dda93.firebasestorage.app"
+    "firebase_url": "https://nobleassets-dda93-default-rtdb.firebaseio.com",
+    "project_id": "nobleassets-dda93",
+    "storage_bucket": "nobleassets-dda93.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:149378416912:android:18d35b34cefebe54502595",
         "android_client_info": {
-          "package_name": "com.cribsfinder.mobile"
+          "package_name": "com.nobleassets.app"
         }
       },
       "oauth_client": [],

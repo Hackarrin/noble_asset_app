@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
@@ -21,11 +21,12 @@ class _SignupVerifyState extends State<SignupVerify> {
   final TextEditingController controller = TextEditingController();
 
   String phone = "";
+  String name = "";
 
   void resendPhoneCode() async {
     try {
       Alert.showLoading(context, "Sending...");
-      await JWT.sendVerifyCode(phone, "NG", "sms");
+      await JWT.sendVerifyCode();
       Alert.show(context, "", "Verification code has been sent!",
           type: "success");
     } catch (err) {
@@ -39,10 +40,12 @@ class _SignupVerifyState extends State<SignupVerify> {
       final code = controller.text;
       if (code.isNotEmpty) {
         Alert.showLoading(context, "Verifying...");
-        await JWT.verifyAccount(code, "sms", phone, "NG");
+        await JWT.verifyAccount(code);
         Alert.hideLoading(context);
-        Navigator.pushNamed(context, "/signup-account-info",
-            arguments: jsonEncode({"phone": phone}));
+        Navigator.pushNamed(
+          context,
+          "/signup-welcome",
+        );
       } else {
         Alert.show(context, "", "Please provide a valid code to proceed",
             type: "warning");
@@ -56,14 +59,12 @@ class _SignupVerifyState extends State<SignupVerify> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      final arguments = ModalRoute.of(context)?.settings.arguments;
-      if (arguments != null) {
-        final data = jsonDecode(arguments.toString());
-        setState(() {
-          phone = data["phone"] ?? "";
-        });
-      }
+    Future.delayed(Duration.zero, () async {
+      final profile = await Helpers.getProfile(key: "profile");
+      setState(() {
+        name = profile["fname"].toString();
+      });
+      resendPhoneCode();
     });
   }
 
@@ -104,7 +105,7 @@ class _SignupVerifyState extends State<SignupVerify> {
                   Column(
                     children: [
                       Widgets.buildText(
-                        "Verify Code",
+                        "Verify Your Account, $name",
                         context,
                         isMedium: true,
                         size: 24.0,
@@ -114,7 +115,7 @@ class _SignupVerifyState extends State<SignupVerify> {
                         height: 10.0,
                       ),
                       Widgets.buildText(
-                          "Enter the code we sent over SMS to +234 $phone",
+                          "Enter the code we sent to your email address and phone number.",
                           context,
                           lines: 10,
                           isCenter: true,
@@ -144,9 +145,9 @@ class _SignupVerifyState extends State<SignupVerify> {
                                   Palette.getColor(context, "main", "primary"),
                               highlightColor:
                                   Palette.getColor(context, "main", "primary"),
-                              maxLength: 6,
-                              pinBoxWidth: 50,
-                              pinBoxHeight: 50,
+                              maxLength: 4,
+                              pinBoxWidth: 60,
+                              pinBoxHeight: 60,
                               wrapAlignment: WrapAlignment.center,
                               pinTextStyle: GoogleFonts.nunito(
                                   fontSize: 16.0,

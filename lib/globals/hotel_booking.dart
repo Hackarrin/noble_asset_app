@@ -1,9 +1,10 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 class HotelBooking extends StatelessWidget {
@@ -59,11 +60,27 @@ class HotelBooking extends StatelessWidget {
                             if (!isReview)
                               Expanded(
                                 child: TextButton(
-                                    onPressed: () {
-                                      if (item["status"].toString() == "0") {
-                                      } else {
+                                    onPressed: () async {
+                                      if (item["status"].toString() == "0" ||
+                                          item["status"].toString() == "1") {
+                                        // cancel logic here
+                                        final res =
+                                            await Sheets.cancelBooking(item);
+                                        if (res && action != null) {
+                                          action!();
+                                        }
+                                      } else if (item["roomType"] is List) {
                                         print("roomType - ${item["roomType"]}");
                                         Navigator.pushNamed(context, "/hotel",
+                                            arguments: jsonEncode(
+                                                item["roomType"][0] ?? {}));
+                                      } else {
+                                        Navigator.pushNamed(
+                                            context,
+                                            item['roomType']['type'] ==
+                                                    "shortlet"
+                                                ? "/shortlet"
+                                                : "/automobile",
                                             arguments: jsonEncode(
                                                 item["roomType"] ?? {}));
                                       }
@@ -91,11 +108,23 @@ class HotelBooking extends StatelessWidget {
                               const SizedBox(
                                 width: 10.0,
                               ),
-                            if (item["status"].toString() != "2")
+                            if (item["status"].toString() != "2" &&
+                                (item["status"].toString() != "4" ||
+                                    item["isReviewed"].toString() == "0"))
                               Expanded(
                                 child: TextButton(
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (item["status"].toString() == "0") {
+                                        Navigator.pushNamed(context, "/booking",
+                                            arguments: jsonEncode(item));
+                                      } else if (item["status"].toString() ==
+                                          "4") {
+                                        print("dante - $item");
+                                        final res =
+                                            await Sheets.reviewBooking(item);
+                                        if (res && action != null) {
+                                          action!();
+                                        }
                                       } else {
                                         Navigator.pushNamed(context, "/hotel",
                                             arguments: jsonEncode(
@@ -109,8 +138,8 @@ class HotelBooking extends StatelessWidget {
                                         radius: 30.0),
                                     child: Widgets.buildText(
                                         item["status"].toString() == "4"
-                                            ? "Add Reviews"
-                                            : "E-receipt",
+                                            ? "Add Review"
+                                            : "View details",
                                         context,
                                         color: "text.white",
                                         isMedium: true)),

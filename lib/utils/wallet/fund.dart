@@ -1,15 +1,18 @@
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:paystack_flutter_sdk/paystack_flutter_sdk.dart';
 
 class WalletTopup {
   static Future<Map<String, dynamic>> fundAccount(
       List cards,
-      Map<String, dynamic> account,
+      Map<dynamic, dynamic> account,
       Map<String, dynamic> limits,
       String currency,
       {bool showLimits = false}) async {
@@ -19,6 +22,36 @@ class WalletTopup {
     bool isShowSending = true;
     final currencyDetails = Defaults.walletTypes
         .firstWhere((item) => item["value"].toString() == currency);
+    final _paystack = Paystack();
+
+    void processPaystack() async {
+      try {
+        Alert.showLoading(navigatorKey.currentContext!, "Initializing...");
+        final init = await _paystack.initialize(Defaults.paystackKey, true);
+        if (init) {
+          final accessCode = await JWT.getAccessCode(0);
+          if (accessCode.isNotEmpty) {
+            final response = await _paystack.launch(accessCode);
+            Alert.hideLoading(navigatorKey.currentContext!);
+            if (response.status == "success") {
+              // confirmOrder(response.reference);
+            }
+            return;
+          }
+        }
+        throw Exception(
+            "An error occured while attempting to process payment! Please try again later.");
+      } catch (err) {
+        Alert.hideLoading(navigatorKey.currentContext!);
+        Alert.show(
+            navigatorKey.currentContext!,
+            "",
+            err.toString().isNotEmpty
+                ? err.toString()
+                : "An error has occured! Please try again later.");
+      }
+    }
+
     await showModalBottomSheet(
         elevation: 10,
         backgroundColor: Palette.getColor(
@@ -82,7 +115,7 @@ class WalletTopup {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Widgets.buildText(
-                                      "Choose your preferred method to add funds to your Naira account.",
+                                      "Choose your preferred method to add funds to your Naira wallet.",
                                       context,
                                       lines: 10,
                                       weight: 500),
@@ -157,7 +190,8 @@ class WalletTopup {
                                                 width: 10.0,
                                               ),
                                               Widgets.buildText(
-                                                  "Add new debit card", context,
+                                                  "Topup with new debit card",
+                                                  context,
                                                   weight: 500,
                                                   color: "main.primary")
                                             ],
@@ -496,7 +530,7 @@ class WalletTopup {
                               Column(
                                 children: [
                                   Widgets.buildText(
-                                      "What Are the Sending and Receiving Limits for Your $currency Cribsfinder Wallet Account?",
+                                      "What Are the Sending and Receiving Limits for Your $currency Noble Assets Wallet Account?",
                                       context,
                                       lines: 10),
                                   const SizedBox(

@@ -1,2 +1,2 @@
-/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/496r5t44/armeabi-v7a/CMakeFiles/edit_cache.dir
-/Users/hackarrin/Flutter/cribsfinder/android/app/.cxx/RelWithDebInfo/496r5t44/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/RelWithDebInfo/496r5t44/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/hackarrin/Flutter/nobleassets/android/app/.cxx/RelWithDebInfo/496r5t44/armeabi-v7a/CMakeFiles/rebuild_cache.dir

@@ -1,7 +1,7 @@
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class _ReferralOverviewState extends State<ReferralOverview> {
   final profile = {
     "fname": "Tayo",
     "lname": "Oladele",
-    "email": "info@cribsfinder.com",
+    "email": "info@nobleassets.com",
     "phone": "091833383",
     "dateAdded": "2025-01-01",
     "isVerified": "1",

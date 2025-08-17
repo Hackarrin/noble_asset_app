@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,14 +36,6 @@ class _SplashState extends State<Splash> {
         }
       }
 
-      final isGuest = await Helpers.readPref(Defaults.isGuest);
-      if (isGuest == "1") {
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          Navigator.pushReplacementNamed(context, "/home");
-        });
-        return;
-      }
-
       Future.delayed(const Duration(milliseconds: 2500), () async {
         final userid = await Helpers.readPref(Defaults.userid);
         if (userid.isEmpty) {
@@ -52,7 +44,7 @@ class _SplashState extends State<Splash> {
           });
         } else {
           // logged in, go to home
-          Navigator.pushNamed(context, "/home");
+          Navigator.pushNamed(context, "/login");
         }
       });
     });
@@ -93,7 +85,11 @@ class _SplashState extends State<Splash> {
                           Expanded(
                             child: Stack(
                               children: [
-                                ConstrainedBox(
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Palette.get("main.primary"),
+                                      borderRadius:
+                                          BorderRadius.circular(20.0)),
                                   constraints: BoxConstraints(
                                       minHeight: 300, maxHeight: 500),
                                   child: SizedBox(
@@ -102,7 +98,7 @@ class _SplashState extends State<Splash> {
                                         borderRadius:
                                             BorderRadius.circular(40.0),
                                         child: Image.asset(
-                                            "assets/images/splash.png",
+                                            "assets/images/refer-bg.png",
                                             height: 500,
                                             fit: BoxFit.cover)),
                                   ),
@@ -118,14 +114,14 @@ class _SplashState extends State<Splash> {
                                 runAlignment: WrapAlignment.center,
                                 children: [
                                   Widgets.buildText(
-                                    "Find ",
+                                    "Invest ",
                                     context,
                                     isMedium: true,
                                     size: 35.0,
                                     weight: 700,
                                   ),
                                   Widgets.buildText(
-                                    "Any Crib ",
+                                    "& Save",
                                     context,
                                     isMedium: true,
                                     size: 35.0,
@@ -133,7 +129,7 @@ class _SplashState extends State<Splash> {
                                     weight: 700,
                                   ),
                                   Widgets.buildText(
-                                    "You Want",
+                                    "With Confidence",
                                     context,
                                     isMedium: true,
                                     size: 35.0,
@@ -145,7 +141,7 @@ class _SplashState extends State<Splash> {
                                 height: 20.0,
                               ),
                               Widgets.buildText(
-                                  "Find the perfect space for your stay—for business, leisure, content creation, or a weekend escape. Verified listings, easy booking, and total comfort.",
+                                  "Invest securely and confidently on the go. Grow your money confidently by investing in pre-vetted investment opportunities.",
                                   context,
                                   lines: 10,
                                   size: 16.0,
@@ -173,35 +169,6 @@ class _SplashState extends State<Splash> {
                                         weight: 500,
                                         size: 16.0)),
                               ),
-                              const SizedBox(
-                                height: 15.0,
-                              ),
-                              Widgets.buildText("OR", context,
-                                  isMedium: true,
-                                  color: "main.primary",
-                                  size: 14.0),
-                              const SizedBox(
-                                height: 15.0,
-                              ),
-                              SizedBox(
-                                width: double.infinity,
-                                child: TextButton(
-                                    onPressed: () {
-                                      Helpers.writePref(Defaults.isGuest, "1");
-                                      Navigator.pushNamed(context, "/home");
-                                    },
-                                    style: Widgets.buildButton(context,
-                                        vertical: 15.0,
-                                        horizontal: 10.0,
-                                        radius: 60.0,
-                                        sideColor:
-                                            Palette.get("text.secondary"),
-                                        background:
-                                            Palette.get("background.paper")),
-                                    child: Widgets.buildText(
-                                        "Continue as Guest", context,
-                                        isMedium: true)),
-                              ),
                             ],
                           ),
                         ],
@@ -219,12 +186,7 @@ class _SplashState extends State<Splash> {
                       fit: BoxFit.contain,
                     ),
                   ),
-                ),
-                Positioned(
-                    right: 0.0,
-                    bottom: 0.0,
-                    child: Image.asset("assets/images/splash-icon.png",
-                        width: screenWidth * (3.5 / 4)))
+                )
               ],
             ),
     );

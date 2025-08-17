@@ -1,10 +1,10 @@
-import 'package:cribsfinder/globals/hotel_item.dart';
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/modals.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/hotel_item.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -1420,215 +1420,228 @@ class HotelModals {
                                 ],
                               ),
                             ),
+                            if (!isRental) const SizedBox(height: 20.0),
                             if (!isRental)
-                            const SizedBox(height: 20.0),
-                            if(!isRental)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Palette.getColor(
-                                    context, "background", "paper"),
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Widgets.buildText(
-                                      "Bedroom and Bathroom", context,
-                                      weight: 500),
-                                  const SizedBox(
-                                    height: 20.0,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Widgets.buildText("Bedrooms", context,
-                                          color: "text.secondary"),
-                                      Padding(
-                                        padding: const EdgeInsets.all(3.0),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10.0,
-                                                horizontal: 15.0),
-                                            margin: const EdgeInsets.only(
-                                                bottom:
-                                                    6.0), //Same as `blurRadius` i guess
-                                            decoration: BoxDecoration(
-                                                color: Palette.getColor(context,
-                                                    "background", "default"),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0),
-                                                border: Border(
-                                                    bottom: BorderSide(
-                                                        color: Palette.getColor(
-                                                            context,
-                                                            "main",
-                                                            "primary")))),
-                                            child: Row(
-                                              children: [
-                                                GestureDetector(
-                                                    onTap: () {
-                                                      var item = num.tryParse(
-                                                                  bedroomBathrooms[
-                                                                          "bedroom"]
-                                                                      .toString())
-                                                              ?.toInt() ??
-                                                          0;
-                                                      item = item - 1 < 0
-                                                          ? 0
-                                                          : item - 1;
-                                                      setState(() {
-                                                        bedroomBathrooms[
-                                                            "bedroom"] = item;
-                                                        result["bedroom_bathroom"] =
-                                                            bedroomBathrooms;
-                                                      });
-                                                    },
-                                                    child: Helpers.fetchIcons(
-                                                        "minus-circle", "solid",
-                                                        size: 30)),
-                                                const SizedBox(
-                                                  width: 15.0,
-                                                ),
-                                                Widgets.buildText(
-                                                    bedroomBathrooms["bedroom"]
-                                                        .toString(),
-                                                    context,
-                                                    isMedium: true,
-                                                    color: "text.secondary"),
-                                                const SizedBox(
-                                                  width: 15.0,
-                                                ),
-                                                GestureDetector(
-                                                    onTap: () {
-                                                      final item = (num.tryParse(
-                                                                      bedroomBathrooms[
-                                                                              "bedroom"]
-                                                                          .toString())
-                                                                  ?.toInt() ??
-                                                              0) +
-                                                          1;
-                                                      setState(() {
-                                                        bedroomBathrooms[
-                                                            "bedroom"] = item;
-                                                        result["bedroom_bathroom"] =
-                                                            bedroomBathrooms;
-                                                      });
-                                                    },
-                                                    child: Helpers.fetchIcons(
-                                                        "add", "solid",
-                                                        size: 30,
-                                                        color: "main.primary")),
-                                              ],
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Palette.getColor(
+                                      context, "background", "paper"),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                ),
+                                padding: const EdgeInsets.all(20.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Widgets.buildText(
+                                        "Bedroom and Bathroom", context,
+                                        weight: 500),
+                                    const SizedBox(
+                                      height: 20.0,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Widgets.buildText("Bedrooms", context,
+                                            color: "text.secondary"),
+                                        Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10.0,
+                                                      horizontal: 15.0),
+                                              margin: const EdgeInsets.only(
+                                                  bottom:
+                                                      6.0), //Same as `blurRadius` i guess
+                                              decoration: BoxDecoration(
+                                                  color: Palette.getColor(
+                                                      context,
+                                                      "background",
+                                                      "default"),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100.0),
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          color:
+                                                              Palette.getColor(
+                                                                  context,
+                                                                  "main",
+                                                                  "primary")))),
+                                              child: Row(
+                                                children: [
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        var item = num.tryParse(
+                                                                    bedroomBathrooms[
+                                                                            "bedroom"]
+                                                                        .toString())
+                                                                ?.toInt() ??
+                                                            0;
+                                                        item = item - 1 < 0
+                                                            ? 0
+                                                            : item - 1;
+                                                        setState(() {
+                                                          bedroomBathrooms[
+                                                              "bedroom"] = item;
+                                                          result["bedroom_bathroom"] =
+                                                              bedroomBathrooms;
+                                                        });
+                                                      },
+                                                      child: Helpers.fetchIcons(
+                                                          "minus-circle",
+                                                          "solid",
+                                                          size: 30)),
+                                                  const SizedBox(
+                                                    width: 15.0,
+                                                  ),
+                                                  Widgets.buildText(
+                                                      bedroomBathrooms[
+                                                              "bedroom"]
+                                                          .toString(),
+                                                      context,
+                                                      isMedium: true,
+                                                      color: "text.secondary"),
+                                                  const SizedBox(
+                                                    width: 15.0,
+                                                  ),
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        final item = (num.tryParse(
+                                                                        bedroomBathrooms["bedroom"]
+                                                                            .toString())
+                                                                    ?.toInt() ??
+                                                                0) +
+                                                            1;
+                                                        setState(() {
+                                                          bedroomBathrooms[
+                                                              "bedroom"] = item;
+                                                          result["bedroom_bathroom"] =
+                                                              bedroomBathrooms;
+                                                        });
+                                                      },
+                                                      child: Helpers.fetchIcons(
+                                                          "add", "solid",
+                                                          size: 30,
+                                                          color:
+                                                              "main.primary")),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                  Divider(
-                                    color: Color(0x1a000000),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Widgets.buildText("Bathrooms", context,
-                                          color: "text.secondary"),
-                                      Padding(
-                                        padding: const EdgeInsets.all(3.0),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(5.0),
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10.0,
-                                                horizontal: 15.0),
-                                            margin: const EdgeInsets.only(
-                                                bottom:
-                                                    6.0), //Same as `blurRadius` i guess
-                                            decoration: BoxDecoration(
-                                                color: Palette.getColor(context,
-                                                    "background", "default"),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0),
-                                                border: Border(
-                                                    bottom: BorderSide(
-                                                        color: Palette.getColor(
-                                                            context,
-                                                            "main",
-                                                            "primary")))),
-                                            child: Row(
-                                              children: [
-                                                GestureDetector(
-                                                    onTap: () {
-                                                      var item = num.tryParse(
-                                                                  bedroomBathrooms[
-                                                                          "bathroom"]
-                                                                      .toString())
-                                                              ?.toInt() ??
-                                                          0;
-                                                      item = item - 1 < 0
-                                                          ? 0
-                                                          : item - 1;
-                                                      setState(() {
-                                                        bedroomBathrooms[
-                                                            "bathroom"] = item;
-                                                        result["bedroom_bathroom"] =
-                                                            bedroomBathrooms;
-                                                      });
-                                                    },
-                                                    child: Helpers.fetchIcons(
-                                                        "minus-circle", "solid",
-                                                        size: 30)),
-                                                const SizedBox(
-                                                  width: 15.0,
-                                                ),
-                                                Widgets.buildText(
-                                                    bedroomBathrooms["bathroom"]
-                                                        .toString(),
-                                                    context,
-                                                    isMedium: true,
-                                                    color: "text.secondary"),
-                                                const SizedBox(
-                                                  width: 15.0,
-                                                ),
-                                                GestureDetector(
-                                                    onTap: () {
-                                                      final item = (num.tryParse(
-                                                                      bedroomBathrooms[
-                                                                              "bathroom"]
-                                                                          .toString())
-                                                                  ?.toInt() ??
-                                                              0) +
-                                                          1;
-                                                      setState(() {
-                                                        bedroomBathrooms[
-                                                            "bathroom"] = item;
-                                                        result["bedroom_bathroom"] =
-                                                            bedroomBathrooms;
-                                                      });
-                                                    },
-                                                    child: Helpers.fetchIcons(
-                                                        "add", "solid",
-                                                        size: 30,
-                                                        color: "main.primary")),
-                                              ],
+                                        )
+                                      ],
+                                    ),
+                                    Divider(
+                                      color: Color(0x1a000000),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Widgets.buildText("Bathrooms", context,
+                                            color: "text.secondary"),
+                                        Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(5.0),
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10.0,
+                                                      horizontal: 15.0),
+                                              margin: const EdgeInsets.only(
+                                                  bottom:
+                                                      6.0), //Same as `blurRadius` i guess
+                                              decoration: BoxDecoration(
+                                                  color: Palette.getColor(
+                                                      context,
+                                                      "background",
+                                                      "default"),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100.0),
+                                                  border: Border(
+                                                      bottom: BorderSide(
+                                                          color:
+                                                              Palette.getColor(
+                                                                  context,
+                                                                  "main",
+                                                                  "primary")))),
+                                              child: Row(
+                                                children: [
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        var item = num.tryParse(
+                                                                    bedroomBathrooms[
+                                                                            "bathroom"]
+                                                                        .toString())
+                                                                ?.toInt() ??
+                                                            0;
+                                                        item = item - 1 < 0
+                                                            ? 0
+                                                            : item - 1;
+                                                        setState(() {
+                                                          bedroomBathrooms[
+                                                                  "bathroom"] =
+                                                              item;
+                                                          result["bedroom_bathroom"] =
+                                                              bedroomBathrooms;
+                                                        });
+                                                      },
+                                                      child: Helpers.fetchIcons(
+                                                          "minus-circle",
+                                                          "solid",
+                                                          size: 30)),
+                                                  const SizedBox(
+                                                    width: 15.0,
+                                                  ),
+                                                  Widgets.buildText(
+                                                      bedroomBathrooms[
+                                                              "bathroom"]
+                                                          .toString(),
+                                                      context,
+                                                      isMedium: true,
+                                                      color: "text.secondary"),
+                                                  const SizedBox(
+                                                    width: 15.0,
+                                                  ),
+                                                  GestureDetector(
+                                                      onTap: () {
+                                                        final item = (num.tryParse(
+                                                                        bedroomBathrooms["bathroom"]
+                                                                            .toString())
+                                                                    ?.toInt() ??
+                                                                0) +
+                                                            1;
+                                                        setState(() {
+                                                          bedroomBathrooms[
+                                                                  "bathroom"] =
+                                                              item;
+                                                          result["bedroom_bathroom"] =
+                                                              bedroomBathrooms;
+                                                        });
+                                                      },
+                                                      child: Helpers.fetchIcons(
+                                                          "add", "solid",
+                                                          size: 30,
+                                                          color:
+                                                              "main.primary")),
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ],
+                                        )
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
                             const SizedBox(height: 20.0),
                             Container(
                               decoration: BoxDecoration(

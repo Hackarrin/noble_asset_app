@@ -15,6 +15,7 @@ class Fetch {
   bool isFormData = false;
   bool noToken = false;
   String? file = "";
+  String? fileName = "";
   List<String>? files = [];
 
   Fetch(String url, this.params,
@@ -22,6 +23,7 @@ class Fetch {
       this.isFormData = false,
       this.noToken = false,
       this.file,
+      this.fileName,
       this.files}) {
     uri = Uri.parse(url);
   }
@@ -56,7 +58,10 @@ class Fetch {
             final mimeTypeData =
                 lookupMimeType(file!, headerBytes: [0xFF, 0xD8])?.split('/');
             request.files.add(await http.MultipartFile.fromPath(
-                "customer_photo", file!,
+                fileName == null || fileName!.isEmpty
+                    ? "customer_photo"
+                    : fileName!,
+                file!,
                 contentType: MediaType(mimeTypeData![0], mimeTypeData[1])));
             final res = await request.send();
             response = await http.Response.fromStream(res);
@@ -75,7 +80,10 @@ class Fetch {
               final mimeTypeData =
                   lookupMimeType(file, headerBytes: [0xFF, 0xD8])?.split('/');
               request.files.add(await http.MultipartFile.fromPath(
-                  "product_photos[]", file,
+                  fileName == null || fileName!.isEmpty
+                      ? "product_photos[]"
+                      : fileName!,
+                  file,
                   contentType: MediaType(mimeTypeData![0], mimeTypeData[1])));
             }
             final res = await request.send();
@@ -88,6 +96,10 @@ class Fetch {
             'Authorization': "Bearer $userKey"
           });
       }
+      print("response body $uri ${response.body} ${method}");
+      if (response.body.isEmpty) {
+        return {};
+      }
       var body = jsonDecode(response.body);
       if (body.containsKey("status")) {
         if (body["status"] == "invalid_token" ||
@@ -99,7 +111,7 @@ class Fetch {
       }
       return jsonDecode(response.body);
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("response ${e.toString()}");
     }
     return {};
   }

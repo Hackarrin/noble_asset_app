@@ -53,18 +53,18 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyALql9YcpvnutBByPfvAD-ai9umOU3Fh9k',
     appId: '1:149378416912:android:18d35b34cefebe54502595',
     messagingSenderId: '149378416912',
-    projectId: 'cribsfinder-dda93',
-    databaseURL: 'https://cribsfinder-dda93-default-rtdb.firebaseio.com',
-    storageBucket: 'cribsfinder-dda93.firebasestorage.app',
+    projectId: 'nobleassets-dda93',
+    databaseURL: 'https://nobleassets-dda93-default-rtdb.firebaseio.com',
+    storageBucket: 'nobleassets-dda93.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCEOaI34HQCfn5HBo7IjspiDw7-7GlWwVI',
     appId: '1:149378416912:ios:846b0fe2770dca14502595',
     messagingSenderId: '149378416912',
-    projectId: 'cribsfinder-dda93',
-    databaseURL: 'https://cribsfinder-dda93-default-rtdb.firebaseio.com',
-    storageBucket: 'cribsfinder-dda93.firebasestorage.app',
-    iosBundleId: 'com.cribsfinder.mobile',
+    projectId: 'nobleassets-dda93',
+    databaseURL: 'https://nobleassets-dda93-default-rtdb.firebaseio.com',
+    storageBucket: 'nobleassets-dda93.firebasestorage.app',
+    iosBundleId: 'com.nobleassets.app',
   );
 }

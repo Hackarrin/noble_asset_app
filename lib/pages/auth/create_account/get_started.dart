@@ -1,5 +1,5 @@
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,13 +36,13 @@ class _GetStartedState extends State<GetStarted> {
     },
     {
       "image": "started-1.png",
-      "title": ["Trust and security with ", "Cribsfinder"],
+      "title": ["Trust and security with ", "Noble Assets"],
       "subtitle":
           "Your safety and satisfaction are our priority. Verified vendors, secure payments, and 24/7 support."
     },
     {
       "image": "started-1.png",
-      "title": ["Cribsfinder Wallet ", "Your Smart Payment", " Solution"],
+      "title": ["Noble Assets Wallet ", "Your Smart Payment", " Solution"],
       "subtitle":
           "Send payments, create invoices, transfer funds, and receive money—all in one place."
     },

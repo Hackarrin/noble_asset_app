@@ -1,17 +1,18 @@
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';
 
-class PaymentMethod extends StatefulWidget {
-  const PaymentMethod({Key? key}) : super(key: key);
+class Statements extends StatefulWidget {
+  const Statements({Key? key}) : super(key: key);
 
   @override
-  _PaymentMethodState createState() => _PaymentMethodState();
+  _StatementsState createState() => _StatementsState();
 }
 
-class _PaymentMethodState extends State<PaymentMethod> {
+class _StatementsState extends State<Statements> {
   List<String> reviewFilter = ["verified", "latest"];
   bool isDescriptionExpanded = false;
 
@@ -62,7 +63,8 @@ class _PaymentMethodState extends State<PaymentMethod> {
                 color: "text.other",
               )),
         ),
-        title: Widgets.buildText("Payment Method", context, isMedium: true),
+        title:
+            Widgets.buildText("Statements & Reports", context, isMedium: true),
         elevation: 0,
         backgroundColor: Palette.getColor(context, "background", "paper"),
         foregroundColor: Palette.getColor(context, "text", "disabled"),
@@ -119,11 +121,11 @@ class PaymentInformation extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Widgets.buildText("How would you like to pay?", context,
+              Widgets.buildText("Statement & Reports", context,
                   color: "text.secondary", isMedium: true),
               const SizedBox(height: 10.0),
               Widgets.buildText(
-                  "Select your preferred payment method below to proceed.",
+                  "Generate your account and portfolio statment by selecting the options below:",
                   context,
                   lines: 3,
                   color: "text.disabled"),
@@ -133,7 +135,7 @@ class PaymentInformation extends StatelessWidget {
         const SizedBox(height: 10.0),
         GestureDetector(
           onTap: () {
-            setMethod("paystack");
+            Sheets.showAccountStatement();
           },
           child: Container(
             width: double.infinity,
@@ -144,27 +146,27 @@ class PaymentInformation extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Image.asset("assets/images/paystack.png",
-                    height: 30.0, fit: BoxFit.contain),
+                Helpers.fetchIcons("newspaper", "regular",
+                    size: 30.0, color: "main.secondary"),
                 const SizedBox(width: 15.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Widgets.buildText("Pay with Paystack", context,
+                      Widgets.buildText("Account Statement", context,
                           color: "text.secondary", isMedium: true),
-                      const SizedBox(height: 5.0),
-                      Widgets.buildText("Cards & Transfer", context,
-                          color: "text.disabled", size: 13.0, weight: 500),
+                      Widgets.buildText(
+                          "See a breakdown of your wallet credit and debit.",
+                          context,
+                          color: "text.disabled",
+                          size: 13.0,
+                          lines: 3,
+                          weight: 500),
                     ],
                   ),
                 ),
-                Checkbox(
-                    value: method == "paystack",
-                    onChanged: (checked) {
-                      setMethod("paystack");
-                    })
+                Helpers.fetchIcons("caret-right", "regular", size: 20.0)
               ],
             ),
           ),
@@ -172,7 +174,7 @@ class PaymentInformation extends StatelessWidget {
         const SizedBox(height: 10.0),
         GestureDetector(
           onTap: () {
-            setMethod("wallet");
+            Sheets.showPortfolioStatement();
           },
           child: Container(
             width: double.infinity,
@@ -183,74 +185,26 @@ class PaymentInformation extends StatelessWidget {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Image.asset("assets/images/logo.png",
-                    height: 44.0, fit: BoxFit.contain),
+                Helpers.fetchIcons("corporate-alt", "regular",
+                    size: 30.0, color: "main.secondary"),
                 const SizedBox(width: 15.0),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Widgets.buildText("Wallet", context,
+                      Widgets.buildText("Portfolio Statement", context,
                           color: "text.secondary", isMedium: true),
-                      const SizedBox(height: 5.0),
                       Widgets.buildText(
-                          "Use Your Wallet for Fast & Secure Payments", context,
+                          "Download a breakdown of your portfolio.", context,
                           color: "text.disabled",
                           size: 13.0,
-                          weight: 500,
-                          lines: 3),
+                          lines: 3,
+                          weight: 500),
                     ],
                   ),
                 ),
-                Checkbox(
-                    value: method == "wallet",
-                    onChanged: (checked) {
-                      setMethod("wallet");
-                    })
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 10.0),
-        GestureDetector(
-          onTap: () {
-            setMethod("stripe");
-          },
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-                color: Palette.get("background.paper"),
-                borderRadius: BorderRadius.circular(10.0),
-                border: Border.all(color: Color(0x0D000000))),
-            padding: const EdgeInsets.all(20.0),
-            child: Row(
-              children: [
-                Image.asset("assets/images/stripe.jpeg",
-                    height: 44.0, fit: BoxFit.contain),
-                const SizedBox(width: 15.0),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Widgets.buildText("Stripe", context,
-                          color: "text.secondary", isMedium: true),
-                      const SizedBox(height: 5.0),
-                      Widgets.buildText(
-                          "Seamless international Payments", context,
-                          color: "text.disabled",
-                          size: 13.0,
-                          weight: 500,
-                          lines: 3),
-                    ],
-                  ),
-                ),
-                Checkbox(
-                    value: method == "stripe",
-                    onChanged: (checked) {
-                      setMethod("stripe");
-                    })
+                Helpers.fetchIcons("caret-right", "regular", size: 20.0)
               ],
             ),
           ),

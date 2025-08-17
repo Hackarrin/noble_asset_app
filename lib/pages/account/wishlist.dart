@@ -1,31 +1,42 @@
-import 'dart:convert';
-
-import 'package:cribsfinder/globals/automobile_item.dart';
-import 'package:cribsfinder/globals/hotel_item.dart';
-import 'package:cribsfinder/globals/shortlet_item.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/helpers.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/globals/hotel_booking.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_swipe_action_cell/core/cell.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../utils/palette.dart';
 
-class Wishlist extends StatefulWidget {
-  const Wishlist({Key? key}) : super(key: key);
+class Investments extends StatefulWidget {
+  const Investments({Key? key}) : super(key: key);
 
   @override
-  _WishlistState createState() => _WishlistState();
+  _InvestmentsState createState() => _InvestmentsState();
 }
 
-class _WishlistState extends State<Wishlist>
+class _InvestmentsState extends State<Investments>
     with SingleTickerProviderStateMixin {
   var selected = "";
+  int _selectedTab = 0;
+  String error = "";
+  String search = "";
+  String status = "0";
+  Map<String, dynamic> filters = {
+    "listing": {},
+    "dateFrom": "",
+    "dateTo": "",
+    "type": "all",
+  };
+  int page = 0;
+  int perPage = 10;
+  String order = "id";
+  String sortBy = "desc";
+  bool loading = true;
   late TabController tabController;
-  final bookings = [
+  final savings = [
     {
       "title": "Urban hotels",
       "image": "assets/images/hotels.jpeg",
@@ -43,7 +54,6 @@ class _WishlistState extends State<Wishlist>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 1
     },
@@ -64,7 +74,6 @@ class _WishlistState extends State<Wishlist>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 2
     },
@@ -85,7 +94,6 @@ class _WishlistState extends State<Wishlist>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 0
     },
@@ -106,7 +114,6 @@ class _WishlistState extends State<Wishlist>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 1
     },
@@ -127,69 +134,56 @@ class _WishlistState extends State<Wishlist>
       "infants": 5,
       "dateAdded": "2025-03-03 11:00:00",
       "quantity": 5,
-      "roomType": "Deluxe Room",
       "type": "",
       "status": 4
     },
-    {
-      "title": "Urban hotels",
-      "image": "assets/images/hotels.jpeg",
-      "location": "Osapa Lagos",
-      "price": 39500,
-      "rating": 4.9,
-      "room": "Deluxe Room",
-      "hotelId": "123456",
-      "checkin": "2025-03-04 12:30:20",
-      "checkout": "2025-04-04 12:30:20",
-      "confirmationCode": "4378nd7343",
-      "vendor": "Tayo Oladele",
-      "adults": "10",
-      "children": 10,
-      "infants": 5,
-      "dateAdded": "2025-03-03 11:00:00",
-      "quantity": 5,
-      "roomType": "Deluxe Room",
-      "type": "",
-      "status": 0
-    },
   ];
-  String error = "";
-  String search = "";
-  String status = "";
-  Map<String, dynamic> filters = {
-    "listing": {},
-    "dateFrom": "",
-    "dateTo": "",
-    "type": "all",
-  };
-  int page = 0;
-  int perPage = 10;
-  String order = "id";
-  String sortBy = "desc";
-  bool loading = true;
   bool isLoggedIn = true;
-  List<dynamic> filteredWishlist = [];
+  List<dynamic> filteredInvestments = [];
+  void filter() {
+    if (_selectedTab == 0) {
+      // upcoming
+      setState(() {
+        status = "0";
+      });
+    } else if (_selectedTab == 1) {
+      // completed
+      setState(() {
+        status = "4";
+      });
+    } else {
+      // cancelled
+      setState(() {
+        status = "2";
+      });
+    }
+    fetch();
+  }
+
   void fetch() async {
     try {
       setState(() {
         error = "";
         loading = true;
       });
-      final res = await JWT.getWishlist(
+      final res = await JWT.getBookings(
           search, status, filters, page, perPage, order, sortBy);
       setState(() {
-        filteredWishlist = res["data"];
+        filteredInvestments = res["data"];
         loading = false;
       });
-      if (filteredWishlist.isEmpty) {
+      if (filteredInvestments.isEmpty) {
+        final stat = Defaults.bookingStatus
+            .firstWhere((stat) => stat["value"].toString() == status);
         setState(() {
           error =
-              "You have not added any items yet, but don't worry! Search and explore top listings on Cribsfinder.";
+              "You don't have any ${stat["label"]?.toLowerCase()} savings yet, but don't worry! Search and explore top listings on Noble Assets.";
         });
       }
     } catch (err) {
       setState(() {
-        error = err.toString();
+        error =
+            "You don't have any investment yet, but don't worry! They'll show up here when you add them.";
         loading = false;
       });
       print(err);
@@ -198,6 +192,7 @@ class _WishlistState extends State<Wishlist>
 
   @override
   void initState() {
+    tabController = TabController(length: 3, vsync: this);
     super.initState();
     Future.delayed(Duration.zero, () async {
       final userId = await Helpers.readPref(Defaults.userid);
@@ -212,6 +207,7 @@ class _WishlistState extends State<Wishlist>
 
   @override
   void dispose() {
+    tabController.dispose();
     super.dispose();
   }
 
@@ -248,20 +244,8 @@ class _WishlistState extends State<Wishlist>
                     )),
               )
             : null,
-        title: Widgets.buildText("My Wishlist", context, isMedium: true),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-                onPressed: () {
-                  Navigator.pushReplacementNamed(context, "/home");
-                },
-                style: Widgets.buildButton(context,
-                    radius: 50.0, sideColor: Color(0xFFF1F1F1)),
-                icon: Helpers.fetchIcons("plus-small", "solid",
-                    color: "text.disabled", size: 20.0)),
-          )
-        ],
+        title: Widgets.buildText("My Investments", context, isMedium: true),
+        actions: [],
         elevation: 0,
         backgroundColor: Palette.getColor(context, "background", "paper"),
         foregroundColor: Palette.getColor(context, "text", "disabled"),
@@ -271,21 +255,55 @@ class _WishlistState extends State<Wishlist>
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: isLoggedIn
-              ? (loading
-                  ? Shimmer.fromColors(
-                      baseColor: Palette.get("background.neutral"),
-                      highlightColor: Palette.get("background.default"),
-                      loop: 1,
-                      child: AbsorbPointer(child: buildContent()),
-                    )
-                  : (error.isNotEmpty
-                      ? Alert.showErrorMessage(context, "",
-                          padding: 50.0,
-                          buttonText: "Retry",
-                          message: error,
-                          action: fetch)
-                      : buildContent()))
-              : Alert.showErrorMessage(context, "Login to view your wishlist",
+              ? DefaultTabController(
+                  length: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Palette.get("text.white"),
+                        ),
+                        child: TabBar(
+                          labelStyle: GoogleFonts.nunito(
+                              fontSize: 15.0, fontWeight: FontWeight.w500),
+                          dividerColor: Colors.transparent,
+                          indicatorWeight: 3.0,
+                          dividerHeight: 2.0,
+                          unselectedLabelColor: Palette.get("text.disabled"),
+                          onTap: (index) {
+                            setState(() {
+                              _selectedTab = index;
+                            });
+                            filter();
+                          },
+                          tabs: [
+                            Tab(text: "Active"),
+                            Tab(text: "Matured"),
+                            Tab(text: "Cancelled"),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                          child: loading
+                              ? Shimmer.fromColors(
+                                  baseColor: Palette.get("background.neutral"),
+                                  highlightColor:
+                                      Palette.get("background.default"),
+                                  loop: 1,
+                                  child: AbsorbPointer(child: buildContent()),
+                                )
+                              : (error.isNotEmpty
+                                  ? Alert.showErrorMessage(context, "",
+                                      padding: 50.0,
+                                      buttonText: "Retry",
+                                      message: error,
+                                      action: fetch)
+                                  : buildContent()))
+                    ],
+                  ),
+                )
+              : Alert.showErrorMessage(context, "Login to view your savings",
                   buttonText: "Login", action: () {
                   Navigator.pushNamed(context, "/login");
                 }),
@@ -297,41 +315,26 @@ class _WishlistState extends State<Wishlist>
   Widget buildContent() {
     return Padding(
       padding: EdgeInsets.only(bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
-      child: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          final item = loading ? bookings[index] : filteredWishlist[index];
-          print("item $item");
-          return Container(
-            padding: const EdgeInsets.only(left: 15.0, right: 15.0),
-            margin: const EdgeInsets.only(bottom: 10.0),
-            child: SwipeActionCell(
-              key: ObjectKey(item),
-              trailingActions: <SwipeAction>[
-                SwipeAction(
-                    title: "",
-                    backgroundRadius: 10.0,
-                    widthSpace: 100,
-                    performsFirstActionWithFullSwipe: true,
-                    forceAlignmentToBoundary: true,
-                    icon: Helpers.fetchIcons("trash", "regular", size: 30.0),
-                    onTap: (CompletionHandler handler) async {
-                      await handler(true);
-                      filteredWishlist.removeAt(index);
-                      Helpers.wishlist(item, item["type"].toString());
-                      setState(() {});
+      child: loading || filteredInvestments.isNotEmpty
+          ? ListView.builder(
+              itemBuilder: (BuildContext context, int index) {
+                final item =
+                    loading ? savings[index] : filteredInvestments[index];
+                return Padding(
+                  padding: const EdgeInsets.only(
+                      left: 15.0, right: 15.0, bottom: 15.0),
+                  child: HotelBooking(
+                    item: item,
+                    action: () {
+                      fetch();
                     },
-                    color: Palette.get("warning.main")),
-              ],
-              child: item["type"].toString() == "0"
-                  ? HotelItem(item: item, direction: "horizontal")
-                  : (item["type"].toString() != "1"
-                      ? AutomobileItem(item: item, direction: "horizontal")
-                      : ShortletItem(item: item, direction: "horizontal")),
-            ),
-          );
-        },
-        itemCount: loading ? bookings.length : filteredWishlist.length,
-      ),
+                  ),
+                );
+              },
+              itemCount: loading ? savings.length : filteredInvestments.length,
+            )
+          : Alert.showErrorMessage(context, "No Investments!",
+              message: error, buttonText: "Explore"),
     );
   }
 }

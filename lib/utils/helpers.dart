@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cribsfinder/main.dart';
-import 'package:cribsfinder/utils/alert.dart';
-import 'package:cribsfinder/utils/apis.dart';
-import 'package:cribsfinder/utils/defaults.dart';
-import 'package:cribsfinder/utils/fetch.dart';
-import 'package:cribsfinder/utils/jwt.dart';
-import 'package:cribsfinder/utils/palette.dart';
-import 'package:cribsfinder/utils/webview.dart';
-import 'package:cribsfinder/utils/widget.dart';
+import 'package:nobleassets/main.dart';
+import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/apis.dart';
+import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/fetch.dart';
+import 'package:nobleassets/utils/jwt.dart';
+import 'package:nobleassets/utils/palette.dart';
+import 'package:nobleassets/utils/webview.dart';
+import 'package:nobleassets/utils/widget.dart';
 import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'dart:async';
@@ -41,22 +42,6 @@ class Helpers {
 
   static Future<String> getToken() async {
     return await readPref(Defaults.userid);
-  }
-
-  static Future<Map<String, dynamic>> getProfile() async {
-    Map<String, dynamic> profile = {};
-    try {
-      final profileString = await Helpers.readPref(Defaults.profile);
-      if (profileString.isNotEmpty) {
-        final Map<String, dynamic> data = jsonDecode(profileString);
-        if (data.isNotEmpty) {
-          profile = data;
-        }
-      }
-    } catch (err) {
-      print(err);
-    }
-    return profile;
   }
 
   static String getInitial(String title) {
@@ -90,13 +75,16 @@ class Helpers {
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(radius),
           color: Palette.get("background.neutral")),
-      child: Center(
-        child: Widgets.buildText(
-          isInitials ? getInitial(text) : text,
-          navigatorKey.currentContext!,
-          isBold: true,
-          isCenter: true,
-          size: 24.0,
+      padding: const EdgeInsets.all(8.0),
+      child: FittedBox(
+        child: Center(
+          child: Widgets.buildText(
+            isInitials ? getInitial(text) : text,
+            navigatorKey.currentContext!,
+            isBold: true,
+            isCenter: true,
+            size: 24.0,
+          ),
         ),
       ),
     );
@@ -119,15 +107,19 @@ class Helpers {
   static Widget getProfilePhoto(BuildContext context,
       {height = 140.0, profile = const {}}) {
     final initial = getInitial(
-      profile.containsKey("name") ? profile["name"] : "",
+      profile.containsKey("fname")
+          ? "${profile["fname"]} ${profile["lname"]}"
+          : "",
     );
+    print("response ${profile}");
     final def = SizedBox(
       width: height,
       height: height,
       child: ClipOval(
         child: CircleAvatar(
           radius: height / 2.0,
-          backgroundColor: Palette.getColor(context, "background", "neutral"),
+          backgroundColor:
+              Palette.getColor(context, "main", "primary").withAlpha(50),
           child: Widgets.buildText(initial, context,
               isBold: true,
               isCenter: true,
@@ -140,7 +132,7 @@ class Helpers {
       return ClipRRect(
         borderRadius: BorderRadius.circular(height / 2.0),
         child: CachedNetworkImage(
-          imageUrl: "${API.assetUsers}${profile["photo"].toString()}",
+          imageUrl: "${API.uRLUSERPHOTO}${profile["photo"].toString()}",
           placeholder: (context, url) => def,
           errorWidget: (context, url, error) => def,
           height: height,
@@ -150,6 +142,65 @@ class Helpers {
       );
     }
     return def;
+  }
+
+  static Future<Map<String, dynamic>> getBalances({isOverride = false}) async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    String isShowBalance =
+        isOverride ? "1" : await Helpers.readPref(Defaults.showBalance);
+    isShowBalance = isShowBalance == "" ? "1" : isShowBalance;
+    Map<String, dynamic> balances = {
+      "naira": '0',
+      "dollar": '0',
+      'savings': '0',
+      'investments': '0',
+      'interestNaira': '0',
+      'interestDollar': '0',
+      'lastInterestDate': '',
+      'interestDays': ''
+    };
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("wallets")) {
+      balances["naira"] =
+          isShowBalance == "1" ? data["wallets"]["naira"].toString() : "****";
+      balances["dollar"] =
+          isShowBalance == "1" ? data["wallets"]["dollar"].toString() : "****";
+      balances["interestNaira"] = data["wallets"]["interestNaira"];
+      balances["interestDollar"] = data["wallets"]["interestDollar"];
+      balances["lastInterestDate"] = data["wallets"]["lastInterestDate"];
+      balances["interestDays"] = data["wallets"]["interestDays"];
+    }
+    if (data.containsKey("savings")) {
+      balances["savings"] =
+          isShowBalance == "1" ? data["savings"].toString() : "****";
+    }
+    if (data.containsKey("investments")) {
+      balances["investments"] =
+          isShowBalance == "1" ? data["investments"].toString() : "****";
+    }
+    if (data.containsKey("referrers")) {
+      balances["referrers"] =
+          isShowBalance == "1" ? data["referrers"].toString() : "****";
+    }
+    return balances;
+  }
+  static Future<Map<String, dynamic>> getAccount() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    Map<String, dynamic> account = {"bank": '', "number": ''};
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("account")) {
+      account = data['account'];
+    }
+    return account;
+  }
+  static Future<Map<String, dynamic>> getWithdrawalAccount() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    Map<String, dynamic> account = {};
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("withdrawal_account")) {
+      account = data["withdrawal_account"];
+    }
+    return account;
   }
 
   static bool isNumeric(String str) {
@@ -174,25 +225,154 @@ class Helpers {
     }
   }
 
-  static void toHome(BuildContext context) async {
-    List cart = [];
-    final String storage = await Helpers.readPref("cart");
-    if (storage.isNotEmpty) {
-      cart = jsonDecode(storage);
+  static void getHome() {
+    fetchDefaults();
+    fetchBanks();
+    fetchInvestTypes();
+    fetchLatestSavings();
+    fetchLatestInvestments();
+    fetchSavingsPlans();
+  }
+
+  static fetchBanks() async {
+    try {
+      if (navigatorKey.currentContext == null) {
+        return;
+      }
+      Map data = await Fetch(API.getBanks, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.banks, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
     }
-    if (cart.isNotEmpty) {
-      Navigator.pushReplacementNamed(context, "/checkout");
-    } else {
-      final isLocationGranted = await Permission.location.isGranted;
-      final isNotificatedGranted = await Permission.notification.isGranted;
-      if (isLocationGranted) {
-        if (isNotificatedGranted) {
-          Navigator.pushReplacementNamed(context, "/home");
-        } else {
-          Navigator.pushNamed(context, "/signup-notification");
+  }
+
+  static fetchInvestTypes() async {
+    if (navigatorKey.currentContext == null) {
+      return;
+    }
+    try {
+      debugPrint("checking...");
+      Map data = await Fetch(
+        API.getInvestmentsCategories,
+        {},
+        method: "get",
+      ).load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.investTypes, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static fetchLatestSavings() async {
+    if (navigatorKey.currentContext == null) {
+      return;
+    }
+    try {
+      Map data = await Fetch(API.getSavings, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.savings, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static fetchLatestInvestments() async {
+    if (navigatorKey.currentContext == null) {
+      return;
+    }
+    try {
+      Map data = await Fetch(API.getInvestments, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.investments, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static fetchSavingsPlans() async {
+    if (navigatorKey.currentContext == null) {
+      return;
+    }
+    try {
+      Map data = await Fetch(API.getSavingsPlans, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.savingsPlans, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static String greeting() {
+    Random random = Random();
+    var prefix = ["Good", ""];
+    int randomNumber = random.nextInt(prefix.length - 1);
+    var hour = DateTime.now().hour;
+    var greeting = "Evening";
+    if (hour < 12) {
+      greeting = 'Morning';
+    }
+    if (hour >= 12 && hour < 17) {
+      greeting = 'Afternoon';
+    }
+    return "${prefix[randomNumber]} $greeting";
+  }
+
+  static fetchDefaults() async {
+    try {
+      if (navigatorKey.currentContext == null) {
+        return;
+      }
+      Map data = await Fetch(API.getDefaults, {}, method: "get").load();
+      Map res = data["body"];
+      if (data["status"].toString() == "200") {
+        writePref(Defaults.defaults, jsonEncode(res["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> getProfile({String key = ""}) async {
+    Map<String, dynamic> profile = {};
+    try {
+      final profileString = await Helpers.readPref(Defaults.profile);
+      if (profileString.isNotEmpty) {
+        final Map<String, dynamic> data = jsonDecode(profileString);
+        if (data.isNotEmpty) {
+          profile =
+              key.isNotEmpty ? (data.containsKey(key) ? data[key] : {}) : data;
         }
+      }
+    } catch (err) {
+      print(err);
+    }
+    return profile;
+  }
+
+  static void toHome(BuildContext context) async {
+    final profile = await getProfile(key: "profile");
+    final isVerified = profile["is_verified"].toString();
+    print("response $isVerified $profile");
+    if (isVerified == "0") {
+      Navigator.pushReplacementNamed(context, "/signup-verify");
+    } else {
+      final isNotificatedGranted = await Permission.notification.isGranted;
+      if (isNotificatedGranted) {
+        Navigator.pushReplacementNamed(context, "/home");
       } else {
-        Navigator.pushNamed(context, "/signup-location");
+        Navigator.pushNamed(context, "/signup-notification");
       }
     }
   }
@@ -236,7 +416,7 @@ class Helpers {
 
   static void updateCartServer() {
     final items = readPref("cart");
-    Fetch(API.cart, {
+    Fetch(API.login, {
       "update": "",
       "items": items,
       "userToken": getToken(),
@@ -441,15 +621,15 @@ class Helpers {
         if (firstDate.year == secondDate.year) {
           if (firstDate.month == secondDate.month) {
             output = secondDate.day - firstDate.day == 0
-                ? " Just joined Cribsfinder"
-                : "${secondDate.day - firstDate.day} day${(secondDate.day - firstDate.day) > 1 ? "s" : ""} on Cribsfinder";
+                ? " Just joined Noble Assets"
+                : "${secondDate.day - firstDate.day} day${(secondDate.day - firstDate.day) > 1 ? "s" : ""} on Noble Assets";
           } else {
             output =
-                "${secondDate.month - firstDate.month} month${(secondDate.month - firstDate.month) > 1 ? "s" : ""} on Cribsfinder";
+                "${secondDate.month - firstDate.month} month${(secondDate.month - firstDate.month) > 1 ? "s" : ""} on Noble Assets";
           }
         } else {
           output =
-              "${secondDate.year - firstDate.year} year${(secondDate.year - firstDate.year) > 1 ? "s" : ""} on Cribsfinder";
+              "${secondDate.year - firstDate.year} year${(secondDate.year - firstDate.year) > 1 ? "s" : ""} on Noble Assets";
         }
         return output;
       } catch (e) {
@@ -573,20 +753,30 @@ class Helpers {
       return;
     }
     try {
-      var uri = Uri.parse(url);
-      if (await canLaunchUrl(uri) || url.startsWith("http")) {
-        if (url.startsWith("http")) {
-          if (url.contains("cribsfinder.com") &&
-              !url.contains("assets.cribsfinder.com")) {
-            Navigator.push(
-                navigatorKey.currentContext!,
-                MaterialPageRoute(
-                    builder: (context) => WebAccess(url: url, title: title)));
+      if (url.startsWith("tel:")) {
+        final Uri uri = Uri(
+          scheme: 'tel',
+          path: url.split(":")[1],
+        );
+        print("dante");
+        await launchUrl(uri);
+      } else {
+        var uri = Uri.parse(url);
+        if (await canLaunchUrl(uri) || url.startsWith("http")) {
+          if (url.startsWith("http")) {
+            if (url.contains("nobleassets.com") &&
+                !url.contains("assets.nobleassets.com")) {
+              Navigator.push(
+                  navigatorKey.currentContext!,
+                  MaterialPageRoute(
+                      builder: (context) => WebAccess(url: url, title: title)));
+            } else {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            }
           } else {
-            await launchUrl(uri, mode: LaunchMode.externalApplication);
+            await launchUrl(uri,
+                mode: LaunchMode.externalNonBrowserApplication);
           }
-        } else {
-          await launchUrl(uri, mode: LaunchMode.externalNonBrowserApplication);
         }
       }
     } catch (err) {
@@ -644,6 +834,201 @@ class Helpers {
     return data;
   }
 
+  static Future<List<dynamic>> getAccounts() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["accounts"] : [];
+  }
+
+  static Future<String> getProfileID() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != ""
+        ? jsonDecode(profile)["profile"]["uid"].toString()
+        : "";
+  }
+
+  static Future<int> getAccountType() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != ""
+        ? num.tryParse(jsonDecode(profile)["profile"]["type"].toString())
+                ?.toInt() ??
+            0
+        : 0;
+  }
+
+  static Future<String> getQoute() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    print(profile);
+    return profile != "" ? jsonDecode(profile)["qoute"] : "";
+  }
+
+  static Future<Map<String, dynamic>> getCompany() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["company"] : {};
+  }
+
+  static Future<Map<String, dynamic>> getInvestmentProfile() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["investmentsProfile"] : {};
+  }
+
+  static Future<String> getEmail() async {
+    final accounts = await getAccounts();
+    var email = "";
+    print(accounts);
+    for (final account in accounts) {
+      if (account.containsKey("email") &&
+          account["email"].toString().isNotEmpty) {
+        email = account["email"].toString();
+        break;
+      }
+    }
+    return email;
+  }
+
+  static fetchProfile() async {
+    try {
+      if (navigatorKey.currentContext == null) {
+        return;
+      }
+      final email = await Helpers.getEmail();
+      Map data =
+          await Fetch("${API.profile}?email=$email", {}, method: "get").load();
+      if (data["status"] == "success") {
+        writePref(Defaults.profile, jsonEncode(data["data"]));
+      }
+    } catch (err) {
+      debugPrint(err.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> getNOK() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    Map<String, dynamic> nok = {
+      'name': '',
+      'relationship': '',
+      'phone': '',
+      'email': ''
+    };
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("nok")) {
+      nok = data['nok'];
+    }
+    return nok;
+  }
+
+  static Future<Map<String, dynamic>> getVerifications() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    Map<String, dynamic> verification = {
+      'bvn': '',
+      'idNum': '',
+      'state': '',
+      'address': '',
+      'dob': '',
+      'photo': '',
+      'idType': ''
+    };
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("verification")) {
+      verification = data['verification'];
+    }
+    return verification;
+  }
+
+  static Future<Map<String, dynamic>> checkCompliance() async {
+    String ret = "";
+    int percent = 0;
+    String profile = await Helpers.readPref(Defaults.profile);
+    Map<String, dynamic> data = profile != "" ? jsonDecode(profile) : {};
+    if (data.containsKey("profile") &&
+        data["profile"]["type"].toString() == "3") {
+      // joint account, no id needed
+      return {"ret": "", "percent": 100};
+    }
+
+    if (data.containsKey("verification")) {
+      Map<String, dynamic> verification = data['verification'];
+      if (verification.containsKey("bvn") && verification["bvn"] != "") {
+        // bvn done
+        if (verification.containsKey("idNum") &&
+            verification["idNum"] != "" &&
+            verification["photo"] != "") {
+          //verification done
+          if (verification.containsKey("state") &&
+              verification["address"] != "" &&
+              verification["lga"] != "" &&
+              verification["dob"] != "") {
+            //addresses done
+            if (data.containsKey("nok")) {
+              Map<String, dynamic> nok = data['nok'];
+              if (nok.containsKey("name") &&
+                  nok["name"] != "" &&
+                  nok["relationship"] != "" &&
+                  nok["address"] != "") {
+                if (verification["selfie"] != "") {
+                  // selfie done
+                  if (verification["proofOfAddress"] != "") {
+                    if (data.containsKey("investmentsProfile") &&
+                        data["investmentsProfile"].containsKey("rating")) {
+                      // all done
+                      ret = "";
+                      percent = 100;
+                    } else {
+                      ret = "investment_profile";
+                      percent = 95;
+                    }
+                  } else {
+                    ret = "proofOfAddress";
+                    percent = 90;
+                  }
+                } else {
+                  ret = "selfie";
+                  percent = 80;
+                }
+              } else {
+                ret = "nok";
+                percent = 70;
+              }
+            } else {
+              ret = "nok";
+              percent = 60;
+            }
+          } else {
+            ret = "address";
+            percent = 50;
+          }
+        } else {
+          ret = "verification";
+          percent = 25;
+        }
+      } else {
+        ret = "bvn";
+        percent = 15;
+      }
+    }
+    return {"ret": ret, "percent": percent};
+  }
+
+  static Future<List<dynamic>> getPromos() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["promos"] : [];
+  }
+
+  static Future<List<dynamic>> getFavourites() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["favourites"] : [];
+  }
+
+  static Future<Map<String, dynamic>> getReferrers() async {
+    String profile = await Helpers.readPref(Defaults.profile);
+    return profile != "" ? jsonDecode(profile)["referrals"] : "";
+  }
+
+  static Future<String> getDefault(String key) async {
+    String defaults = await Helpers.readPref(Defaults.defaults);
+    Map<String, dynamic> map = defaults != "" ? jsonDecode(defaults) : {};
+    return map.containsKey(key) ? map[key] : "";
+  }
+
   static wishlist(item, type) async {
     try {
       if (item["favourite"].toString() == "1") {
@@ -698,5 +1083,17 @@ class Helpers {
   static Future<String> getCurrentVersion() async {
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     return packageInfo.version;
+  }
+
+  static String humanFileSize(int bytes, int decimals) {
+    if (bytes <= 0) return "0 Bytes";
+    const suffixes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+    var i = (log(bytes) / log(1024)).floor();
+    return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
+  }
+
+  static bool isImage(String file) {
+    final images = ["jpeg", "jpg", "png", "gif"];
+    return images.contains(file.split(".").last);
   }
 }

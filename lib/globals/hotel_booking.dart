@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:nobleassets/utils/defaults.dart';
 import 'package:nobleassets/utils/helpers.dart';
-import 'package:nobleassets/utils/modals.dart';
 import 'package:nobleassets/utils/palette.dart';
 import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,8 @@ class HotelBooking extends StatelessWidget {
     return Column(children: [
       GestureDetector(
         onTap: () {
-          Navigator.pushNamed(context, "/booking", arguments: jsonEncode(item));
+          Navigator.pushNamed(context, "/investment",
+              arguments: jsonEncode(item));
         },
         child: Container(
           width: double.infinity,
@@ -37,115 +37,32 @@ class HotelBooking extends StatelessWidget {
                     decoration: BoxDecoration(
                         color: Palette.getColor(context, "background", "paper"),
                         border: Border.all(color: Color(0x0d000000)),
-                        borderRadius: BorderRadius.circular(30.0)),
+                        borderRadius: BorderRadius.circular(10.0)),
                     child: Column(
                       children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(width: 150, child: hotelPhoto(context)),
-                            const SizedBox(
-                              width: 15.0,
-                            ),
-                            Expanded(child: hotelContent(context))
-                          ],
-                        ),
+                        hotelContent(context),
                         const SizedBox(height: 10.0),
                         const Divider(color: Color(0x14000000)),
                         const SizedBox(height: 10.0),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            if (!isReview)
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () async {
-                                      if (item["status"].toString() == "0" ||
-                                          item["status"].toString() == "1") {
-                                        // cancel logic here
-                                        final res =
-                                            await Sheets.cancelBooking(item);
-                                        if (res && action != null) {
-                                          action!();
-                                        }
-                                      } else if (item["roomType"] is List) {
-                                        print("roomType - ${item["roomType"]}");
-                                        Navigator.pushNamed(context, "/hotel",
-                                            arguments: jsonEncode(
-                                                item["roomType"][0] ?? {}));
-                                      } else {
-                                        Navigator.pushNamed(
-                                            context,
-                                            item['roomType']['type'] ==
-                                                    "shortlet"
-                                                ? "/shortlet"
-                                                : "/automobile",
-                                            arguments: jsonEncode(
-                                                item["roomType"] ?? {}));
-                                      }
-                                    },
-                                    style: Widgets.buildButton(context,
-                                        background:
-                                            item["status"].toString() == "2"
-                                                ? Palette.get("main.primary")
-                                                : Color(0x3341B11A),
-                                        vertical: 15.0,
-                                        horizontal: 20.0,
-                                        radius: 30.0),
-                                    child: Widgets.buildText(
-                                        item["status"].toString() == "0" ||
-                                                item["status"].toString() == "1"
-                                            ? "Cancel"
-                                            : "Re-book",
-                                        context,
-                                        color: item["status"].toString() == "2"
-                                            ? "text.white"
-                                            : "main.primary",
-                                        isMedium: true)),
-                              ),
-                            if (!isReview)
-                              const SizedBox(
-                                width: 10.0,
-                              ),
-                            if (item["status"].toString() != "2" &&
-                                (item["status"].toString() != "4" ||
-                                    item["isReviewed"].toString() == "0"))
-                              Expanded(
-                                child: TextButton(
-                                    onPressed: () async {
-                                      if (item["status"].toString() == "0") {
-                                        Navigator.pushNamed(context, "/booking",
-                                            arguments: jsonEncode(item));
-                                      } else if (item["status"].toString() ==
-                                          "4") {
-                                        print("dante - $item");
-                                        final res =
-                                            await Sheets.reviewBooking(item);
-                                        if (res && action != null) {
-                                          action!();
-                                        }
-                                      } else {
-                                        Navigator.pushNamed(context, "/hotel",
-                                            arguments: jsonEncode(
-                                                item["roomType"] ?? {}));
-                                      }
-                                    },
-                                    style: Widgets.buildButton(context,
-                                        background: Palette.get("main.primary"),
-                                        vertical: 15.0,
-                                        horizontal: 20.0,
-                                        radius: 30.0),
-                                    child: Widgets.buildText(
-                                        item["status"].toString() == "4"
-                                            ? "Add Review"
-                                            : "View details",
-                                        context,
-                                        color: "text.white",
-                                        isMedium: true)),
-                              ),
+                            Widgets.buildText("You'll get:", context,
+                                color: "text.secondary", size: 14.0),
+                            const SizedBox(
+                              width: 5.0,
+                            ),
+                            Expanded(
+                              child: Widgets.buildText(
+                                  Helpers.formatCurrency(
+                                      item["total"].toString()),
+                                  context,
+                                  color: "main.primary",
+                                  isMedium: true,
+                                  isRight: true,
+                                  size: 14.0),
+                            ),
                           ],
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -159,97 +76,64 @@ class HotelBooking extends StatelessWidget {
   }
 
   Widget hotelContent(BuildContext context) {
-    final stat = Defaults.bookingStatus.firstWhere((stat) =>
+    final stat = Defaults.investmentStatus.firstWhere((stat) =>
         stat["value"].toString() == (item["status"] ?? "0").toString());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10.0),
-        Widgets.buildText(
-            item.containsKey("roomType")
-                ? item["roomType"] is List
-                    ? (item["roomType"][0]["listingName"] ??
-                            item["roomType"][0]["title"])
-                        .toString()
-                    : (item["roomType"]["listingName"] ??
-                            item["roomType"]["title"])
-                        .toString()
-                : item["title"].toString(),
-            context,
-            isMedium: true),
-        SizedBox(height: 15.0),
-        Widgets.buildText(
-            Helpers.formatDistanceDate(
-                item["checkin"].toString(), item["checkout"].toString()),
-            context,
-            color: "text.secondary"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          spacing: 10.0,
+          children: [
+            Expanded(
+                child: Widgets.buildText(item["name"].toString(), context,
+                    isMedium: true)),
+            Widgets.buildText(stat["label"].toString(), context,
+                color: "${stat["color"]}.main", isBold: true, size: 16.0)
+          ],
+        ),
+        SizedBox(height: 5.0),
+        Widgets.buildText(item["daysLeft"].toString(), context,
+            color: "text.disabled"),
         const SizedBox(height: 10.0),
         Row(
           children: [
-            Helpers.fetchIcons(
-              "location-alt",
-              "regular",
-              size: 15.0,
-              color: "main.primary",
-            ),
+            Widgets.buildText("You paid:", context,
+                color: "text.secondary", size: 14.0),
             const SizedBox(
-              width: 2.0,
+              width: 5.0,
             ),
             Expanded(
               child: Widgets.buildText(
-                  item.containsKey("roomType")
-                      ? item["roomType"] is List
-                          ? item["roomType"][0]["location"].toString()
-                          : item["roomType"]["location"].toString()
-                      : item["location"].toString(),
-                  context,
-                  color: "text.secondary"),
+                Helpers.formatCurrency(item["paid"].toString()),
+                context,
+                isMedium: true,
+                size: 14.0,
+                isRight: true,
+              ),
             ),
           ],
         ),
-        SizedBox(height: 15.0),
+        const SizedBox(height: 10.0),
         Row(
           children: [
-            Widgets.buildText(
-                Helpers.formatCurrency(item["total"].toString()), context,
-                color: "main.primary", weight: 600),
-            Widgets.buildText(
-              "/ ${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString())} night${Helpers.dateDiff(item["checkin"].toString(), item["checkout"].toString()) > 1 ? "s" : ""}",
-              context,
+            Widgets.buildText("Interest Earned:", context,
+                color: "text.secondary", size: 14.0),
+            const SizedBox(
+              width: 5.0,
+            ),
+            Expanded(
+              child: Widgets.buildText(
+                  isRight: true,
+                  Helpers.formatCurrency(item["interest"].toString()),
+                  context,
+                  isMedium: true,
+                  size: 14.0),
             ),
           ],
         ),
         SizedBox(height: 5.0),
-        Widgets.buildText(stat["label"].toString(), context,
-            color: "${stat["color"]}.main", weight: 600),
-      ],
-    );
-  }
-
-  Widget hotelPhoto(BuildContext context) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20.0),
-          child: Helpers.getPhoto(
-            item.containsKey("image")
-                ? item["image"].toString()
-                : item.containsKey("roomType")
-                    ? (item["roomType"] is List
-                        ? item["roomType"][0]["featuredPhoto"].toString()
-                        : item["roomType"]["featuredPhoto"].toString())
-                    : "",
-            type: item["type"].toString() == "0"
-                ? "hotel"
-                : (item["type"].toString() == "1" ? "car" : "shortlet"),
-            text: item.containsKey("roomType")
-                ? item["roomType"] is List
-                    ? item["roomType"][0]["title"].toString()
-                    : item["roomType"]["title"].toString()
-                : item["title"].toString(),
-            height: 145.0,
-          ),
-        ),
       ],
     );
   }

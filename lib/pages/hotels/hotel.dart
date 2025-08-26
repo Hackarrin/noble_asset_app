@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:nobleassets/globals/hotel_item.dart';
-import 'package:nobleassets/globals/room_item.dart';
 import 'package:nobleassets/utils/alert.dart';
 import 'package:nobleassets/utils/bookings/hotel.dart';
 import 'package:nobleassets/utils/defaults.dart';
@@ -1555,47 +1554,6 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                             const SizedBox(
                               height: 15.0,
                             ),
-                            ListView.builder(
-                              physics: NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 20.0),
-                                  child: RoomItem(
-                                    item: _selectedRooms[index],
-                                    checkin: filter["checkin"].toString(),
-                                    checkout: filter["checkout"].toString(),
-                                    index: index,
-                                    calendar: _data["calendar"] ?? [],
-                                    numRooms: _numRooms,
-                                    numNights: Helpers.dateDiff(
-                                        filter["checkin"].toString(),
-                                        filter["checkout"].toString()),
-                                    roomsSelected: roomsSelected,
-                                    handleCheckout: handleCheckout,
-                                    setNumRooms: (Map numRooms) {
-                                      setState(() {
-                                        _numRooms = numRooms;
-                                      });
-                                    },
-                                    setRoomSelected: (int roomSelected) {
-                                      setState(() {
-                                        roomsSelected = [
-                                          ...roomsSelected,
-                                          roomSelected
-                                        ];
-                                      });
-                                    },
-                                    setRoomUnSelected: (int roomSelected) {
-                                      setState(() {
-                                        roomsSelected.remove(roomSelected);
-                                      });
-                                    },
-                                  ),
-                                );
-                              },
-                              itemCount: _selectedRooms.length,
-                            ),
                             const SizedBox(
                               height: 15.0,
                             ),
@@ -1603,7 +1561,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                 color: "text.secondary", isMedium: true),
                             const SizedBox(
                               height: 15.0,
-                            ),
+                            ),nobl
                             Container(
                               padding: const EdgeInsets.all(10.0),
                               decoration: BoxDecoration(

@@ -63,10 +63,9 @@ class _WalletState extends State<Wallet> {
   void get() async {
     try {
       Map data = await Fetch(API.getTransactions, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
+      if (data["status"].toString() == "success") {
         setState(() {
-          _transactions = res["data"];
+          _transactions = data["data"];
         });
       }
     } catch (e) {
@@ -336,32 +335,24 @@ class _WalletState extends State<Wallet> {
 
   Future<void> fetch() async {
     if (await Helpers.readPref(Defaults.userid) != "") {
-      Map<String, dynamic> data = await Helpers.getProfile();
-      if (data["is_verified"] == 1) {
-        Map<String, dynamic> accountDetails = await Helpers.getAccount();
-        Map<String, dynamic> balanceDetails =
-            await Helpers.getBalances(isOverride: true);
-        Map<String, dynamic> withdrawalAccount =
-            await Helpers.getWithdrawalAccount();
-        final rate = await Helpers.getDefault("interest_rate");
-        setState(() {
-          interestRate = rate;
-          account = accountDetails;
-          accountNumber = account["number"] ?? "";
-          balance["naira"] = balanceDetails["naira"];
-          balance["dollar"] = balanceDetails["dollar"];
-          balance["interestNaira"] = balanceDetails["interestNaira"];
-          balance["interestDollar"] = balanceDetails["interestDollar"];
-          balance["lastInterestDate"] = balanceDetails["lastInterestDate"];
-          balance["interestDays"] = balanceDetails["interestDays"];
-          _withdrawalAccount = withdrawalAccount;
-        });
-      } else {
-        if (navigatorKey.currentContext != null) {
-          Navigator.pushReplacementNamed(
-              navigatorKey.currentContext!, '/verify');
-        }
-      }
+      Map<String, dynamic> accountDetails = await Helpers.getAccount();
+      Map<String, dynamic> balanceDetails =
+          await Helpers.getBalances(isOverride: true);
+      Map<String, dynamic> withdrawalAccount =
+          await Helpers.getWithdrawalAccount();
+      final rate = await Helpers.getDefault("interest_rate");
+      setState(() {
+        interestRate = rate;
+        account = accountDetails;
+        accountNumber = account["number"] ?? "";
+        balance["naira"] = balanceDetails["naira"];
+        balance["dollar"] = balanceDetails["dollar"];
+        balance["interestNaira"] = balanceDetails["interestNaira"];
+        balance["interestDollar"] = balanceDetails["interestDollar"];
+        balance["lastInterestDate"] = balanceDetails["lastInterestDate"];
+        balance["interestDays"] = balanceDetails["interestDays"];
+        _withdrawalAccount = withdrawalAccount;
+      });
     }
   }
 
@@ -449,6 +440,7 @@ class _WalletState extends State<Wallet> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.sizeOf(context).width;
+    print("response $_transactions");
     return Scaffold(
         backgroundColor: Palette.getColor(context, "background", "default"),
         appBar: AppBar(
@@ -496,18 +488,18 @@ class _WalletState extends State<Wallet> {
                         itemWidth: screenWidth,
                         loop: true,
                         itemBuilder: (BuildContext context, int index) {
-                          Map<String, dynamic> balance = {};
+                          Map<String, dynamic> item = {};
                           switch (index) {
                             case 0:
-                              balance = {"NGN": balance["naira"]};
+                              item = {"NGN": balance["naira"]};
                               break;
                             case 1:
-                              balance = {"USD": balance["dollar"]};
+                              item = {"USD": balance["dollar"]};
                               break;
                           }
                           return WalletBalance(
-                              overview: balance,
-                              type: balance.keys.first,
+                              overview: item,
+                              type: item.keys.first,
                               isVisible: _isVisible,
                               setVisible: () {
                                 setState(() {
@@ -596,60 +588,60 @@ class _WalletState extends State<Wallet> {
                   const SizedBox(
                     height: 20.0,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Palette.get("background.paper"),
-                        borderRadius: BorderRadius.circular(20.0),
-                        border: Border.all(color: Color(0x0D000000))),
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        for (var i = 0; i < quickAccess.length; i += 1)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                menuSelected(quickAccess[i]["action"]);
-                              },
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: i == 0
-                                            ? Color(0xFF23813F)
-                                            : (i == 1
-                                                ? Color(0xFFF8F8FA)
-                                                : Colors.white),
-                                        borderRadius:
-                                            BorderRadius.circular(50.0),
-                                        border: i == 0
-                                            ? null
-                                            : Border.all(
-                                                color: Color(0xFFF8F8FA))),
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Helpers.fetchIcons(
-                                        quickAccess[i]["icon"], "regular",
-                                        size: 20.0,
-                                        color: i == 0
-                                            ? "text.white"
-                                            : "text.black"),
-                                  ),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  Widgets.buildText(
-                                      quickAccess[i]["title"], context)
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  // Container(
+                  //   decoration: BoxDecoration(
+                  //       color: Palette.get("background.paper"),
+                  //       borderRadius: BorderRadius.circular(20.0),
+                  //       border: Border.all(color: Color(0x0D000000))),
+                  //   padding: const EdgeInsets.all(15.0),
+                  //   child: Row(
+                  //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //     crossAxisAlignment: CrossAxisAlignment.center,
+                  //     children: [
+                  //       for (var i = 0; i < quickAccess.length; i += 1)
+                  //         Padding(
+                  //           padding: const EdgeInsets.only(right: 10.0),
+                  //           child: GestureDetector(
+                  //             onTap: () {
+                  //               menuSelected(quickAccess[i]["action"]);
+                  //             },
+                  //             child: Column(
+                  //               mainAxisAlignment: MainAxisAlignment.center,
+                  //               crossAxisAlignment: CrossAxisAlignment.center,
+                  //               children: [
+                  //                 Container(
+                  //                   decoration: BoxDecoration(
+                  //                       color: i == 0
+                  //                           ? Color(0xFF23813F)
+                  //                           : (i == 1
+                  //                               ? Color(0xFFF8F8FA)
+                  //                               : Colors.white),
+                  //                       borderRadius:
+                  //                           BorderRadius.circular(50.0),
+                  //                       border: i == 0
+                  //                           ? null
+                  //                           : Border.all(
+                  //                               color: Color(0xFFF8F8FA))),
+                  //                   padding: const EdgeInsets.all(15.0),
+                  //                   child: Helpers.fetchIcons(
+                  //                       quickAccess[i]["icon"], "regular",
+                  //                       size: 20.0,
+                  //                       color: i == 0
+                  //                           ? "text.white"
+                  //                           : "text.black"),
+                  //                 ),
+                  //                 const SizedBox(
+                  //                   height: 5.0,
+                  //                 ),
+                  //                 Widgets.buildText(
+                  //                     quickAccess[i]["title"], context)
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ),
+                  //     ],
+                  //   ),
+                  // ),
                   if (account.containsKey("number") && account["number"] != "")
                     const SizedBox(
                       height: 20.0,
@@ -764,119 +756,33 @@ class _WalletState extends State<Wallet> {
                   const SizedBox(
                     height: 20.0,
                   ),
-                  ConstrainedBox(
-                      constraints:
-                          BoxConstraints.loose(Size(screenWidth, 180.0)),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
+                  Container(
+                    decoration: BoxDecoration(
+                        color: Palette.get("background.paper"),
+                        border: Border.all(color: Color(0x0D000000)),
+                        borderRadius: BorderRadius.circular(20.0)),
+                    padding: const EdgeInsets.all(10.0),
+                    child: ListView.builder(
                         shrinkWrap: true,
-                        itemBuilder: (BuildContext context, int index) {
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
                           final item = _transactions[index];
-                          final _walletBackground = {
-                            "NGN": Color(0xFF23813F),
-                            "USD": Color(0xFF403C3C),
-                            "GBP": Color(0xFFf97959),
-                          };
                           return Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: _walletBackground[item["currency"]],
-                                  borderRadius: BorderRadius.circular(20.0)),
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(15.0),
-                                    decoration: BoxDecoration(
-                                        color: Palette.get("background.paper"),
-                                        borderRadius:
-                                            BorderRadius.circular(50.0)),
-                                    child: Helpers.fetchIcons(
-                                        Defaults
-                                            .walletTransactionType[num.tryParse(
-                                                        item["type"].toString())
-                                                    ?.toInt() ??
-                                                0]["icon"]
-                                            .toString(),
-                                        "regular",
-                                        size: 20.0),
-                                  ),
-                                  const SizedBox(
-                                    height: 10.0,
-                                  ),
-                                  Widgets.buildText(item["title"], context,
-                                      color: "text.white",
-                                      weight: 500,
-                                      size: 13.0),
-                                  const SizedBox(
-                                    height: 5.0,
-                                  ),
-                                  Widgets.buildText(
-                                      Helpers.formatDate(
-                                          item["date"].toString(),
-                                          formatString: "MMM d, yyyy"),
-                                      context,
-                                      color: "text.white"),
-                                  const SizedBox(
-                                    height: 15.0,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    spacing: 30.0,
-                                    children: [
-                                      Widgets.buildText(
-                                          Helpers.formatCurrency(
-                                              item["amount"].toString(),
-                                              currency: item["currency"]),
-                                          context,
-                                          color: "text.white",
-                                          isMedium: true),
-                                      Transform.rotate(
-                                        angle: 7.0,
-                                        child: Helpers.fetchIcons(
-                                            "arrow-small-up", "regular",
-                                            color: "text.white", size: 20.0),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        itemCount:
-                            _transactions.length < 4 ? _transactions.length : 4,
-                      )),
-                  const SizedBox(
-                    height: 20.0,
-                  ),
-                  if (_transactions.length > 4)
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Palette.get("background.paper"),
-                          border: Border.all(color: Color(0x0D000000)),
-                          borderRadius: BorderRadius.circular(20.0)),
-                      padding: const EdgeInsets.all(10.0),
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            final item = _transactions[index + 3];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 20.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
+                            padding: EdgeInsets.only(
+                                bottom: index + 1 < _transactions.length
+                                    ? 20.0
+                                    : 0.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
                                     children: [
                                       Container(
                                         padding: const EdgeInsets.all(10.0),
                                         decoration: BoxDecoration(
-                                            color: Color(0x1A23813F),
+                                            color: Palette.get("main.primary")
+                                                .withAlpha(50),
                                             borderRadius:
                                                 BorderRadius.circular(50.0)),
                                         child: Helpers.fetchIcons(
@@ -893,42 +799,49 @@ class _WalletState extends State<Wallet> {
                                       const SizedBox(
                                         width: 10.0,
                                       ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Widgets.buildText(
-                                              item["title"], context),
-                                          Widgets.buildText(
-                                              Helpers.formatDate(
-                                                  item["date"].toString(),
-                                                  formatString: "MMM d, yyyy"),
-                                              context,
-                                              size: 12.0,
-                                              color: "text.secondary"),
-                                        ],
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Widgets.buildText(
+                                                item["title"], context,
+                                                lines: 2),
+                                            Widgets.buildText(
+                                                Helpers.formatDate(
+                                                    item["date"].toString(),
+                                                    formatString:
+                                                        "MMM d, yyyy"),
+                                                context,
+                                                size: 12.0,
+                                                color: "text.secondary"),
+                                          ],
+                                        ),
                                       )
                                     ],
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Widgets.buildText(
-                                          Helpers.formatCurrency(
-                                              item["amount"].toString(),
-                                              currency: item["currency"]),
-                                          context,
-                                          weight: 500),
-                                      Widgets.buildText("Successful", context,
-                                          size: 12.0, color: "success.main"),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            );
-                          },
-                          itemCount: _transactions.length - 4),
-                    )
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Widgets.buildText(
+                                        Helpers.formatCurrency(
+                                            item["amount"].toString(),
+                                            currency:
+                                                item["currency"].toString(),
+                                            isShow: _isVisible),
+                                        context,
+                                        weight: 500),
+                                    Widgets.buildText("Successful", context,
+                                        size: 12.0, color: "success.main"),
+                                  ],
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                        itemCount: _transactions.length),
+                  )
                 ],
               ),
             ),

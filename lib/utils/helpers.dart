@@ -184,6 +184,7 @@ class Helpers {
     }
     return balances;
   }
+
   static Future<Map<String, dynamic>> getAccount() async {
     String profile = await Helpers.readPref(Defaults.profile);
     Map<String, dynamic> account = {"bank": '', "number": ''};
@@ -193,6 +194,7 @@ class Helpers {
     }
     return account;
   }
+
   static Future<Map<String, dynamic>> getWithdrawalAccount() async {
     String profile = await Helpers.readPref(Defaults.profile);
     Map<String, dynamic> account = {};
@@ -240,9 +242,8 @@ class Helpers {
         return;
       }
       Map data = await Fetch(API.getBanks, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.banks, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.banks, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -260,9 +261,8 @@ class Helpers {
         {},
         method: "get",
       ).load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.investTypes, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.investTypes, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -275,9 +275,8 @@ class Helpers {
     }
     try {
       Map data = await Fetch(API.getSavings, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.savings, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.savings, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -290,9 +289,8 @@ class Helpers {
     }
     try {
       Map data = await Fetch(API.getInvestments, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.investments, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.investments, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -305,9 +303,8 @@ class Helpers {
     }
     try {
       Map data = await Fetch(API.getSavingsPlans, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.savingsPlans, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.savingsPlans, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -335,9 +332,8 @@ class Helpers {
         return;
       }
       Map data = await Fetch(API.getDefaults, {}, method: "get").load();
-      Map res = data["body"];
-      if (data["status"].toString() == "200") {
-        writePref(Defaults.defaults, jsonEncode(res["data"]));
+      if (data["status"].toString() == "success") {
+        writePref(Defaults.defaults, jsonEncode(data["data"]));
       }
     } catch (err) {
       debugPrint(err.toString());
@@ -1059,6 +1055,15 @@ class Helpers {
     if (navigatorKey.currentState != null && !person) {
       navigatorKey.currentState!.pushReplacementNamed("/login");
     }
+  }
+
+  static Future<List<dynamic>> getInvestments() async {
+    List<dynamic> investments = [];
+    String data = await Helpers.readPref(Defaults.investments);
+    if (data != "") {
+      investments = jsonDecode(data);
+    }
+    return investments;
   }
 
   static Future<AsymmetricKeyPair<PublicKey, PrivateKey>>

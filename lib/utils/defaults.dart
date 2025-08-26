@@ -14,8 +14,8 @@ class Defaults {
 
   static const favouritesPages = {
     "wallet_topup": '',
-    "create_savings": 'add_savings',
-    "create_investment": 'add_investments',
+    "create_savings": 'savings',
+    "create_investment": 'investments',
     "bill_payments": "airtime",
     "client_profile": "profile_start",
     "savings": "",
@@ -33,6 +33,66 @@ class Defaults {
     "COMPANY ACCOUNT",
     "PROGENY ACCOUNT",
     "JOINT ACCOUNT"
+  ];
+  static const ageRange = ["Below 21", "25 - 40", "41 - 65", "65 - above"];
+  static const understanding = ["None", "Little", "Adequate"];
+  static const experience = ["None", "< 3 years", "> 3 years"];
+  static const educationalQualification = [
+    "SSCE",
+    "BSc.",
+    "OND",
+    "HND",
+    "Masters",
+    "Others",
+  ];
+  static const employmentStatus = [
+    "Self-employed or business owners",
+    "Employee",
+    "Student",
+    "Unemployed",
+    "Home maker",
+  ];
+  static const understandingExperience = [
+    {
+      "title": "Treasury Bills & Bonds",
+      "understanding": "understandingTreasury",
+      "experience": "experienceTreasury",
+    },
+    {
+      "title": "Fixed Deposit",
+      "understanding": "understandingFixedDeposit",
+      "experience": "experienceFixedDeposit",
+    },
+    {
+      "title": "Mutual Funds",
+      "understanding": "understandingMutualFunds",
+      "experience": "experienceMutualFunds",
+    },
+    {
+      "title": "Stocks",
+      "understanding": "understandingStocks",
+      "experience": "experienceStocks",
+    },
+    {
+      "title": "Commercial Paper",
+      "understanding": "understandingCommercialPaper",
+      "experience": "experienceCommercialPaper",
+    },
+    {
+      "title": "Private Structured Note",
+      "understanding": "understandingStructuredNote",
+      "experience": "experienceStructuredNote",
+    },
+    {
+      "title": "Private Equity Investments",
+      "understanding": "understandingEquity",
+      "experience": "experienceEquity",
+    },
+    {
+      "title": "Derivatives and Options",
+      "understanding": "understandingDerivatives",
+      "experience": "experienceDerivatives",
+    },
   ];
   static const favouritesIcons = {
     "wallet_topup": 'wallet-arrow',
@@ -68,19 +128,64 @@ class Defaults {
       "selected-attraction-categories";
   static const String selectedCountry = "selected-country";
 
+  static const ratings = [
+    {
+      "title": "Risk Averse",
+      "description":
+          "This client's main objective is capital preservation and he/she prefers not to take any investment risk, therefore your return preference will be deposit rates. The portfolio will comprise largely of deposit investments and investment horizon is very short.",
+    },
+    {
+      "title": "Conservative",
+      "description":
+          "This client's major objective is partly capital preservation, while achieving a higher return than deposit interest rate. The client has a slightly longer investment horizon than the risk averse client and is willing to accept some level of risk to achieve overall long term investment objective. The portfolio will comprise of deposit investments, treasury bill and sovereign bonds.",
+    },
+    {
+      "title": "Moderate",
+      "description":
+          "This client is willing to take a higher level of risk to achieve capital growth through investment in multiple income streams largely comprising of sovereign & corporate fixed income securities and some equity. The potential return is higher, but the client is also aware that the potential losses do exist and accepts that value of the portfolio may fluctuate in the short run, while long term return objective are more bullish. The investment horizon is much longer but not more than 3 years without market risk during disposal.",
+    },
+    {
+      "title": "Moderately Aggressive",
+      "description":
+          "This client major objective is capital growth and he/she aims for higher potential returns. The client is willing to accept higher level of risk and volatility. The client portfolio consist of high yield debt notes, equity linked notes and equity. The client has a long term investment horizon and accepts higher fluctuations in the short term to achieve long term capital growth objective in the long term.",
+    },
+    {
+      "title": "Highly aggressive",
+      "description":
+          "The client portfolio objective is significant capital growth over the medium to long term horizon. The portfolio consists of private high yield instruments, equities and private equity. He is aware that the value of the original investment may have substantial fluctuations and pursue longer term investment return objectives.",
+    },
+  ];
+  static const percentInvest = [
+    "Less than 25%",
+    "Between 25% - 50%",
+    "Above 50%",
+  ];
+  static const financialGoals = [
+    "Maximum 1 year",
+    "Up to 3 years",
+    "Up to 5 years",
+    "Up to 7 years",
+  ];
+  static const returnTarget = [
+    "Maximum 1 year",
+    "Up to 3 years",
+    "Up to 5 years",
+    "Up to 7 years",
+  ];
+
   static const Map<String, Map<String, dynamic>> complianceMessage = {
     "bvn": {
       "title": "Verify your Account",
       "message": "Provide your BVN to verify your account.",
       "actionText": "VERIFY",
-      "page": "/profile",
+      "page": "/bvn",
       "info": {"to": "bvn"}
     },
     "address": {
       "title": "Where do you reside?",
       "message": "Provide your location information to complete your KYC.",
       "actionText": "PROCEED",
-      "page": "/profile",
+      "page": "/compliance",
       "info": {"to": "identification"}
     },
     "verification": {
@@ -88,14 +193,14 @@ class Defaults {
       "message":
           "Let us know who you are by providing your photo ID and other information.",
       "actionText": "UPDATE KYC",
-      "page": "/profile",
+      "page": "/compliance",
       "info": {"to": "identification"}
     },
     "nok": {
       "title": "Next of kin details",
       "message": "Update your next of kin information.",
       "actionText": "UPDATE",
-      "page": "/profile",
+      "page": "/nok",
       "info": {"to": "next-of-kin"}
     },
     "selfie": {
@@ -103,7 +208,7 @@ class Defaults {
       "message":
           "To protect against identify theft, complete your facial verification.",
       "actionText": "VERIFY",
-      "page": "/profile",
+      "page": "/identification",
       "info": {"to": "selfie"}
     },
     "investment_profile": {
@@ -298,6 +403,25 @@ class Defaults {
       "value": "4",
     },
   ];
+  static const investmentStatus = [
+    {"label": "Cancelled", "color": "error", "value": "0"},
+    {
+      "label": "Active",
+      "color": "success",
+      "value": "1",
+    },
+    {
+      "label": "Matured",
+      "color": "info",
+      "value": "2",
+    },
+    {
+      "label": "Pending",
+      "color": "warning",
+      "value": "3",
+    },
+  ];
+
   static const deviceIcons = [
     "window-alt",
     "computer",
@@ -306,26 +430,14 @@ class Defaults {
     "mobile-notch"
   ];
   static const walletTransactionType = [
-    {
-      "name": "Hotel",
-      "icon": "bed",
-    },
-    {
-      "name": "Automobile",
-      "icon": "car-side",
-    },
-    {
-      "name": "Short-let",
-      "icon": "house-building",
-    },
     {"name": "Wallet Debit", "icon": "arrow-small-down"},
     {
       "name": "Wallet Credit",
       "icon": "arrow-small-up",
     },
     {
-      "name": "Airtime",
-      "icon": "phone-call",
+      "name": "Investment",
+      "icon": "investment",
     },
     {
       "name": "Data",

@@ -1,6 +1,4 @@
 import 'package:flutter/scheduler.dart';
-import 'package:nobleassets/pages/account/message.dart';
-import 'package:nobleassets/pages/account/messages.dart';
 import 'package:nobleassets/pages/account/next_of_kin.dart';
 import 'package:nobleassets/pages/account/social.dart';
 import 'package:nobleassets/pages/auth/splash.dart';
@@ -16,7 +14,7 @@ import 'package:nobleassets/pages/auth/create_account/account_info.dart';
 import 'package:nobleassets/pages/auth/create_account/signup.dart';
 
 import 'package:nobleassets/pages/checkout.dart';
-import 'package:nobleassets/pages/account/booking.dart';
+import 'package:nobleassets/pages/account/investment.dart';
 import 'package:nobleassets/pages/account/account.dart';
 import 'package:nobleassets/pages/account/identification.dart';
 import 'package:nobleassets/pages/account/security.dart';
@@ -34,13 +32,17 @@ import 'package:nobleassets/pages/account/wallet-add-account.dart';
 import 'package:nobleassets/pages/account/referral.dart';
 import 'package:nobleassets/pages/account/referral_overview.dart';
 import 'package:nobleassets/pages/account/transactions.dart';
+import 'package:nobleassets/pages/investor/profile_about.dart';
+import 'package:nobleassets/pages/investor/profile_confirmation.dart';
+import 'package:nobleassets/pages/investor/profile_objective.dart';
+import 'package:nobleassets/pages/investor/profile_start.dart';
+import 'package:nobleassets/pages/investor/profile_success.dart';
 import 'package:nobleassets/utils/defaults.dart';
 import 'package:nobleassets/utils/helpers.dart';
 import 'package:nobleassets/utils/palette.dart';
 import 'package:encrypt_shared_preferences/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'firebase_options.dart';
 import 'pages/home.dart';
@@ -100,7 +102,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Noble Assets',
       routes: {
         "/checkout": (context) => const Checkout(),
-        "/booking": (context) => const Booking(),
+        "/investment": (context) => const Investment(),
         "/account": (context) => const Account(),
         "/identification": (context) => const Identification(),
         "/security": (context) => const Security(),
@@ -112,8 +114,6 @@ class _MyAppState extends State<MyApp> {
         "/devices": (context) => const Devices(),
         "/device-preferences": (context) => const DevicePreferences(),
         "/settings": (context) => const Settings(),
-        "/messages": (context) => const Messages(),
-        "/message": (context) => const Message(),
         "/reviews": (context) => const Reviews(),
         "/statements": (context) => const Statements(),
         "/wallet": (context) => const Wallet(),
@@ -134,6 +134,11 @@ class _MyAppState extends State<MyApp> {
         "/forgot-reset-password": (context) => const ResetForgotPassword(),
         "/get-started": (context) => const GetStarted(),
         "/social": (context) => const Social(),
+        '/profile_start': (context) => const ProfileStart(),
+        '/profile_about': (context) => const ProfileAbout(),
+        '/profile_objective': (context) => const ProfileObjective(),
+        '/profile_confirmation': (context) => const ProfileConfirmation(),
+        '/profile_success': (context) => const ProfileSuccess(),
       },
       theme: _buildTheme(Brightness.light, context),
       darkTheme: _buildTheme(Brightness.dark, context),

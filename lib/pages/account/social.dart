@@ -14,18 +14,18 @@ class Social extends StatefulWidget {
 class _SocialState extends State<Social> with SingleTickerProviderStateMixin {
   List socials = [
     {
-      "name": "@nobleassets",
+      "name": "@nobleassetsng",
+      "subtitle": "Follow us on Facebook",
+      "icon": "facebook",
+      "socialColor": "#1877F2",
+      "path": "https://web.facebook.com/nobleassetsng/",
+    },
+    {
+      "name": "@nobleassetsng",
       "subtitle": "Follow us on Instagram",
       "icon": "instagram",
       "socialColor": "#E02D69",
-      "path": "https://www.instagram.com/nobleassets",
-    },
-    {
-      "name": "@nobleassets",
-      "subtitle": "Follow us on Tiktok",
-      "icon": "tik-tok",
-      "socialColor": "#007EBB",
-      "path": "https://www.tiktok.com/@nobleassets",
+      "path": "https://www.instagram.com/nobleassetsng",
     },
     {
       "name": "@nobleassetsng",
@@ -33,6 +33,14 @@ class _SocialState extends State<Social> with SingleTickerProviderStateMixin {
       "icon": "twitter-alt",
       "socialColor": "#00AAEC",
       "path": "https://x.com/nobleassetsng",
+    },
+    {
+      "name": "noble-assets-management-limited",
+      "subtitle": "Follow us on LinkedIn",
+      "icon": "linkedin",
+      "socialColor": "#0077B5",
+      "path":
+          "https://www.linkedin.com/company/noble-assets-management-limited",
     },
   ];
   var enableBiometric = false;

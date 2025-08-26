@@ -23,7 +23,7 @@ class _InvestmentsState extends State<Investments>
   int _selectedTab = 0;
   String error = "";
   String search = "";
-  String status = "0";
+  String status = "1";
   Map<String, dynamic> filters = {
     "listing": {},
     "dateFrom": "",
@@ -144,20 +144,19 @@ class _InvestmentsState extends State<Investments>
     if (_selectedTab == 0) {
       // upcoming
       setState(() {
-        status = "0";
+        status = "1";
       });
     } else if (_selectedTab == 1) {
       // completed
       setState(() {
-        status = "4";
+        status = "2";
       });
     } else {
       // cancelled
       setState(() {
-        status = "2";
+        status = "0";
       });
     }
-    fetch();
   }
 
   void fetch() async {
@@ -166,18 +165,17 @@ class _InvestmentsState extends State<Investments>
         error = "";
         loading = true;
       });
-      final res = await JWT.getBookings(
-          search, status, filters, page, perPage, order, sortBy);
+      final res = await JWT.getInvestments();
       setState(() {
         filteredInvestments = res["data"];
         loading = false;
       });
       if (filteredInvestments.isEmpty) {
-        final stat = Defaults.bookingStatus
+        final stat = Defaults.investmentStatus
             .firstWhere((stat) => stat["value"].toString() == status);
         setState(() {
           error =
-              "You don't have any ${stat["label"]?.toLowerCase()} savings yet, but don't worry! Search and explore top listings on Noble Assets.";
+              "You don't have any ${stat["label"]?.toLowerCase()} investments yet, but don't worry, they'll show up here when they are available.";
         });
       }
     } catch (err) {
@@ -303,7 +301,8 @@ class _InvestmentsState extends State<Investments>
                     ],
                   ),
                 )
-              : Alert.showErrorMessage(context, "Login to view your savings",
+              : Alert.showErrorMessage(
+                  context, "Login to view your investments",
                   buttonText: "Login", action: () {
                   Navigator.pushNamed(context, "/login");
                 }),
@@ -313,13 +312,16 @@ class _InvestmentsState extends State<Investments>
   }
 
   Widget buildContent() {
+    final investments = filteredInvestments
+        .where((y) => y["status"].toString() == status)
+        .toList();
+    print("response $status");
     return Padding(
       padding: EdgeInsets.only(bottom: 20.0, left: 0.0, right: 0.0, top: 20.0),
-      child: loading || filteredInvestments.isNotEmpty
+      child: loading || investments.isNotEmpty
           ? ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                final item =
-                    loading ? savings[index] : filteredInvestments[index];
+                final item = loading ? savings[index] : investments[index];
                 return Padding(
                   padding: const EdgeInsets.only(
                       left: 15.0, right: 15.0, bottom: 15.0),
@@ -331,7 +333,7 @@ class _InvestmentsState extends State<Investments>
                   ),
                 );
               },
-              itemCount: loading ? savings.length : filteredInvestments.length,
+              itemCount: loading ? savings.length : investments.length,
             )
           : Alert.showErrorMessage(context, "No Investments!",
               message: error, buttonText: "Explore"),

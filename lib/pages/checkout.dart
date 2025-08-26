@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:nobleassets/globals/automobile_item.dart';
 import 'package:nobleassets/globals/hotel_item.dart';
-import 'package:nobleassets/globals/shortlet_item.dart';
 import 'package:nobleassets/utils/alert.dart';
 import 'package:nobleassets/utils/defaults.dart';
 import 'package:nobleassets/utils/helpers.dart';
@@ -666,26 +664,6 @@ class _CheckoutState extends State<Checkout>
                                     SizedBox(
                                         width: double.infinity,
                                         child: HotelItem(
-                                          item:
-                                              _cart.isNotEmpty ? _cart[0] : {},
-                                          direction: "horizontal",
-                                          isBordered: false,
-                                        )),
-                                  if (_activeStep == 1 &&
-                                      _cart[0]["listingType"].toString() == "2")
-                                    SizedBox(
-                                        width: double.infinity,
-                                        child: ShortletItem(
-                                          item:
-                                              _cart.isNotEmpty ? _cart[0] : {},
-                                          direction: "horizontal",
-                                          isBordered: false,
-                                        )),
-                                  if (_activeStep == 1 &&
-                                      _cart[0]["listingType"].toString() == "1")
-                                    SizedBox(
-                                        width: double.infinity,
-                                        child: AutomobileItem(
                                           item:
                                               _cart.isNotEmpty ? _cart[0] : {},
                                           direction: "horizontal",

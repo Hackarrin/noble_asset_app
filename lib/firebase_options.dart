@@ -50,12 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyALql9YcpvnutBByPfvAD-ai9umOU3Fh9k',
-    appId: '1:149378416912:android:18d35b34cefebe54502595',
-    messagingSenderId: '149378416912',
-    projectId: 'nobleassets-dda93',
-    databaseURL: 'https://nobleassets-dda93-default-rtdb.firebaseio.com',
-    storageBucket: 'nobleassets-dda93.firebasestorage.app',
+    apiKey: 'AIzaSyBD3Hwx6YQkyLIkwLWRgHJvkrMpL-f5X6M',
+    appId: '1:867234111262:android:57c4e640883c520b5bf30f',
+    messagingSenderId: '867234111262',
+    projectId: 'noble-assets-apps',
+    storageBucket: 'noble-assets-apps.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:nobleassets/utils/alert.dart';
 import 'package:nobleassets/utils/apis.dart';
@@ -93,7 +95,7 @@ class _WalletState extends State<Dashboard> {
   ];
   final String _coins = "100.0";
   final String _referrals = "40";
-  final List _transactions = [
+  List _transactions = [
     {
       "type": 0,
       "amount": 940343,
@@ -744,14 +746,15 @@ class _WalletState extends State<Dashboard> {
 
   void menuSelected(String type) {
     final action = Defaults.favouritesPages[type].toString();
-    if (action.isNotEmpty) {
-      Navigator.pushNamed(context, "/$action");
-    } else if (type == "wallet_topup") {
-      // Sheets.topupWallet();
-    } else if (type == "savings") {
+    print("response $type $action");
+    if (type == "wallet_topup") {
+      Sheets.showComingSoon();
+    } else if (type == "create_savings") {
       Navigator.pushReplacementNamed(context, "/home", arguments: "1");
-    } else if (type == "investments") {
+    } else if (type == "create_investment") {
       Navigator.pushReplacementNamed(context, "/home", arguments: "2");
+    } else if (action.isNotEmpty) {
+      Navigator.pushNamed(context, "/$action");
     }
   }
 
@@ -767,7 +770,10 @@ class _WalletState extends State<Dashboard> {
         mergedList.addAll(list);
       }
 
+      final trans = await Helpers.getInvestments();
+
       setState(() {
+        _transactions = trans;
         quickAccess = mergedList
             .where((item) => selected.contains(item["action"].toString()))
             .toList();
@@ -782,9 +788,10 @@ class _WalletState extends State<Dashboard> {
       final account = await Helpers.getProfile();
       final profile = account["profile"] ?? {};
       final wallet = account["wallets"] ?? {};
+      wallet["investments"] = account["investments"] ?? 0;
+      wallet["savings"] = account["savings"] ?? 0;
       List accounts = await Helpers.getAccounts();
       final isVisible = await Helpers.readPref(Defaults.showBalance);
-      print("response $isVisible");
       setState(() {
         _isVisible = isVisible == "1";
         _accounts = accounts.length;
@@ -826,7 +833,7 @@ class _WalletState extends State<Dashboard> {
 
   @override
   Widget build(BuildContext context) {
-    print("response $_favourites");
+    print("response $_wallet");
     final screenWidth = MediaQuery.sizeOf(context).width;
     return Scaffold(
         backgroundColor: Palette.getColor(context, "background", "default"),
@@ -1196,70 +1203,86 @@ class _WalletState extends State<Dashboard> {
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index) {
-                            final item = _transactions[index + 3];
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 20.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10.0),
-                                        decoration: BoxDecoration(
-                                            color: Color(0x1A23813F),
-                                            borderRadius:
-                                                BorderRadius.circular(50.0)),
-                                        child: Helpers.fetchIcons(
-                                            Defaults.walletTransactionType[
-                                                    num.tryParse(item["type"]
-                                                                .toString())
-                                                            ?.toInt() ??
-                                                        0]["icon"]
-                                                .toString(),
-                                            "regular",
-                                            color: "main.primary",
-                                            size: 20.0),
-                                      ),
-                                      const SizedBox(
-                                        width: 10.0,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Widgets.buildText(
-                                              item["title"], context),
-                                          Widgets.buildText(
-                                              Helpers.formatDate(
-                                                  item["date"].toString(),
-                                                  formatString: "MMM d, yyyy"),
-                                              context,
-                                              size: 12.0,
-                                              color: "text.secondary"),
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Widgets.buildText(
-                                          Helpers.formatCurrency(
-                                              item["amount"].toString(),
-                                              currency: item["currency"]),
-                                          context,
-                                          weight: 500),
-                                      Widgets.buildText("Successful", context,
-                                          size: 12.0, color: "success.main"),
-                                    ],
-                                  )
-                                ],
+                            final item = _transactions[index];
+                            final stat = Defaults.investmentStatus.firstWhere(
+                                (stat) =>
+                                    stat["value"].toString() ==
+                                    (item["status"] ?? "0").toString());
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, "/investment",
+                                    arguments: jsonEncode(item));
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: index + 1 < _transactions.length
+                                        ? 20.0
+                                        : 0.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10.0),
+                                          decoration: BoxDecoration(
+                                              color: Palette.get("main.primary")
+                                                  .withAlpha(50),
+                                              borderRadius:
+                                                  BorderRadius.circular(50.0)),
+                                          child: Helpers.fetchIcons(
+                                              Defaults.walletTransactionType[4]
+                                                      ["icon"]
+                                                  .toString(),
+                                              "regular",
+                                              color: "main.primary",
+                                              size: 20.0),
+                                        ),
+                                        const SizedBox(
+                                          width: 10.0,
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Widgets.buildText(
+                                                item["name"].toString(),
+                                                context,
+                                                isMedium: true,
+                                                size: 14.0),
+                                            Widgets.buildText(
+                                                item["daysLeft"].toString(),
+                                                context,
+                                                size: 12.0,
+                                                color: "text.secondary"),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        Widgets.buildText(
+                                            Helpers.formatCurrency(
+                                                item["total"].toString(),
+                                                isShow: _isVisible),
+                                            context,
+                                            weight: 500),
+                                        Widgets.buildText(
+                                            stat["label"].toString(), context,
+                                            size: 14.0,
+                                            color:
+                                                "${stat["color"].toString()}.main"),
+                                      ],
+                                    )
+                                  ],
+                                ),
                               ),
                             );
                           },
-                          itemCount: _transactions.length - 4),
+                          itemCount: _transactions.length),
                     )
                 ],
               ),

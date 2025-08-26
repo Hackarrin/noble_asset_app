@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:nobleassets/globals/automobile_item.dart';
 import 'package:nobleassets/globals/hotel_item.dart';
 import 'package:nobleassets/utils/alert.dart';
 import 'package:nobleassets/utils/helpers.dart';
@@ -659,16 +658,11 @@ class _HotelHomeState extends State<HotelHome> {
                       final item = (data["topStays"] ?? [])[index];
                       return SizedBox(
                         width: screenWidth - 70,
-                        child: selected == "car"
-                            ? AutomobileItem(
-                                item: item,
-                                offset: 20,
-                                wishlistAction: handleWishlistChanged)
-                            : HotelItem(
-                                item: item,
-                                offset: 20,
-                                wishlistAction: handleWishlistChanged,
-                              ),
+                        child: HotelItem(
+                          item: item,
+                          offset: 20,
+                          wishlistAction: handleWishlistChanged,
+                        ),
                       );
                     },
                     itemCount: (data["topStays"] ?? []).length,
@@ -716,17 +710,11 @@ class _HotelHomeState extends State<HotelHome> {
                   final item = (data["nearbyItems"] ?? [])[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: selected == "car"
-                        ? AutomobileItem(
-                            item: item,
-                            direction: "vertical",
-                            wishlistAction: handleWishlistChanged,
-                          )
-                        : HotelItem(
-                            item: item,
-                            direction: "horizontal",
-                            wishlistAction: handleWishlistChanged,
-                            type: selected),
+                    child: HotelItem(
+                        item: item,
+                        direction: "horizontal",
+                        wishlistAction: handleWishlistChanged,
+                        type: selected),
                   );
                 },
                 itemCount: (data["nearbyItems"] ?? []).length,
@@ -820,18 +808,12 @@ class _HotelHomeState extends State<HotelHome> {
                           data["destinations"][selectedDestination][index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
-                        child: selected == "car"
-                            ? AutomobileItem(
-                                item: listing,
-                                direction: "horizontal",
-                                wishlistAction: handleWishlistChanged,
-                              )
-                            : HotelItem(
-                                item: listing,
-                                direction: "horizontal",
-                                type: selected,
-                                wishlistAction: handleWishlistChanged,
-                              ),
+                        child: HotelItem(
+                          item: listing,
+                          direction: "horizontal",
+                          type: selected,
+                          wishlistAction: handleWishlistChanged,
+                        ),
                       );
                     },
                     itemCount: (data["destinations"][selectedDestination] ?? [])
@@ -923,15 +905,11 @@ class _HotelHomeState extends State<HotelHome> {
                           data["locations"][selectedLocation][index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 10.0),
-                        child: selected == "car"
-                            ? AutomobileItem(
-                                item: listing,
-                                wishlistAction: handleWishlistChanged)
-                            : HotelItem(
-                                item: listing,
-                                type: selected,
-                                wishlistAction: handleWishlistChanged,
-                              ),
+                        child: HotelItem(
+                          item: listing,
+                          type: selected,
+                          wishlistAction: handleWishlistChanged,
+                        ),
                       );
                     },
                     itemCount:
@@ -954,18 +932,12 @@ class _HotelHomeState extends State<HotelHome> {
                   final item = (data["items"] ?? [])[index];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
-                    child: selected == "car"
-                        ? AutomobileItem(
-                            item: item,
-                            direction: "horizontal",
-                            wishlistAction: handleWishlistChanged,
-                          )
-                        : HotelItem(
-                            item: item,
-                            direction: "horizontal",
-                            type: selected,
-                            wishlistAction: handleWishlistChanged,
-                          ),
+                    child: HotelItem(
+                      item: item,
+                      direction: "horizontal",
+                      type: selected,
+                      wishlistAction: handleWishlistChanged,
+                    ),
                   );
                 },
                 itemCount: (data["items"] ?? []).length,

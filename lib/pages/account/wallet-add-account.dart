@@ -1,9 +1,5 @@
-import 'package:nobleassets/utils/apis.dart';
-import 'package:nobleassets/utils/defaults.dart';
 import 'package:nobleassets/utils/helpers.dart';
 import 'package:nobleassets/utils/widget.dart';
-import 'package:card_swiper/card_swiper.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/palette.dart';

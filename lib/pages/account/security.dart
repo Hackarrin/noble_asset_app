@@ -1,11 +1,7 @@
-import 'dart:convert';
-
-import 'package:nobleassets/globals/hotel_booking.dart';
-import 'package:nobleassets/globals/hotel_item.dart';
 import 'package:nobleassets/utils/helpers.dart';
+import 'package:nobleassets/utils/modals.dart';
 import 'package:nobleassets/utils/widget.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../../utils/palette.dart';
 
@@ -20,7 +16,7 @@ class _SecurityState extends State<Security>
     with SingleTickerProviderStateMixin {
   final menus = [
     {"name": "Reset Password", "page": "/reset-password"},
-    {"name": "Deactivate Account", "page": "/deactivate"},
+    {"name": "Deactivate Account", "page": "deactivate"},
   ];
 
   @override
@@ -91,6 +87,8 @@ class _SecurityState extends State<Security>
                               if (item["page"].toString().startsWith("/")) {
                                 Navigator.pushNamed(
                                     context, item["page"].toString());
+                              } else {
+                                Sheets.deleteAccount();
                               }
                             },
                             child: Container(

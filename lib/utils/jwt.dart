@@ -420,6 +420,15 @@ class JWT {
         "We cannot fetch your bookings at the moment! Please check back later.");
   }
 
+  static Future<Map<dynamic, dynamic>> getInvestments() async {
+    final response = await Fetch(API.getInvestments, {}, method: "get").load();
+    if (response["status"] == "success") {
+      return response;
+    }
+    throw Exception(
+        "We cannot fetch your investments at the moment! Please check back later.");
+  }
+
   static Future<Map<dynamic, dynamic>> getReviews(
       search, status, filters, page, perPage, order, sortBy) async {
     final response = await Fetch(API.login, {
@@ -447,6 +456,21 @@ class JWT {
     if (response["status"] == "not_found") {
       throw Exception(
           "The booking you are looking for does not exists! Please check back later.");
+    }
+    throw Exception("An error has occurred! Please check back later.");
+  }
+
+  static Future<Map<String, dynamic>> getInvestment(investmentId) async {
+    final response = await Fetch(
+            "${API.investmentDetails}?investment=$investmentId", {},
+            method: "get")
+        .load();
+    if (response["status"] == "success") {
+      return response["data"];
+    }
+    if (response["status"] == "not_found") {
+      throw Exception(
+          "The investment you are looking for does not exists! Please check back later.");
     }
     throw Exception("An error has occurred! Please check back later.");
   }

@@ -73,7 +73,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         {
           "name": "Call Center",
           "icon": "phone-call",
-          "page": "tel:+23470474743662"
+          "page": "tel:+2349162784000"
         },
         {
           "name": "Visit the Help Center",
@@ -164,26 +164,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Widgets.buildText("My Profile", context, isMedium: true),
-        actions: [
-          Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, "/contact");
-                  },
-                  child: Helpers.fetchIcons("user-headset", "regular",
-                      color: "text.primary", size: 24.0))),
-          Padding(
-            padding: const EdgeInsets.only(right: 15.0),
-            child: GestureDetector(
-                onTap: () async {
-                  await Navigator.pushNamed(context, "/settings");
-                  get();
-                },
-                child: Helpers.fetchIcons("settings", "regular",
-                    color: "text.primary", size: 24.0)),
-          )
-        ],
+        actions: [],
         elevation: 0,
         backgroundColor: Palette.getColor(context, "background", "paper"),
         foregroundColor: Palette.getColor(context, "text", "disabled"),
@@ -211,7 +192,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         child: Container(
                             width: double.infinity,
                             padding: EdgeInsets.symmetric(
-                                horizontal: 5.0, vertical: 20.0),
+                                horizontal: 5.0, vertical: 0.0),
                             decoration: BoxDecoration(
                               color: Palette.getColor(
                                   context, "background", "paper"),

@@ -1,7 +1,7 @@
 import 'package:nobleassets/pages/account/bookings.dart';
 import 'package:nobleassets/pages/account/profile.dart';
 import 'package:nobleassets/pages/account/wallet.dart';
-import 'package:nobleassets/pages/account/wishlist.dart';
+import 'package:nobleassets/pages/account/investments.dart';
 import 'package:nobleassets/pages/dashboard.dart';
 import 'package:nobleassets/pages/hotels/home.dart';
 import 'package:nobleassets/utils/helpers.dart';

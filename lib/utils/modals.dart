@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:nobleassets/globals/automobile_item.dart';
-import 'package:nobleassets/globals/cruise_item.dart';
-import 'package:nobleassets/globals/event_item.dart';
 import 'package:nobleassets/globals/hotel_item.dart';
-import 'package:nobleassets/globals/shortlet_item.dart';
 import 'package:nobleassets/main.dart';
 import 'package:nobleassets/utils/alert.dart';
+import 'package:nobleassets/utils/apis.dart';
 import 'package:nobleassets/utils/defaults.dart';
+import 'package:nobleassets/utils/fetch.dart';
 import 'package:nobleassets/utils/helpers.dart';
 import 'package:nobleassets/utils/jwt.dart';
 import 'package:nobleassets/utils/palette.dart';
@@ -671,41 +669,6 @@ class Sheets {
                           Navigator.pop(context);
                         }),
                   ),
-                if (type == "shortlet")
-                  Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: ShortletItem(
-                        item: item,
-                        close: () {
-                          Navigator.pop(context);
-                        }),
-                  ),
-                if (type == "event")
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: 15.0, left: 15.0, right: 15.0, bottom: 50.0),
-                    child: EventItem(item: item, direction: "horizontal"),
-                  ),
-                if (type == "car")
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: 15.0, left: 15.0, right: 15.0, bottom: 30.0),
-                    child: AutomobileItem(
-                        item: item,
-                        close: () {
-                          Navigator.pop(context);
-                        }),
-                  ),
-                if (type == "cruise")
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: 15.0, left: 15.0, right: 15.0, bottom: 30.0),
-                    child: CruiseItem(
-                        item: item,
-                        close: () {
-                          Navigator.pop(context);
-                        }),
-                  )
               ],
             );
           });
@@ -1570,6 +1533,129 @@ class Sheets {
             );
           });
         });
+  }
+
+  static Future<bool> showCancelInvestment(
+      BuildContext context, String name, String percent, String pid) async {
+    cancelInvestment() async {
+      try {
+        final email = await Helpers.getEmail();
+        FocusManager.instance.primaryFocus?.unfocus();
+        Alert.showLoading(context, "Cancelling...");
+        Map data = await Fetch(
+          API.cancelInvestments,
+          {"investmentId": pid, "email": email},
+        ).load();
+        if (data["status"].toString() == "200") {
+          await Helpers.fetchProfile();
+          Alert.hideLoading(
+            context,
+          );
+          Navigator.pop(navigatorKey.currentContext!, true);
+
+          String status = data["status"].toString();
+          Alert.show(
+              navigatorKey.currentContext!,
+              "",
+              status == "pending"
+                  ? "Your termination request has been sent to other signatories for approval! We'll notify you once the request has been approved."
+                  : "Your investment has been terminated successfully!");
+        } else {
+          Alert.hideLoading(
+            context,
+          );
+          Alert.show(navigatorKey.currentContext!, "",
+              "Something went wrong. Please try again later.");
+        }
+      } catch (e) {
+        Alert.hideLoading(
+          context,
+        );
+        Alert.show(navigatorKey.currentContext!, "",
+            "Something went wrong. Please try again later.");
+      }
+    }
+
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Palette.getColor(context, "background", "default"),
+                  border: Border.all(
+                      color:
+                          Palette.getColor(context, "background", "neutral")),
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      topRight: Radius.circular(30.0)),
+                ),
+                padding: const EdgeInsets.all(30.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Widgets.buildText("Terminate $name?", context,
+                          color: "error.light",
+                          size: 20.0,
+                          isBold: true,
+                          lines: 4),
+                      const SizedBox(height: 10),
+                      Widgets.buildText(
+                          "Please confirm you want to terminate this investment.\nPlease note that by terminating this investment, you will be charged $percent% of your interest.\n You will be credited your remaining interest and principal.",
+                          context,
+                          color: "text.secondary",
+                          lines: 10,
+                          size: 15.0,
+                          isCenter: true),
+                      const SizedBox(height: 30),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              cancelInvestment();
+                            },
+                            style: Widgets.buildButton(context,
+                                radius: 10.0,
+                                horizontal: 10.0,
+                                vertical: 10.0,
+                                background: Palette.getColor(
+                                    context, "main", "primary")),
+                            child: Widgets.buildText("YES, PROCEED", context,
+                                color: "text.white", size: 16.0)),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, true);
+                            },
+                            style: Widgets.buildButton(context,
+                                radius: 10.0,
+                                horizontal: 10.0,
+                                vertical: 10.0,
+                                background: Palette.getColor(
+                                    context, "background", "default")),
+                            child: Widgets.buildText("NO, Cancel", context,
+                                color: "error.light", size: 16.0)),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+    return true;
   }
 
   static Future<void> showProofAddress() async {
@@ -3021,6 +3107,66 @@ class Sheets {
     return res;
   }
 
+  static Future<bool> showComingSoon() async {
+    var res = false;
+    await showModalBottomSheet(
+        elevation: 10,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Wrap(
+              children: [
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      color: Palette.getColor(context, "background", "paper"),
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0))),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 25.0, horizontal: 25.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 15.0,
+                    children: [
+                      Widgets.buildText("Coming Soon!", context,
+                          isMedium: true, size: 24.0, lines: 3),
+                      Widgets.buildText(
+                          "We are hard at work on serving you as best as we can! This feature will be available on our next update.",
+                          context,
+                          color: "text.secondary",
+                          size: 14.0,
+                          lines: 10),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                            onPressed: () {
+                              res = true;
+                              Navigator.pop(context);
+                            },
+                            style: Widgets.buildButton(context,
+                                horizontal: 15.0,
+                                vertical: 15.0,
+                                radius: 60.0,
+                                background: Palette.get("error.main")),
+                            child: Widgets.buildText("Close", context,
+                                color: "text.white")),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          });
+        });
+    return res;
+  }
+
   static Future<bool> showNoInterest(interest) async {
     var res = false;
     await showModalBottomSheet(
@@ -3543,5 +3689,158 @@ class Sheets {
           });
         });
     return res;
+  }
+
+  static Future<bool> deleteAccount() async {
+    if (navigatorKey.currentContext == null) {
+      return false;
+    }
+    late StateSetter setState;
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
+    bool ret = false;
+
+    void update() async {
+      if (navigatorKey.currentContext == null) {
+        return;
+      }
+      FocusManager.instance.primaryFocus?.unfocus();
+      try {
+        Alert.showLoading(navigatorKey.currentContext!, "Deleting account...");
+        final data = await Fetch(API.accountDelete, {}).load();
+        Alert.hideLoading(navigatorKey.currentContext!);
+        print("response $data");
+        if (data["status"].toString() == "success") {
+          Alert.show(navigatorKey.currentContext!, "",
+              "Your account has been deactivated and is scheduled for deletion! Please note that it may take up to 30 days for your data to be deleted completely.");
+          Future.delayed(
+              const Duration(seconds: 4), () => Helpers.logout(person: false));
+        } else {
+          Alert.show(navigatorKey.currentContext!, "",
+              "An error has occurred! Please try again later.");
+        }
+      } catch (err) {
+        Alert.show(navigatorKey.currentContext!, "",
+            "An error occurred! Please try again later.");
+      }
+    }
+
+    void showConfirm() {
+      showDialog(
+        context: navigatorKey.currentContext!,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Palette.getColor(context, "background", "default"),
+            title: Widgets.buildText("Confirm Account Deletion", context,
+                size: 20.0, color: "error.main"),
+            content: Widgets.buildText(
+                "By proceeding, your account will be deactivated and scheduled for deletion. Please note that account deletion may take up to 30 days.",
+                context,
+                lines: 10,
+                color: "text.secondary"),
+            actions: <Widget>[
+              TextButton(
+                child: Widgets.buildText("Yes, Proceed", context,
+                    size: 16.0, color: "error.main"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  update();
+                },
+              ),
+              TextButton(
+                child: Widgets.buildText("No, Cancel", context,
+                    size: 16.0, color: "main.secondary"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+
+    await showModalBottomSheet(
+        elevation: 10,
+        isScrollControlled: true,
+        isDismissible: true,
+        enableDrag: false,
+        backgroundColor: Colors.transparent,
+        context: navigatorKey.currentContext!,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, StateSetter mystate) {
+            setState = mystate;
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Palette.getColor(context, "background", "default"),
+                  border: Border.all(
+                      color:
+                          Palette.getColor(context, "background", "neutral")),
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(30.0),
+                      topRight: Radius.circular(30.0)),
+                ),
+                padding: const EdgeInsets.all(30.0),
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Icon(Icons.no_accounts,
+                            size: 80.0,
+                            color:
+                                Palette.getColor(context, "main", "secondary")),
+                        const SizedBox(height: 30.0),
+                        Widgets.buildText("Delete Account", context,
+                            color: "error.main",
+                            size: 30.0,
+                            isBold: true,
+                            isCenter: true),
+                        const SizedBox(height: 10),
+                        Widgets.buildText(
+                            "We are really sorry to see you go!\nAre you sure you want to delete your account? Once you confirm, your account will be deactivated and your data will be gone.",
+                            context,
+                            color: "text.secondary",
+                            lines: 10,
+                            size: 14.0,
+                            isCenter: true),
+                        const SizedBox(
+                          height: 25.0,
+                        ),
+                        SizedBox(
+                          width: double.infinity,
+                          child: TextButton(
+                              onPressed: () {
+                                showConfirm();
+                              },
+                              style: Widgets.buildButton(context,
+                                  background: Palette.get("main.primary"),
+                                  vertical: 15.0,
+                                  radius: 90.0,
+                                  horizontal: 20.0),
+                              child: Widgets.buildText(
+                                  "Delete Account", context,
+                                  isMedium: true, color: "text.white")),
+                        ),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Widgets.buildText("Cancel", context,
+                                isMedium: true, color: "main.primary"))
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+    return ret;
   }
 }

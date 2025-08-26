@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:nobleassets/globals/automobile_item.dart';
 import 'package:nobleassets/globals/hotel_item.dart';
-import 'package:nobleassets/globals/shortlet_item.dart';
 import 'package:nobleassets/utils/alert.dart';
 import 'package:nobleassets/utils/bookings/hotel.dart';
 import 'package:nobleassets/utils/helpers.dart';
@@ -474,66 +472,25 @@ class _HotelFilterState extends State<HotelFilter> {
                   child: ListView.builder(
                     itemBuilder: (BuildContext context, int index) {
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: isRental == 1
-                            ? AutomobileItem(
-                                item: _data[index],
-                                wishlistAction: (item) {
-                                  setState(() {
-                                    _data = _data
-                                        .map((i) => {
-                                              ...i,
-                                              "favourite": i["listingId"] ==
-                                                      item["listingId"]
-                                                  ? i["favourite"].toString() ==
-                                                          "1"
-                                                      ? 0
-                                                      : 1
-                                                  : i["favourite"]
-                                            })
-                                        .toList();
-                                  });
-                                })
-                            : (filterType == "hotel"
-                                ? HotelItem(
-                                    item: _data[index],
-                                    wishlistAction: (item) {
-                                      setState(() {
-                                        _data = _data
-                                            .map((i) => {
-                                                  ...i,
-                                                  "favourite": i["listingId"] ==
-                                                          item["listingId"]
-                                                      ? i["favourite"]
-                                                                  .toString() ==
-                                                              "1"
-                                                          ? 0
-                                                          : 1
-                                                      : i["favourite"]
-                                                })
-                                            .toList();
-                                      });
-                                    })
-                                : ShortletItem(
-                                    item: _data[index],
-                                    wishlistAction: (item) {
-                                      setState(() {
-                                        _data = _data
-                                            .map((i) => {
-                                                  ...i,
-                                                  "favourite": i["listingId"] ==
-                                                          item["listingId"]
-                                                      ? i["favourite"]
-                                                                  .toString() ==
-                                                              "1"
-                                                          ? 0
-                                                          : 1
-                                                      : i["favourite"]
-                                                })
-                                            .toList();
-                                      });
-                                    })),
-                      );
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: HotelItem(
+                              item: _data[index],
+                              wishlistAction: (item) {
+                                setState(() {
+                                  _data = _data
+                                      .map((i) => {
+                                            ...i,
+                                            "favourite": i["listingId"] ==
+                                                    item["listingId"]
+                                                ? i["favourite"].toString() ==
+                                                        "1"
+                                                    ? 0
+                                                    : 1
+                                                : i["favourite"]
+                                          })
+                                      .toList();
+                                });
+                              }));
                     },
                     itemCount: _data.length,
                   ),

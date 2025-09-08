@@ -1561,7 +1561,7 @@ class _HotelState extends State<Hotel> with SingleTickerProviderStateMixin {
                                 color: "text.secondary", isMedium: true),
                             const SizedBox(
                               height: 15.0,
-                            ),nobl
+                            ),
                             Container(
                               padding: const EdgeInsets.all(10.0),
                               decoration: BoxDecoration(

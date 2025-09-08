@@ -57,7 +57,7 @@ class JWT {
     if (Platform.isAndroid) {
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
       deviceId = androidInfo.id;
-      type = "3";
+      type = "0";
       name = "${androidInfo.brand} ${androidInfo.model}";
       var release = androidInfo.version.release;
       var sdkInt = androidInfo.version.sdkInt;
@@ -65,7 +65,7 @@ class JWT {
     } else {
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
       deviceId = iosInfo.identifierForVendor ?? "";
-      type = "4";
+      type = "1";
       name = iosInfo.name ?? "";
       var systemName = iosInfo.systemName;
       var version = iosInfo.systemVersion;

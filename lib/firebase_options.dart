@@ -58,12 +58,12 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCEOaI34HQCfn5HBo7IjspiDw7-7GlWwVI',
-    appId: '1:149378416912:ios:846b0fe2770dca14502595',
-    messagingSenderId: '149378416912',
-    projectId: 'nobleassets-dda93',
-    databaseURL: 'https://nobleassets-dda93-default-rtdb.firebaseio.com',
-    storageBucket: 'nobleassets-dda93.firebasestorage.app',
+    apiKey: 'AIzaSyDMo2T3ii0SCH58SawnSRSItztM4GN4VC4',
+    appId: '1:867234111262:ios:d8c858fde211be4e5bf30f',
+    messagingSenderId: '867234111262',
+    projectId: 'noble-assets-apps',
+    storageBucket: 'noble-assets-apps.firebasestorage.app',
     iosBundleId: 'com.nobleassets.app',
   );
+
 }
